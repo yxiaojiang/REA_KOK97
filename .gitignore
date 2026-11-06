@@ -1,0 +1,37 @@
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Unpacked ROM binaries & packaged ROM archives (copyrighted / generated artifacts)
+build/unpacked/*.bin
+build/*.bin
+output/
+*.zip
+*.7z
+
+# WinKawaks sandbox binaries & runtime state (copied from host emulator)
+sandbox/*.exe
+sandbox/*.dll
+sandbox/*.rom
+sandbox/blend/
+sandbox/cheats/
+sandbox/eeprom/
+sandbox/lang/
+sandbox/recinput/
+sandbox/saves/
+sandbox/sshots/
+sandbox/tracklst/
+sandbox/capture/deleteme.txt
+sandbox/ini/deleteme.txt
+
+# OS & Editor temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+*~
