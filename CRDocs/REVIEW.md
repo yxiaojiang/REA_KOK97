@@ -1,101 +1,78 @@
-# 审查结论与问题清单 (CRDocs — TASK-ROM-004 Round 4)
+# 审查结论与问题清单 (CRDocs — TASK-ROM-005 Round 5)
 
-- **Task ID**：`TASK-ROM-004`
-- **Target**：调色板皮肤魔改（八神庵专属黑金配色与 Neo-Geo LSPC2-A2 编解码器实现，实机自动化验证）
+- **Task ID**：`TASK-ROM-005`
+- **Target**：C-ROM 图像瓦片解交错与重构工具链工程化沉淀（40MB 全量双向无损校验、单瓦片/瓦片集导出与导入）
 - **Reviewer**：Argon
-- **Review Round**：Round 4
-- **Decision**：**APPROVED**（`P0: 0`, `P1: 0`, `P2: 0`；前序 `[CR-003-P2-01]` 已圆满关闭 `RESOLVED`）
+- **Review Round**：Round 5
+- **Decision**：**APPROVED**（`P0: 0`, `P1: 0`, `P2: 0`；全量 40MB C-ROM 达 100% bit-exact 复原）
 
 ---
 
 ## 审查结论
 
-经独立核查 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)、[`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/output/roms/kof97pls.zip) 全量二进制 Diff、Motorola 68000 / Neo-Geo LSPC2-A2 硬件调色板编码规范、原生目录只读隔离性及自动化实机截图（[`kof97pls050.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls050.png)、[`kof97pls051.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls051.png)、[`kof97pls052.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls052.png)），**`TASK-ROM-004`（阶段四：调色板皮肤魔改）100% 满足 `DIR-001`、[`Rules.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/.claude/Rules.md) 与 [`Plan.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/Plan.md) 验收标准，予以正式通过（`APPROVED`）**。
+经独立核查 [`tools/crom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/crom_tool.py)、[`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)、SNK Neo-Geo MVS 16x16 4bpp 瓦片四象限架构与位平面交错规范、40MB 全量 6 颗 C-ROM（327,680 个瓦片）双向重构无损比对、单瓦片/瓦片集 PNG 导出导入流及宿主目录只读隔离性，**`TASK-ROM-005`（阶段五：C-ROM 图像瓦片重绘工具归档与工具链沉淀）100% 满足 `DIR-001`、[`Rules.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/.claude/Rules.md) 与 [`Plan.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/Plan.md) 验收标准，予以正式通过（`APPROVED`）**。
+
+至此，本项目从阶段一至阶段五（`TASK-ROM-001` 到 `TASK-ROM-005`）全部 5 项任务均以最高工程标准实现并取得独立审查通过。
 
 ---
 
 ## 独立核验清单与实测结果
 
-### 1. 宿主目录只读安全与纯英文规范（100% 达标）
-- **原生文件只读隔离**：独立复核 `C:\Program Files (x86)\KOF97\roms` 原始资产：
-  - `kof97.ZIP`（29,286,731 B，MD5 `87e8718af8b5d452e6d32697c051c994`，mtime 维持 `946656000.0`）
-  - `kof97pls.zip`（1,438,722 B，MD5 `6f152d3ec8d2d5cb252a203e97603677`，mtime 维持 `1075863528.0`）
-  - `neogeo.zip`（57,734 B，MD5 `6ab3817a33c5b75bb745ca1f9efb55d1`，mtime 维持 `1036030632.0`）
-  确认宿主目录零写入、零篡改。
-- **纯 ASCII 规范**：独立扫描代码库核心工具与脚本：
-  - `tools/rom_tool.py`（59,922 字节，非 ASCII 字符数：`0`）
-  - `sandbox/launch_sandbox.bat`（700 字节，非 ASCII 字符数：`0`）
-  100% 遵守纯 ASCII 英文规范，杜绝 Windows 控制台编码隐患。
+### 1. 宿主目录安全与纯 ASCII 规范（100% 达标）
+- **宿主目录只读保护**：独立比对 `C:\Program Files (x86)\KOF97\roms` 原始资产：
+  - `kof97.ZIP`（29,286,731 B，MD5 `87e8718af8b5d452e6d32697c051c994`）
+  - `kof97pls.zip`（1,438,722 B，MD5 `6f152d3ec8d2d5cb252a203e97603677`）
+  - `neogeo.zip`（57,734 B，MD5 `6ab3817a33c5b75bb745ca1f9efb55d1`）
+  确认时间戳与哈希完全无变动，未发生任何原地写入或文件污染。
+- **纯 ASCII 源码规范**：
+  - `tools/crom_tool.py`（19,726 字节，非 ASCII 字节数：`0`）
+  - `tools/rom_tool.py`（64,324 字节，非 ASCII 字节数：`0`）
+  - `sandbox/launch_sandbox.bat`（700 字节，非 ASCII 字节数：`0`）
+  所有注释与代码 100% 纯 ASCII，消除了 Windows 环境下的编码兼容隐患。
 
-### 2. Neo-Geo LSPC2-A2 16-bit 调色板编解码器独立核算（100% 精确）
-- **硬件位布局核验**：
-  SNK Neo-Geo MVS / AES 视频硬件（LSPC2-A2）采用 16-bit 非线性 RGB 位排布：
-  - Bit 15：`Dark bit`（暗位）
-  - Bit 14：`R0`（红色分量 LSB）
-  - Bit 13：`G0`（绿色分量 LSB）
-  - Bit 12：`B0`（蓝色分量 LSB）
-  - Bits 11..8：`R4..R1`（红色高 4 位）
-  - Bits 7..4：`G4..G1`（绿色高 4 位）
-  - Bits 3..0：`B4..B1`（蓝色高 4 位）
-- 核查 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L73-L105) 中的 `encode_lspc2()` 与 `decode_lspc2()`，位掩码与移位逻辑完全吻合硬件设计规范。
-- 独立执行 `python tools/rom_tool.py self-test`，覆盖基线样字双向往返无损编解码校验，测试 100% 通过。
+### 2. Neo-Geo MVS 16x16 4bpp 图像瓦片硬件架构核验（100% 精确）
+- **四象限（Quadrant Blocks）与平面排布规范**：
+  SNK Neo-Geo MVS 硬件精灵系统将 16x16 像素瓦片划分为 4 个 8x8 子块，每个瓦片固定 128 字节：
+  - Block 0：右上象限（`X=8, Y=0`），偏移行 0..7；
+  - Block 1：右下象限（`X=8, Y=8`），偏移行 8..15；
+  - Block 2：左上象限（`X=0, Y=0`），偏移行 0..7；
+  - Block 3：左下象限（`X=0, Y=8`），偏移行 8..15。
+- **位平面（Bitplane）拆分**：
+  - 奇数编号 C-ROM（`C1`, `C3`, `C5`）存放 Bitplane 0 与 Bitplane 1（每瓦片 64 字节，每行 2 字节）；
+  - 偶数编号 C-ROM（`C2`, `C4`, `C6`）存放 Bitplane 2 与 Bitplane 3（每瓦片 64 字节，每行 2 字节）；
+  - 4-bit 颜色索引为 `(bp3 << 3) | (bp2 << 2) | (bp1 << 1) | bp0`。
+- **单元自检验证**：独立运行 `python tools/rom_tool.py self-test`，覆盖 16x16 4bpp 瓦片往返编解码、模拟数据解交错往返、以及实机硬件 64 个真实 C-ROM 瓦片逐字节对比，测试 100% 通过。
 
-### 3. P2-ROM 全量二进制 Diff 独立复核（精准 72 字节）
-独立比对 `build/unpacked/p2_be.bin` 与原版 `KOF97_P2.ROM`（经 `bswap16` 转换后的大端逻辑空间）：
-全量 4,194,304 字节中，**仅精确修改 72 字节**，其余 4,194,232 字节零漂移，且修改范围严格限制在调色板数据区内：
+### 3. 40MB 全量 C-ROM 解交错与重构 100% bit-exact 复原核验
+独立编写验证脚本，将解交错并重新交错生成的 6 颗 C-ROM 文件与原生 `kof97.ZIP` 逐字节全量比对：
 
-1. **八神庵 A 键主调色板（`0x2DF7F0..0x2DF80F`，修改 21 字节）**：
-   - `Word #00`（`+0x00`）：`0x07C0`（PalID 控制头严格原值保持）；
-   - `Word #01..#04`（`+0x02..+0x08`）：`0x4FFB`, `0x0FC8`, `0x5E95`, `0x1B52`（肤色高光、主肤色、阴影与深阴影严格原值保持，肤色自然）；
-   - `Word #05..#07`（`+0x0A..+0x0E`）：由原版亮白灰（`0x1FFF`, `0x6BBC`, `0x2778`）精准替换为黑夜衬衣：
-     - `Word #05`: `0x0333`（RGB 5-bit: `6, 6, 6`，高光黑炭）；
-     - `Word #06`: `0x7111`（RGB 5-bit: `3, 3, 3`，暗灰过渡）；
-     - `Word #07`: `0x7000`（RGB 5-bit: `1, 1, 1`，深黑阴影）；
-   - `Word #08..#11`（`+0x10..+0x16`）：由原版酒红头发/裤装（`0x6D32`, `0x6A21`, `0x7710`, `0x4400`）替换为金属纯黄金渐变：
-     - `Word #08`: `0x7FD3`（RGB 5-bit: `31, 27, 7`，耀眼亮金高光）；
-     - `Word #09`: `0x7DA1`（RGB 5-bit: `27, 21, 3`，黄金主色）；
-     - `Word #10`: `0x1A70`（RGB 5-bit: `20, 14, 1`，暗金阴影）；
-     - `Word #11`: `0x0640`（RGB 5-bit: `12, 8, 0`，青铜沉底）；
-   - `Word #12..#15`（`+0x18..+0x1E`）：由原版紫灰蓝（`0x7334`, `0x7223`, `0x7112`, `0x1000`）替换为黑金风衣：
-     - `Word #12`: `0x1222`（RGB 5-bit: `4, 4, 5`，深灰反光）；
-     - `Word #13`: `0x1111`（RGB 5-bit: `2, 2, 3`，暗夜黑主色）；
-     - `Word #14`: `0x6001`（RGB 5-bit: `1, 1, 2`，风衣暗部）；
-     - `Word #15`: `0x0000`（RGB 5-bit: `0, 0, 0`，纯黑勾边）。
-2. **选人/立绘头像板同步金发化（`0x2DF990..0x2DF9EF`，修改 22 字节）**：
-   - `0x2DF990`（PalID `0x07CD`）：Words #08, #10, #11, #15 替换为黄金梯级；
-   - `0x2DF9B0`（PalID `0x07CE`）：Words #07, #08, #09 替换为黄金梯级；
-   - `0x2DF9D0`（PalID `0x07CF`）：Words #06, #07, #08, #14 替换为黄金梯级；
-   精准确保选人界面的巨大半身立绘与顶部 HUD 小头像金发一致性。
-3. **历史偏移兼容写入（`0x2DC9F0..0x2DCA0F`，修改 29 字节）**：
-   - 保持 `Word #00: 0x0650` 控制头，同步覆写为一致黑金配色，防止历史脚本调用产生色彩突变。
+| C-ROM 镜像文件 | 规格尺寸 (Bytes) | 原版 CRC32 | 重构生成的 CRC32 | SHA-256 绝对一致 | 逐字节 Diff 结果 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `KOF97_C1.ROM` | 8,388,608 | `0x5F8BF0A1` | `0x5F8BF0A1` | **PASS (True)** | **0 字节差异 (bit-exact)** |
+| `KOF97_C2.ROM` | 8,388,608 | `0xE4D45C81` | `0xE4D45C81` | **PASS (True)** | **0 字节差异 (bit-exact)** |
+| `KOF97_C3.ROM` | 8,388,608 | `0x581D6618` | `0x581D6618` | **PASS (True)** | **0 字节差异 (bit-exact)** |
+| `KOF97_C4.ROM` | 8,388,608 | `0x49BB1E68` | `0x49BB1E68` | **PASS (True)** | **0 字节差异 (bit-exact)** |
+| `KOF97_C5.ROM` | 4,194,304 | `0x34FC4E51` | `0x34FC4E51` | **PASS (True)** | **0 字节差异 (bit-exact)** |
+| `KOF97_C6.ROM` | 4,194,304 | `0x4FF4D47B` | `0x4FF4D47B` | **PASS (True)** | **0 字节差异 (bit-exact)** |
 
-### 4. P1 防御 Patch 无损继承核验（100% 保持）
-- 独立复核 `build/unpacked/p1_be.bin` 与原版比较：
-  - 维持且仅维持 `TASK-ROM-003` 批准的 **4 处精确改动（共 20 字节）**：
-    1. `0x000300..0x000308`: `E2 48 D1 6C 01 3A 4E 75`（Code Cave 受创减半跳板）
-    2. `0x01394A..0x01394E`: `4E B8 03 00`（`JSR ($0300).W`）
-    3. `0x01397E..0x013982`: `4E 71 4E 71`（免疫破防）
-    4. `0x0139A4..0x0139A8`: `4E 71 4E 71`（免疫眩晕）
-  - 大端校验和 `0x21465F0A`，经 `bswap16` 打包后磁盘 CRC32 为 `0xFF227541`，零回退。
-- `s1.bin`（131,072 B）零差异，CRC32 为 `0x8514ECF5`。
+40MB 全量共计 **327,680 个瓦片、41,943,040 字节**，在经历解交错为 `.spr` 流并重新交错回写后，达到了 **100% bit-exact 完美复原**。
 
-### 5. 打包交付物与实机视觉截图独立复核（100% 达标）
-- 检验 `output/roms/kof97pls.zip` 内容：
-  - `232-p1p.bin`（1,048,576 B，磁盘 CRC32 `0xFF227541`）
-  - `232-p2p.bin`（4,194,304 B，磁盘 CRC32 `0xAF5CC95E`）
-  - `232-s1p.bin`（131,072 B，磁盘 CRC32 `0x8514ECF5`）
-- 检验截获实机图像数据：
-  1. [`sandbox/capture/kof97pls050.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls050.png)：Member Select 界面光标聚焦八神庵，左下巨幅半身像金发璀璨，发丝质感与黑衣对比分明；
-  2. [`sandbox/capture/kof97pls051.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls051.png)：Order Select 界面八神庵作为首发 1P，金发金裤与黑长风衣比例协调；
-  3. [`sandbox/capture/kof97pls052.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls052.png)：Round 1 实机格斗对决态，金发刘海、金色绑带裤、深邃墨黑风衣在战斗中完美呈现，无破皮拉花或色块错位；顶部血槽、破防槽（103）与眩晕槽（103）完好无损。
+### 4. 图像导出与反向回写能力核验（100% 达标）
+- 审查核验导出的 PNG 构件：
+  - `sandbox/capture/tile_1.png` 与 `tile_10.png`（16x16 索引色 PNG，结构完好）；
+  - `sandbox/capture/sheet_256.png`（256x256 瓦片集）与 `sheet_c5c6.png`（256x128 瓦片集，结构完好）。
+- 独立编写临时沙盒测试脚本执行 `import_tile_png()`，将修改后的 16x16 PNG 像素回写至奇偶 ROM 并重新逆解，验证像素矩阵往返 100% 无损。
+
+### 5. 前序防御 Patch 与调色板换肤零回归（100% 保持）
+- 独立核验 `build/unpacked/` 与 `output/roms/kof97pls.zip`：
+  - `232-p1p.bin`（1,048,576 B，大端 CRC32 `0x21465F0A`，磁盘 CRC32 `0xFF227541`）保持免破防、免眩晕与受创减半 Code Cave 补丁；
+  - `232-p2p.bin`（4,194,304 B，大端 CRC32 `0xF1187330`，磁盘 CRC32 `0xAF5CC95E`）保持八神庵黑金配色与选人金发立绘；
+  - `232-s1p.bin`（131,072 B，磁盘 CRC32 `0x8514ECF5`）零变动。
+- 全套系统功能完整兼容，无任何回归问题。
 
 ---
 
 ## 问题清单 (P0 / P1 / P2)
 
-本轮无新增 `P0`、`P1`、`P2` 问题。
-
-### 历史问题关闭情况
-- **`[CR-003-P2-01]` 阶段四（`TASK-ROM-004`）八神庵真实角色 ID（`0x1B`）与 A 键调色板物理偏移校准（`0x2DF7F0`）**：
-  - **状态**：**`RESOLVED`**
-  - **结论**：Antigravity 完整采纳了 Argon 反汇编查表结论，在 `p2_be.bin` 真实偏移 `0x2DF7F0`（PalID `0x07C0`）及头像板 `0x2DF990..0x2DF9EF`（PalID `0x07CD..0x07CF`）成功落地黑金配色，实机对战与立绘均实现金发黑衣展现。该项圆满闭环关闭。
+本轮无新增 `P0`、`P1`、`P2` 问题（`P0: 0`, `P1: 0`, `P2: 0`）。
+所有历史问题均已在各阶段关闭。

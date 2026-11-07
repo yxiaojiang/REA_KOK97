@@ -76,10 +76,10 @@ flowchart TD
 
 ---
 
-## 阶段五：C-ROM 图像瓦片重绘归档（P2-已完成，READY_FOR_REVIEW）
+## 阶段五：C-ROM 图像瓦片重绘归档（P2-已完成，APPROVED）
 
 * **目标**：将 40MB C-ROM 4bpp 瓦片解交错（De-interleave）与重新打包工具链工程化留存，支持单瓦片与图集 PNG 导出/回写。
-* **Task ID**：`TASK-ROM-005`（待 `CRDocs` Round 5 审核：`READY_FOR_REVIEW`）
+* **Task ID**：`TASK-ROM-005`（已通过 `CRDocs` Round 5 审核：`APPROVED`）
 * **细分步骤**：
   1. 实现 SNK Neo-Geo MVS 16x16 4bpp 瓦片四象限（右上、右下、左上、左下）与奇偶位平面（奇数 ROM 平面 0/1、偶数 ROM 平面 2/3）无损编解码器；
   2. 实现全量 40MB（`C1/C2`, `C3/C4`, `C5/C6`，共 327,680 个瓦片）解交错生成 `.spr` 二进制流；
