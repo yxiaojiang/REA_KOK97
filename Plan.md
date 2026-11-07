@@ -64,10 +64,10 @@ flowchart TD
 
 ---
 
-## 阶段四：调色板皮肤魔改（P1-已实施，READY_FOR_REVIEW）
+## 阶段四：调色板皮肤魔改（P1-已完成，APPROVED）
 
 * **目标**：实现目标角色（八神庵 Iori）专属黑金配色换肤。
-* **Task ID**：`TASK-ROM-004`（Round 4 实施完成，待 Argon 审查）
+* **Task ID**：`TASK-ROM-004`（已通过 `CRDocs` Round 4 审核：`APPROVED`）
 * **细分步骤**：
   1. 在 `tools/rom_tool.py` 中实现符合 Neo-Geo `LSPC2-A2` 非线性位布局的 RGB 编解码器（已实现并纳入 self-test）；
   2. 按 `[CR-003-P2-01]` 校准结论，定位 `232-p2p.bin` Bank 2 中八神庵（`CharID = 0x1B`）A 键真实主调色板 **`0x2DF7F0`**（编号 `0x07C0`，32 字节 / 16 个字，以及同块受击/立绘/HUD 头像调色板 `0x2DF850`、`0x2DF990..0x2DF9EF`，并兼容覆盖 `0x2DC9F0`）；
@@ -76,7 +76,13 @@ flowchart TD
 
 ---
 
-## 阶段五：C-ROM 图像瓦片重绘归档（P2-延期特性）
+## 阶段五：C-ROM 图像瓦片重绘归档（P2-已完成，READY_FOR_REVIEW）
 
-* **目标**：将 40MB C-ROM 4bpp 瓦片解交错（De-interleave）与重新打包工具链工程化留存。
-* **Task ID**：`TASK-ROM-005`（延期至后续迭代）
+* **目标**：将 40MB C-ROM 4bpp 瓦片解交错（De-interleave）与重新打包工具链工程化留存，支持单瓦片与图集 PNG 导出/回写。
+* **Task ID**：`TASK-ROM-005`（待 `CRDocs` Round 5 审核：`READY_FOR_REVIEW`）
+* **细分步骤**：
+  1. 实现 SNK Neo-Geo MVS 16x16 4bpp 瓦片四象限（右上、右下、左上、左下）与奇偶位平面（奇数 ROM 平面 0/1、偶数 ROM 平面 2/3）无损编解码器；
+  2. 实现全量 40MB（`C1/C2`, `C3/C4`, `C5/C6`，共 327,680 个瓦片）解交错生成 `.spr` 二进制流；
+  3. 实现 `.spr` 重构回写至各 C-ROM 镜像，经逐字节与 CRC32 校验达到 100% bit-exact 无损复原；
+  4. 支持单瓦片 (`crom-export-tile`) 与瓦片集图集 (`crom-export-sheet`) PNG 格式导出与反向导入；
+  5. 完整集成入 `tools/rom_tool.py` 命令行并纳入 `self-test` 全局自检。

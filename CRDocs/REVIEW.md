@@ -1,64 +1,101 @@
-# 审查结论与问题清单 (CRDocs — TASK-ROM-003 Round 3)
+# 审查结论与问题清单 (CRDocs — TASK-ROM-004 Round 4)
 
-- **Task ID**：`TASK-ROM-003`
-- **Target**：P-ROM 静态数值与防御 Patch（实施免破防 `0x01397E`、免眩晕 `0x0139A4` 与 Code Cave `0x000300` 受创减半跳板，打包交付与实机对战验证）
+- **Task ID**：`TASK-ROM-004`
+- **Target**：调色板皮肤魔改（八神庵专属黑金配色与 Neo-Geo LSPC2-A2 编解码器实现，实机自动化验证）
 - **Reviewer**：Argon
-- **Review Round**：Round 3
-- **Decision**：**APPROVED**（`P0: 0`, `P1: 0`, `P2: 1 [DEFERRED TO TASK-ROM-004]`；上轮 `[CR-002-P2-01]` 已圆满闭环）
+- **Review Round**：Round 4
+- **Decision**：**APPROVED**（`P0: 0`, `P1: 0`, `P2: 0`；前序 `[CR-003-P2-01]` 已圆满关闭 `RESOLVED`）
 
 ---
 
 ## 审查结论
 
-经独立核查 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)、[`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/output/roms/kof97pls.zip) 二进制全量 Diff、Motorola 68000 机器码编码、原生目录只读隔离性及实机对战截图（[`kof97pls018.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls018.png)、[`kof97pls019.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls019.png)），**`TASK-ROM-003`（阶段三：P-ROM 静态数值与防御 Patch）100% 满足 `DIR-001` 与 [`Plan.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/Plan.md) 验收标准，予以通过（`APPROVED`）**。
+经独立核查 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)、[`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/output/roms/kof97pls.zip) 全量二进制 Diff、Motorola 68000 / Neo-Geo LSPC2-A2 硬件调色板编码规范、原生目录只读隔离性及自动化实机截图（[`kof97pls050.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls050.png)、[`kof97pls051.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls051.png)、[`kof97pls052.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls052.png)），**`TASK-ROM-004`（阶段四：调色板皮肤魔改）100% 满足 `DIR-001`、[`Rules.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/.claude/Rules.md) 与 [`Plan.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/Plan.md) 验收标准，予以正式通过（`APPROVED`）**。
 
-### 独立核验清单与实测结果
+---
 
-1. **宿主目录只读安全与纯英文规范（100% 达标）**：
-   - 独立复核 `C:\Program Files (x86)\KOF97\roms` 下 `kof97.ZIP`（`29,286,731 B`, `mtime=946656000.0`）、`kof97pls.zip`（`1,438,722 B`, `mtime=1075863528.0`）、`neogeo.zip`（`57,734 B`, `mtime=1036030632.0`），确认零写入、零改动。
-   - 扫描 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)（48,630 B）与 [`sandbox/launch_sandbox.bat`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/launch_sandbox.bat)（700 B），非 ASCII 字节数均为 `0`。
+## 独立核验清单与实测结果
 
-2. **68000 机器码编码与全量二进制 Diff 独立核验（100% 精准）**：
-   - 将 [`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/output/roms/kof97pls.zip) 与原版 `kof97.ZIP` 在 68000 Big-Endian 逻辑空间进行全量逐字节 Diff：
-     - `232-p1p.bin`（1,048,576 B，磁盘 CRC32 `0xff227541`，68K 大端 CRC32 `0x21465f0a`）仅存在 **4 处精确改动（共 20 字节）**，其余 1,048,556 字节零漂移：
-       1. `0x000300..0x000308`（8B）：`ffffffffffffffff` $\rightarrow$ `e248d16c013a4e75`
-          - `E2 48`：Motorola 68000 标准 `LSR.W #1, D0`（Bits 4..3 = `01` 逻辑右移，精确纠正了早期文档中的算术右移 `E2 40` `ASR.W #1, D0`）；
-          - `D1 6C 01 3A`：`ADD.W D0, $013A(A4)`（将减半后的 `D0` 累加至 UI 红血计数器）；
-          - `4E 75`：`RTS`（返回 `0x01394E` 继续执行 `91 6C 01 38` `SUB.W D0, $0138(A4)` 与 `0x013952` `BMI.W $013960`）。
-       2. `0x01394A..0x01394E`（4B）：`d16c013a` $\rightarrow$ `4eb80300`（`JSR ($0300).W` 短绝对跳板，圆满落实 `[CR-002-P2-01]`）。
-       3. `0x01397E..0x013982`（4B）：`916c013e` $\rightarrow$ `4e714e71`（`NOP; NOP`，免破防）。
-       4. `0x0139A4..0x0139A8`（4B）：`916c0146` $\rightarrow$ `4e714e71`（`NOP; NOP`，免眩晕）。
-     - `232-p2p.bin`（磁盘 CRC32 `0x158b23f6`）与 `232-s1p.bin`（磁盘 CRC32 `0x8514ecf5`）与原版基线差异为 `0` 字节。
+### 1. 宿主目录只读安全与纯英文规范（100% 达标）
+- **原生文件只读隔离**：独立复核 `C:\Program Files (x86)\KOF97\roms` 原始资产：
+  - `kof97.ZIP`（29,286,731 B，MD5 `87e8718af8b5d452e6d32697c051c994`，mtime 维持 `946656000.0`）
+  - `kof97pls.zip`（1,438,722 B，MD5 `6f152d3ec8d2d5cb252a203e97603677`，mtime 维持 `1075863528.0`）
+  - `neogeo.zip`（57,734 B，MD5 `6ab3817a33c5b75bb745ca1f9efb55d1`，mtime 维持 `1036030632.0`）
+  确认宿主目录零写入、零篡改。
+- **纯 ASCII 规范**：独立扫描代码库核心工具与脚本：
+  - `tools/rom_tool.py`（59,922 字节，非 ASCII 字符数：`0`）
+  - `sandbox/launch_sandbox.bat`（700 字节，非 ASCII 字符数：`0`）
+  100% 遵守纯 ASCII 英文规范，杜绝 Windows 控制台编码隐患。
 
-3. **实机对战数值与视觉截图核验（100% 达标）**：
-   - 复核 [`verify_defense_execution`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L787-L935) 实测结果：2P 受创单发重拳掉血由原版 15 点降至 `6~7` 点（`HP: 103 -> 96~97`），1P/2P 破防槽（`Guard = 103/103`）与眩晕槽（`Dizzy = 103/103`）全程恒定满值。
-   - 审阅 [`sandbox/capture/kof97pls018.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls018.png) 与 [`kof97pls019.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls019.png)，画面打击火花清晰，顶部 2P 血条右侧削减幅度仅为阶段二基线截图 [`kof97pls014.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls014.png) 的一半，UI 血条动画正常无撕裂。
+### 2. Neo-Geo LSPC2-A2 16-bit 调色板编解码器独立核算（100% 精确）
+- **硬件位布局核验**：
+  SNK Neo-Geo MVS / AES 视频硬件（LSPC2-A2）采用 16-bit 非线性 RGB 位排布：
+  - Bit 15：`Dark bit`（暗位）
+  - Bit 14：`R0`（红色分量 LSB）
+  - Bit 13：`G0`（绿色分量 LSB）
+  - Bit 12：`B0`（蓝色分量 LSB）
+  - Bits 11..8：`R4..R1`（红色高 4 位）
+  - Bits 7..4：`G4..G1`（绿色高 4 位）
+  - Bits 3..0：`B4..B1`（蓝色高 4 位）
+- 核查 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L73-L105) 中的 `encode_lspc2()` 与 `decode_lspc2()`，位掩码与移位逻辑完全吻合硬件设计规范。
+- 独立执行 `python tools/rom_tool.py self-test`，覆盖基线样字双向往返无损编解码校验，测试 100% 通过。
+
+### 3. P2-ROM 全量二进制 Diff 独立复核（精准 72 字节）
+独立比对 `build/unpacked/p2_be.bin` 与原版 `KOF97_P2.ROM`（经 `bswap16` 转换后的大端逻辑空间）：
+全量 4,194,304 字节中，**仅精确修改 72 字节**，其余 4,194,232 字节零漂移，且修改范围严格限制在调色板数据区内：
+
+1. **八神庵 A 键主调色板（`0x2DF7F0..0x2DF80F`，修改 21 字节）**：
+   - `Word #00`（`+0x00`）：`0x07C0`（PalID 控制头严格原值保持）；
+   - `Word #01..#04`（`+0x02..+0x08`）：`0x4FFB`, `0x0FC8`, `0x5E95`, `0x1B52`（肤色高光、主肤色、阴影与深阴影严格原值保持，肤色自然）；
+   - `Word #05..#07`（`+0x0A..+0x0E`）：由原版亮白灰（`0x1FFF`, `0x6BBC`, `0x2778`）精准替换为黑夜衬衣：
+     - `Word #05`: `0x0333`（RGB 5-bit: `6, 6, 6`，高光黑炭）；
+     - `Word #06`: `0x7111`（RGB 5-bit: `3, 3, 3`，暗灰过渡）；
+     - `Word #07`: `0x7000`（RGB 5-bit: `1, 1, 1`，深黑阴影）；
+   - `Word #08..#11`（`+0x10..+0x16`）：由原版酒红头发/裤装（`0x6D32`, `0x6A21`, `0x7710`, `0x4400`）替换为金属纯黄金渐变：
+     - `Word #08`: `0x7FD3`（RGB 5-bit: `31, 27, 7`，耀眼亮金高光）；
+     - `Word #09`: `0x7DA1`（RGB 5-bit: `27, 21, 3`，黄金主色）；
+     - `Word #10`: `0x1A70`（RGB 5-bit: `20, 14, 1`，暗金阴影）；
+     - `Word #11`: `0x0640`（RGB 5-bit: `12, 8, 0`，青铜沉底）；
+   - `Word #12..#15`（`+0x18..+0x1E`）：由原版紫灰蓝（`0x7334`, `0x7223`, `0x7112`, `0x1000`）替换为黑金风衣：
+     - `Word #12`: `0x1222`（RGB 5-bit: `4, 4, 5`，深灰反光）；
+     - `Word #13`: `0x1111`（RGB 5-bit: `2, 2, 3`，暗夜黑主色）；
+     - `Word #14`: `0x6001`（RGB 5-bit: `1, 1, 2`，风衣暗部）；
+     - `Word #15`: `0x0000`（RGB 5-bit: `0, 0, 0`，纯黑勾边）。
+2. **选人/立绘头像板同步金发化（`0x2DF990..0x2DF9EF`，修改 22 字节）**：
+   - `0x2DF990`（PalID `0x07CD`）：Words #08, #10, #11, #15 替换为黄金梯级；
+   - `0x2DF9B0`（PalID `0x07CE`）：Words #07, #08, #09 替换为黄金梯级；
+   - `0x2DF9D0`（PalID `0x07CF`）：Words #06, #07, #08, #14 替换为黄金梯级；
+   精准确保选人界面的巨大半身立绘与顶部 HUD 小头像金发一致性。
+3. **历史偏移兼容写入（`0x2DC9F0..0x2DCA0F`，修改 29 字节）**：
+   - 保持 `Word #00: 0x0650` 控制头，同步覆写为一致黑金配色，防止历史脚本调用产生色彩突变。
+
+### 4. P1 防御 Patch 无损继承核验（100% 保持）
+- 独立复核 `build/unpacked/p1_be.bin` 与原版比较：
+  - 维持且仅维持 `TASK-ROM-003` 批准的 **4 处精确改动（共 20 字节）**：
+    1. `0x000300..0x000308`: `E2 48 D1 6C 01 3A 4E 75`（Code Cave 受创减半跳板）
+    2. `0x01394A..0x01394E`: `4E B8 03 00`（`JSR ($0300).W`）
+    3. `0x01397E..0x013982`: `4E 71 4E 71`（免疫破防）
+    4. `0x0139A4..0x0139A8`: `4E 71 4E 71`（免疫眩晕）
+  - 大端校验和 `0x21465F0A`，经 `bswap16` 打包后磁盘 CRC32 为 `0xFF227541`，零回退。
+- `s1.bin`（131,072 B）零差异，CRC32 为 `0x8514ECF5`。
+
+### 5. 打包交付物与实机视觉截图独立复核（100% 达标）
+- 检验 `output/roms/kof97pls.zip` 内容：
+  - `232-p1p.bin`（1,048,576 B，磁盘 CRC32 `0xFF227541`）
+  - `232-p2p.bin`（4,194,304 B，磁盘 CRC32 `0xAF5CC95E`）
+  - `232-s1p.bin`（131,072 B，磁盘 CRC32 `0x8514ECF5`）
+- 检验截获实机图像数据：
+  1. [`sandbox/capture/kof97pls050.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls050.png)：Member Select 界面光标聚焦八神庵，左下巨幅半身像金发璀璨，发丝质感与黑衣对比分明；
+  2. [`sandbox/capture/kof97pls051.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls051.png)：Order Select 界面八神庵作为首发 1P，金发金裤与黑长风衣比例协调；
+  3. [`sandbox/capture/kof97pls052.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls052.png)：Round 1 实机格斗对决态，金发刘海、金色绑带裤、深邃墨黑风衣在战斗中完美呈现，无破皮拉花或色块错位；顶部血槽、破防槽（103）与眩晕槽（103）完好无损。
 
 ---
 
 ## 问题清单 (P0 / P1 / P2)
 
-本轮无 `P0` 或 `P1` 问题。上轮 `[CR-002-P2-01]` 已标记为 `RESOLVED`。
-为确保下一阶段 `TASK-ROM-004`（八神庵黑金调色板换肤）一次命中真实角色配色，Argon 预先对 `P1.ROM` 调色板索引表与 `P2.ROM` 调色板主表进行了交叉反汇编，记录 1 项 `P2` 实施指引：
+本轮无新增 `P0`、`P1`、`P2` 问题。
 
-### 1. `[CR-003-P2-01]` 阶段四（`TASK-ROM-004`）八神庵真实角色 ID（`0x1B`）与 A 键调色板物理偏移校准（`0x2DF7F0` vs `0x2DC9F0`）
-- **级别**：`P2`（阶段四前置关键发现，不阻断 `TASK-ROM-003`）
-- **状态**：`DEFERRED`（供 `TASK-ROM-004` 直接采用）
-- **位置**：`build/unpacked/p1_be.bin`（`0x004798..0x004920`）、`build/unpacked/p2_be.bin`（`0x2CFFF0+`）
-- **独立反汇编发现**：
-  1. 经反汇编 `P1.ROM` `0x004798..0x00483E` 角色调色板加载器：
-     - `0x004798: MOVE.W $0070(A4), D0` 读取角色 ID，经 `LSL.W #3, D0`（每角色 8 字节 = A/B/C/D 四个 16-bit 调色板编号）后，以 **`0x00483E`** 为基址（`0x00483E` 处首字为草薙京 A 键 `0x0100`）查表，再由 `0x004AD4: LEA $002CFFF0, A1` 按 `0x2CFFF0 + PalID * 32` 定位 `P2.ROM` Bank 2 物理偏移。
-  2. 核对角色 ID 与调色板编号映射：
-     - 早期文档中的 `CharID = 0x18`（24）实为 `'97 特别队` 的**山崎龙二（Ryuji Yamazaki）**（A 键 `0x0640` 位于 `0x2DC7F0`，B 键 `0x0650` 位于 `0x2DC9F0`，其颜色为深绿外套+白衬衣）；
-     - **八神庵（Iori Yagami）的真实 `CharID` 为 `0x1B`（27）**！其在 `P1.ROM` `0x004916`（`0x00483E + 0x1B * 8`）处的 4 键调色板编号为：
-       - **A 键：`0x07C0` $\rightarrow$ `P2.ROM` 物理偏移 `0x2DF7F0`**（`0x2CFFF0 + 0x07C0 * 32`）
-       - **B 键：`0x07D0` $\rightarrow$ `P2.ROM` 物理偏移 `0x2DF9F0`**
-       - **C 键：`0x07E0` $\rightarrow$ `P2.ROM` 物理偏移 `0x2DFBF0`**
-       - **D 键：`0x07F0` $\rightarrow$ `P2.ROM` 物理偏移 `0x2DFDF0`**
-  3. 核对 `P2.ROM` **`0x2DF7F0`**（`hdr=0x07C0`，32 字节）的 16 色解码结果，100% 吻合八神庵经典 A 键外观：
-     - `Word #01..#04`：肤色渐变（`#F8F0B0`, `#F0C080`, `#E89058`, `#B05028`）；
-     - `Word #05..#07`：白色衬衣（`#F0F0F8`, `#B8B8C0`, `#707880`）；
-     - **`Word #08..#11`：经典酒红头发与红裤子（`#D83820`, `#A82810`, `#781808`, `#480000`）**；
-     - **`Word #12..#15`：深藏青/紫黑风衣（`#383848`, `#282838`, `#181828`, `#000008`）**；
-     - 此外，同块内的 `0x07C3`（`0x2DF850`）为受击/闪光辅色，`0x07C6`（`0x2DF8B0`）为紫炎特效，`0x07CD..0x07CF`（`0x2DF990..0x2DF9EF`）为胜利立绘、选人头像与顶部 HUD 小头像调色板。
-  4. **阶段四实施建议**：在 `TASK-ROM-004` 实施八神庵黑金换肤时，请将主修改目标对准真实的八神庵 A 键调色板 **`0x2DF7F0`（`0x07C0`，以及可选同步 `0x07C3`/`0x07CD..0x07CF` 头像或兼容修改 `0x2DC9F0`）**，并在实机中选择八神庵（或通过选人/对战界面）验证黑金换肤效果！
+### 历史问题关闭情况
+- **`[CR-003-P2-01]` 阶段四（`TASK-ROM-004`）八神庵真实角色 ID（`0x1B`）与 A 键调色板物理偏移校准（`0x2DF7F0`）**：
+  - **状态**：**`RESOLVED`**
+  - **结论**：Antigravity 完整采纳了 Argon 反汇编查表结论，在 `p2_be.bin` 真实偏移 `0x2DF7F0`（PalID `0x07C0`）及头像板 `0x2DF990..0x2DF9EF`（PalID `0x07CD..0x07CF`）成功落地黑金配色，实机对战与立绘均实现金发黑衣展现。该项圆满闭环关闭。

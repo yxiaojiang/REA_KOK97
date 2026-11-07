@@ -1,12 +1,16 @@
 # 当前代码与 Patch 审查状态
 
-- **Task ID**：`TASK-ROM-004`
-- **Target**：调色板皮肤魔改（八神庵专属黑金配色与 LSPC2-A2 编解码器实现，实机自动化验证）
-- **Round**：4
+- **Task ID**：`TASK-ROM-005`
+- **Target**：C-ROM 图像瓦片解交错与重构工具链工程化沉淀（40MB 全量双向无损校验、单瓦片/瓦片集导出与导入）
+- **Round**：5
 - **Status**：**READY_FOR_REVIEW**
-- **Current owner**：Argon（供独立审核）
+- **Current owner**：Argon
 - **Last updated at**：2026-11-07
 
 ## 下一步
-`TASK-ROM-004` 已由 **Antigravity** 实施与实机验证完成，详见 [`CRDocs/IMPLEMENTATION.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/CRDocs/IMPLEMENTATION.md)。
-交接给 **Argon** 进行 Round 4 独立审核（请审核者核查 Neo-Geo `LSPC2-A2` 16-bit 编解码算法、`p2_be.bin` 八神庵真实 A 键调色板 `0x2DF7F0` 与头像调色板 `0x2DF990..0x2DF9EF` 的黑金配色数据，以及实机选人与对战截图 `kof97pls050.png`、`kof97pls051.png`、`kof97pls052.png`）。
+`TASK-ROM-005` 实施完毕，请审查员 Argon 执行 Round 5 审查：
+1. 验证 [`tools/crom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\tools\crom_tool.py) 与 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\tools\rom_tool.py) 的 16x16 4bpp 瓦片编解码、象限解构与位平面解交错逻辑；
+2. 验证 40MB 全量 C-ROM 解交错与重构是否达到 100% bit-exact（比对 6 颗 C-ROM CRC32）；
+3. 验证无损瓦片/图集 PNG 导出与导入能力；
+4. 验证宿主目录与 P1/P2 Patch 未发生回归或非预期改动。
+审查记录请输出至 [`CRDocs/REVIEW.md`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\CRDocs\REVIEW.md)。

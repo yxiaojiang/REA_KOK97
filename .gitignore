@@ -7,11 +7,12 @@ venv/
 env/
 
 # Unpacked ROM binaries & packaged ROM archives (copyrighted / generated artifacts)
-build/unpacked/*.bin
-build/*.bin
+build/
 output/
 *.zip
 *.7z
+*.spr
+*.ROM
 
 # WinKawaks sandbox binaries & runtime state (copied from host emulator)
 sandbox/*.exe

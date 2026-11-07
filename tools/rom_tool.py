@@ -23,6 +23,11 @@ import zipfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+try:
+    from tools import crom_tool
+except ImportError:
+    import crom_tool
+
 
 DEFAULT_SOURCE_ROM_DIR = Path(r"C:\Program Files (x86)\KOF97\roms")
 DEFAULT_KOF97_ZIP = DEFAULT_SOURCE_ROM_DIR / "kof97.ZIP"
@@ -32,6 +37,7 @@ WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_UNPACK_DIR = WORKSPACE_ROOT / "build" / "unpacked"
 DEFAULT_OUTPUT_ZIP = WORKSPACE_ROOT / "output" / "roms" / "kof97pls.zip"
 DEFAULT_SANDBOX_DIR = WORKSPACE_ROOT / "sandbox"
+DEFAULT_CROM_DIR = WORKSPACE_ROOT / "build" / "crom_unpacked"
 
 EXPECTED_SIZES = {
     "p1": 1048576,  # 1 MB
@@ -1419,6 +1425,71 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run unit tests on bswap16 alignment, signature conversion, and lossless round-trip",
     )
 
+    # crom-self-test
+    subparsers.add_parser(
+        "crom-self-test",
+        help="Run unit tests on 16x16 4bpp tile codec and C-ROM deinterleaver",
+    )
+
+    # crom-deinterleave
+    p_crom_deint = subparsers.add_parser(
+        "crom-deinterleave",
+        help="Extract and deinterleave all C-ROM pairs (40MB) into .spr streams",
+    )
+    p_crom_deint.add_argument(
+        "--source",
+        type=Path,
+        default=DEFAULT_KOF97_ZIP,
+        help=f"Source zip (default: {DEFAULT_KOF97_ZIP})",
+    )
+    p_crom_deint.add_argument(
+        "--outdir",
+        type=Path,
+        default=DEFAULT_CROM_DIR,
+        help=f"Output dir (default: {DEFAULT_CROM_DIR})",
+    )
+
+    # crom-interleave
+    p_crom_int = subparsers.add_parser(
+        "crom-interleave",
+        help="Re-interleave .spr streams back into original C-ROM binaries",
+    )
+    p_crom_int.add_argument(
+        "--indir",
+        type=Path,
+        default=DEFAULT_CROM_DIR,
+        help=f"Input dir (default: {DEFAULT_CROM_DIR})",
+    )
+    p_crom_int.add_argument(
+        "--outdir",
+        type=Path,
+        default=DEFAULT_CROM_DIR / "rebuilt",
+        help="Output directory for rebuilt ROMs",
+    )
+
+    # crom-export-tile
+    p_crom_exp = subparsers.add_parser("crom-export-tile", help="Export a 16x16 tile to PNG")
+    p_crom_exp.add_argument("--source", type=Path, default=DEFAULT_KOF97_ZIP, help=f"Source zip (default: {DEFAULT_KOF97_ZIP})")
+    p_crom_exp.add_argument("--pair", choices=["c1_c2", "c3_c4", "c5_c6"], default="c1_c2", help="C-ROM pair name")
+    p_crom_exp.add_argument("--tile", type=int, default=1, help="Tile index to export (default: 1)")
+    p_crom_exp.add_argument("--output", type=Path, default=WORKSPACE_ROOT / "sandbox" / "capture" / "tile_export.png", help="Target PNG path")
+
+    # crom-export-sheet
+    p_crom_sheet = subparsers.add_parser("crom-export-sheet", help="Export a sequential sheet of tiles to PNG")
+    p_crom_sheet.add_argument("--source", type=Path, default=DEFAULT_KOF97_ZIP, help=f"Source zip (default: {DEFAULT_KOF97_ZIP})")
+    p_crom_sheet.add_argument("--pair", choices=["c1_c2", "c3_c4", "c5_c6"], default="c1_c2", help="C-ROM pair name")
+    p_crom_sheet.add_argument("--start", type=int, default=0, help="Starting tile index (default: 0)")
+    p_crom_sheet.add_argument("--count", type=int, default=256, help="Number of tiles to export (default: 256)")
+    p_crom_sheet.add_argument("--cols", type=int, default=16, help="Grid columns (default: 16)")
+    p_crom_sheet.add_argument("--output", type=Path, default=WORKSPACE_ROOT / "sandbox" / "capture" / "tile_sheet.png", help="Target PNG path")
+
+    # crom-import-tile
+    p_crom_imp = subparsers.add_parser("crom-import-tile", help="Import a 16x16 PNG into unpacked C-ROM binaries")
+    p_crom_imp.add_argument("--image", type=Path, required=True, help="Input 16x16 PNG image")
+    p_crom_imp.add_argument("--odd-rom", type=Path, required=True, help="Target Odd C-ROM binary path")
+    p_crom_imp.add_argument("--even-rom", type=Path, required=True, help="Target Even C-ROM binary path")
+    p_crom_imp.add_argument("--tile", type=int, required=True, help="Target tile index to overwrite")
+
     return parser
 
 
@@ -1447,6 +1518,9 @@ def run_self_test() -> None:
         re_w = encode_lspc2(r, g, b, d)
         assert re_w == tw, f"LSPC2 round-trip mismatch: 0x{tw:04X} -> 0x{re_w:04X}"
     print("  [PASS] LSPC2-A2 16-bit color encoder/decoder lossless round-trip test")
+
+    # C-ROM tile codec and deinterleaver tests
+    crom_tool.run_crom_self_test()
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -1516,6 +1590,50 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.command == "verify-palette":
         return verify_palette_execution(args.sandbox_dir, rom_name=args.rom_name)
+
+    if args.command == "crom-self-test":
+        crom_tool.run_crom_self_test()
+        return 0
+
+    if args.command == "crom-deinterleave":
+        print(f"=== Deinterleaving All 40MB C-ROM Pairs from {args.source} ===")
+        rep = crom_tool.deinterleave_all_c_roms(args.source, args.outdir)
+        total_tiles = 0
+        total_bytes = 0
+        for pair_name, info in rep.items():
+            total_tiles += info["num_tiles"]
+            total_bytes += info["spr_size"]
+            print(
+                f"  [{pair_name.upper()}] {info['odd_name']} + {info['even_name']} -> {info['spr_file']}\n"
+                f"       Tiles: {info['num_tiles']:,} | Size: {info['spr_size']:,} B | CRC32: {info['spr_crc32']}"
+            )
+        print(f"[SUCCESS] All C-ROM pairs deinterleaved ({total_tiles:,} tiles, {total_bytes:,} bytes total).")
+        return 0
+
+    if args.command == "crom-interleave":
+        print(f"=== Re-interleaving C-ROM .spr Streams from {args.indir} ===")
+        rep = crom_tool.interleave_all_c_roms(args.indir, args.outdir)
+        for pair_name, info in rep.items():
+            print(
+                f"  [{pair_name.upper()}] {info['spr_file']} -> {info['odd_name']} ({info['odd_crc32']}) + {info['even_name']} ({info['even_crc32']})"
+            )
+        print("[SUCCESS] All C-ROM streams re-interleaved.")
+        return 0
+
+    if args.command == "crom-export-tile":
+        out = crom_tool.export_tile_png(args.source, args.pair, args.tile, args.output)
+        print(f"[SUCCESS] Exported tile {args.tile} from {args.pair} to {out}")
+        return 0
+
+    if args.command == "crom-export-sheet":
+        out = crom_tool.export_sheet_png(args.source, args.pair, args.start, args.count, args.output, args.cols)
+        print(f"[SUCCESS] Exported {args.count} tiles from {args.pair} (start={args.start}) to {out}")
+        return 0
+
+    if args.command == "crom-import-tile":
+        crom_tool.import_tile_png(args.image, args.odd_rom, args.even_rom, args.tile)
+        print(f"[SUCCESS] Imported {args.image} into tile index {args.tile}")
+        return 0
 
     return 1
 
