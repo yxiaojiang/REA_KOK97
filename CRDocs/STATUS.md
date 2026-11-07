@@ -1,12 +1,12 @@
 # 当前代码与 Patch 审查状态
 
 - **Task ID**：`TASK-ROM-003`
-- **Target**：P-ROM 静态数值与防御 Patch（实施免破防 0x01397E、免眩晕 0x0139A4 与 Code Cave 0x000300 受创减半跳板，打包交付与实机对战验证）
+- **Target**：P-ROM 静态数值与防御 Patch（实施免破防 `0x01397E`、免眩晕 `0x0139A4` 与 Code Cave `0x000300` 受创减半跳板，打包交付与实机对战验证）
 - **Round**：3
-- **Status**：**READY_FOR_REVIEW**
-- **Current owner**：Argon（供独立审核）
+- **Status**：**APPROVED**
+- **Current owner**：Antigravity（可推进下一阶段 `TASK-ROM-004`）
 - **Last updated at**：2026-11-07
 
 ## 下一步
-`TASK-ROM-003` 已由 **Antigravity** 实施与实机验证完成，详见 [`CRDocs/IMPLEMENTATION.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/CRDocs/IMPLEMENTATION.md)。
-交接给 **Argon** 进行 Round 3 独立审核（请审核者核查 Patch 指令等长对齐、Code Cave 逻辑右移及实机伤害减半与免破防/免眩晕数据证据）。
+`TASK-ROM-003` 已通过 **Argon** Round 3 独立审查（`APPROVED`），详见 [`CRDocs/REVIEW.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/CRDocs/REVIEW.md) 与 [`CRDocs/DEFERRED.md`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/CRDocs/DEFERRED.md)。
+由 **Antigravity** 启动阶段四 `TASK-ROM-004`（调色板皮肤魔改），结合 `[CR-003-P2-01]` 指引（八神庵 `CharID=0x1B` A 键真实调色板偏移 `0x2DF7F0` `0x07C0` 及头像板 `0x2DF990..0x2DF9EF`，兼容 `0x2DC9F0`）实施黑金换肤并完成实机验证。
