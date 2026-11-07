@@ -1,0 +1,326 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOF97 Studio - Design B (Dark Stage)</title>
+<style>
+  :root{
+    --bg:#0B0C10; --panel:#14151B; --panel2:#1B1C24; --ink:#F2F3F7; --mute:#6D7080; --line:rgba(255,255,255,.07);
+    --accent:#FFB020;
+    --coat:#3A3A4A; --shirt:#F7F7FF; --hair:#DE3A21; --pants:#AD2910; --shoes:#191929; --skin:#F7C584;
+    --glow:#DE3A21;
+    font-family:"Segoe UI","Microsoft YaHei UI","PingFang SC",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#050608;display:grid;place-items:center;color:var(--ink);padding:24px}
+
+  .app{position:relative;width:min(1180px,100%);height:min(740px,calc(100vh - 48px));min-height:620px;background:var(--bg);
+    border-radius:26px;overflow:hidden;display:grid;grid-template-columns:76px 1fr;box-shadow:0 40px 90px -20px #000,0 0 0 1px var(--line)}
+
+  /* rail */
+  .rail{background:var(--panel);display:flex;flex-direction:column;align-items:center;padding:24px 0;gap:10px;border-right:1px solid var(--line)}
+  .logo{width:34px;height:34px;border-radius:10px;background:var(--accent);margin-bottom:26px;display:grid;place-items:center;color:#111;font-weight:800;font-size:13px}
+  .nav{width:46px;height:46px;border-radius:14px;border:0;background:transparent;color:var(--mute);cursor:pointer;display:grid;place-items:center;transition:.2s;position:relative}
+  .nav:hover{color:var(--ink);background:var(--panel2)}
+  .nav.on{color:#111;background:var(--accent)}
+  .nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .rail .sp{flex:1}
+  .led{width:8px;height:8px;border-radius:50%;background:#3DDC84;box-shadow:0 0 10px #3DDC84}
+
+  /* pages */
+  .main{position:relative;display:flex;flex-direction:column;min-width:0}
+  .page{display:none;flex:1;min-height:0;position:relative}
+  .page.on{display:block;animation:fade .35s}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---- skin page ---- */
+  .skin{display:grid;grid-template-columns:1fr 280px;height:100%}
+  .hero{position:relative;overflow:hidden;display:grid;place-items:center}
+  .bigtxt{position:absolute;left:34px;top:44%;transform:translateY(-50%);writing-mode:vertical-rl;font-size:clamp(70px,10vw,120px);font-weight:900;
+    color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.09);letter-spacing:10px;user-select:none;line-height:1;white-space:nowrap}
+  .halo{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,var(--glow),transparent 65%);opacity:.32;filter:blur(40px);transition:background .5s}
+  .figure{position:relative;height:84%;max-height:470px;aspect-ratio:240/400;filter:drop-shadow(0 30px 30px rgba(0,0,0,.6))}
+  .figure svg{width:100%;height:100%;overflow:visible}
+  .figure svg *{transition:fill .45s}
+
+  .who{position:absolute;left:96px;bottom:36px;display:flex;align-items:center;gap:10px;z-index:3}
+  .who button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer;font-size:18px;transition:.2s}
+  .who button:hover{background:var(--accent);color:#111;border-color:var(--accent)}
+  .who .nm{font-size:24px;font-weight:700;min-width:170px;cursor:pointer;padding:0 6px;user-select:none}
+  .menu{position:absolute;left:96px;bottom:92px;width:260px;max-height:320px;overflow:auto;background:var(--panel2);border-radius:16px;padding:8px;
+    border:1px solid var(--line);opacity:0;pointer-events:none;transform:translateY(8px);transition:.2s;z-index:6;box-shadow:0 20px 40px -10px #000}
+  .menu.open{opacity:1;pointer-events:auto;transform:none}
+  .menu div{padding:9px 12px;border-radius:10px;font-size:14px;cursor:pointer;color:#C9CBD6}
+  .menu div:hover{background:rgba(255,255,255,.06)}
+  .menu div.on{background:var(--accent);color:#111;font-weight:600}
+  .menu::-webkit-scrollbar,.side::-webkit-scrollbar{width:6px}
+  .menu::-webkit-scrollbar-thumb,.side::-webkit-scrollbar-thumb{background:#2c2e3a;border-radius:6px}
+
+  .scope{position:absolute;right:26px;top:26px;display:flex;background:rgba(255,255,255,.05);border-radius:999px;padding:4px;z-index:3}
+  .scope button{border:0;background:transparent;color:var(--mute);padding:8px 16px;border-radius:999px;cursor:pointer;font-size:13px;font-family:inherit;transition:.2s}
+  .scope button.on{background:var(--ink);color:#111}
+
+  /* theme list */
+  .side{background:var(--panel);border-left:1px solid var(--line);padding:22px 18px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+  .card{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;cursor:pointer;border:1px solid transparent;background:var(--panel2);transition:.2s}
+  .card:hover{border-color:rgba(255,255,255,.14);transform:translateX(-3px)}
+  .card.on{border-color:var(--accent);background:rgba(255,176,32,.08)}
+  .chips{display:flex;border-radius:10px;overflow:hidden;width:54px;height:34px;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
+  .chips i{flex:1}
+  .card span{font-size:15px;font-weight:600}
+  .tog{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding:14px 6px 2px;color:#B8BBC9;font-size:14px;border-top:1px solid var(--line)}
+
+  /* switch */
+  .sw{width:46px;height:27px;border-radius:999px;background:#2B2D38;position:relative;cursor:pointer;transition:.25s;flex:none}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#8a8d9c;transition:.25s}
+  .sw.on{background:var(--accent)}
+  .sw.on::after{left:22px;background:#111}
+
+  /* ---- combat page ---- */
+  .center{height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 90px;gap:34px}
+  .big2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .tcard{background:var(--panel2);border:1px solid var(--line);border-radius:24px;padding:30px 28px;display:flex;flex-direction:column;gap:46px;cursor:pointer;transition:.25s}
+  .tcard:hover{transform:translateY(-3px)}
+  .tcard.on{background:linear-gradient(160deg,rgba(255,176,32,.16),rgba(255,176,32,.02));border-color:rgba(255,176,32,.5)}
+  .tcard .top{display:flex;justify-content:space-between;align-items:center}
+  .tcard svg{width:34px;height:34px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .tcard h3{font-size:24px;font-weight:700}
+
+  .dmgbox{background:var(--panel2);border:1px solid var(--line);border-radius:24px;padding:28px 34px 22px}
+  .dmgbox h3{font-size:16px;color:var(--mute);font-weight:500;margin-bottom:26px;display:flex;justify-content:space-between}
+  .dmgbox h3 b{color:var(--accent);font-size:28px;font-weight:800;line-height:1}
+  .track{position:relative;height:6px;background:#2B2D38;border-radius:6px;margin:0 14px}
+  .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:6px;transition:width .3s}
+  .stops{position:absolute;inset:0}
+  .stop{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#2B2D38;border:3px solid var(--panel2);cursor:pointer;transition:.25s}
+  .stop.pass{background:var(--accent)}
+  .stop.on{background:#fff;transform:scale(1.35);box-shadow:0 0 0 5px rgba(255,176,32,.35)}
+  .labels{display:flex;justify-content:space-between;margin:22px 0 0;font-size:14px;color:var(--mute)}
+  .labels span{width:60px;text-align:center;cursor:pointer;margin:0 -16px;transition:.2s}
+  .labels span.on{color:var(--ink);font-weight:700}
+
+  /* ---- tools page ---- */
+  .grid4{height:100%;display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:60px 90px 120px}
+  .big{background:var(--panel2);border:1px solid var(--line);border-radius:26px;border:1px solid var(--line);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;
+    justify-content:center;align-items:center;gap:18px;font-size:20px;font-weight:600;font-family:inherit;transition:.25s}
+  .big:hover{background:#22232d;transform:translateY(-3px);border-color:rgba(255,176,32,.5)}
+  .big svg{width:38px;height:38px;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---- bottom dock ---- */
+  .dock{height:76px;flex:none;border-top:1px solid var(--line);background:var(--panel);display:flex;align-items:center;gap:14px;padding:0 24px 0 26px;position:relative;z-index:4}
+  .ticker{flex:1;display:flex;align-items:center;gap:10px;font:13px "Cascadia Mono",Consolas,monospace;color:var(--mute);cursor:pointer;min-width:0;height:44px}
+  .ticker .led{flex:none}
+  .ticker span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ticker:hover{color:var(--ink)}
+  .btn{border:0;border-radius:14px;padding:0 26px;height:46px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+  .btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.18)}
+  .btn.line:hover{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--accent)}
+  .btn.go{background:var(--accent);color:#111;padding:0 34px}
+  .btn.go:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn .p{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--accent)}
+
+  .logsheet{position:absolute;left:0;right:0;bottom:76px;height:240px;background:#0E0F14;border-top:1px solid var(--line);padding:16px 26px;overflow:auto;
+    transform:translateY(110%);transition:transform .35s cubic-bezier(.2,.8,.2,1);z-index:3;font:12.5px/1.85 "Cascadia Mono",Consolas,monospace;color:#8c8fa0}
+  .logsheet.open{transform:none}
+  .logsheet p span{color:#4d4f5e;margin-right:10px}
+  .logsheet p.ok{color:#3DDC84}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <nav class="rail">
+    <div class="logo">97</div>
+    <button class="nav on" data-p="skin" aria-label="skin"><svg viewBox="0 0 24 24"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></svg></button>
+    <button class="nav" data-p="combat" aria-label="combat"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></button>
+    <button class="nav" data-p="tools" aria-label="tools"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></button>
+    <div class="sp"></div>
+    <div class="led" title="ready"></div>
+  </nav>
+
+  <div class="main">
+
+    <!-- SKIN -->
+    <section class="page on" id="pg-skin">
+      <div class="skin">
+        <div class="hero">
+          <div class="bigtxt" id="bigtxt">八神庵</div>
+          <div class="halo"></div>
+          <div class="figure" id="figure"></div>
+
+          <div class="scope" id="scope"><button class="on" data-v="one">当前角色</button><button data-v="all">全员</button></div>
+
+          <div class="who">
+            <button id="prev">&#8249;</button>
+            <div class="nm" id="nm">八神庵</div>
+            <button id="next">&#8250;</button>
+          </div>
+          <div class="menu" id="menu"></div>
+        </div>
+        <div class="side" id="themes">
+          <div class="tog">同步头像<div class="sw on" data-k="avatar"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMBAT -->
+    <section class="page" id="pg-combat">
+      <div class="center">
+        <div class="big2">
+          <div class="tcard on" data-k="guard">
+            <div class="top"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><div class="sw on"></div></div>
+            <h3>免破防</h3>
+          </div>
+          <div class="tcard on" data-k="stun">
+            <div class="top"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg><div class="sw on"></div></div>
+            <h3>免眩晕</h3>
+          </div>
+        </div>
+        <div class="dmgbox">
+          <h3>受到伤害<b id="dmgVal">1/2</b></h3>
+          <div class="track"><div class="fill" id="fill"></div><div class="stops" id="stops"></div></div>
+          <div class="labels" id="labels"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section class="page" id="pg-tools">
+      <div class="grid4">
+        <button class="big" data-a="解包完成"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>解包</button>
+        <button class="big" data-a="已还原官方原版"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>还原</button>
+        <button class="big" data-a="自检通过"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>自检</button>
+        <button class="big" data-a="已打开输出目录"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>输出</button>
+      </div>
+    </section>
+
+    <div class="logsheet" id="logsheet"></div>
+
+    <footer class="dock">
+      <div class="ticker" id="ticker"><i class="led"></i><span id="tickText">就绪</span></div>
+      <button class="btn line" id="save">保存</button>
+      <button class="btn line" id="pack">打包<span class="p"></span></button>
+      <button class="btn go" id="start">开始游戏</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ---- data ---- */
+const CHARS = ["草薙京","二阶堂红丸","大门五郎","特瑞","安迪","东丈","坂崎良","罗伯特","坂崎百合","莉安娜","拉尔夫","克拉克","麻宫雅典娜","椎拳崇","镇元斋","神乐千鹤","不知火舞","琼","金家藩","陈国汉","蔡宝奇","七枷社","谢尔美","克里斯","山崎龙二","布鲁玛丽","比利","八神庵","矢吹真吾","暴走八神庵","暴走莉安娜","真七枷社","真谢尔美","真克里斯","大蛇","经典草薙京"];
+const THEMES = [
+  {n:"原版", coat:"#3A3A4A", shirt:"#F7F7FF", hair:"#DE3A21", pants:"#AD2910", shoes:"#191929"},
+  {n:"黑金", coat:"#212129", shirt:"#3A3A3A", hair:"#FFDE3A", pants:"#DEAD19", shoes:"#101010"},
+  {n:"幽紫", coat:"#25202E", shirt:"#E6E0F5", hair:"#A855F7", pants:"#7E22CE", shoes:"#100D16"},
+  {n:"极地", coat:"#1E293B", shirt:"#F0F9FF", hair:"#38BDF8", pants:"#0284C7", shoes:"#080D1A"},
+  {n:"白银", coat:"#CBD5E1", shirt:"#334155", hair:"#EF4444", pants:"#B91C1C", shoes:"#1E293B"},
+  {n:"翡翠", coat:"#14241B", shirt:"#ECFDF5", hair:"#10B981", pants:"#059669", shoes:"#070E0A"},
+  {n:"纯白", coat:"#E2E8F0", shirt:"#FFFFFF", hair:"#334155", pants:"#1E293B", shoes:"#020617"},
+  {n:"炽炎", coat:"#2E2E38", shirt:"#FFEDD5", hair:"#F59E0B", pants:"#D97706", shoes:"#101016"},
+];
+const DMG = [["无敌","0"],["1/8","1/8"],["1/4","1/4"],["1/2","1/2"],["正常","1x"],["翻倍","2x"]];
+
+/* ---- character figure (pure SVG, driven by CSS variables) ---- */
+const FIGURE = `
+<svg viewBox="0 0 240 400" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="121" cy="392" rx="70" ry="8" fill="rgba(0,0,0,.45)"/>
+  <path d="M88 210 L121 210 L119 366 L92 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L123 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L137 366Z" fill="rgba(0,0,0,.18)"/>
+  <path d="M84 366 L120 366 L126 386 L78 386Z" style="fill:var(--shoes)"/>
+  <path d="M122 366 L158 366 L166 386 L118 386Z" style="fill:var(--shoes)"/>
+  <path d="M92 112 L150 112 L156 222 L86 222Z" style="fill:var(--shirt)"/>
+  <rect x="112" y="90" width="18" height="26" rx="6" style="fill:var(--skin)"/>
+  <path d="M76 112 Q92 104 108 112 L112 292 L68 300Z" style="fill:var(--coat)"/>
+  <path d="M166 112 Q150 104 134 112 L130 292 L174 300Z" style="fill:var(--coat)"/>
+  <path d="M134 112 L130 292 L174 300 L166 112Z" fill="rgba(0,0,0,.2)"/>
+  <path d="M78 112 L56 204 L74 210 L98 132Z" style="fill:var(--coat)"/>
+  <path d="M164 112 L186 204 L168 210 L144 132Z" style="fill:var(--coat)"/>
+  <circle cx="63" cy="216" r="10" style="fill:var(--skin)"/>
+  <circle cx="179" cy="216" r="10" style="fill:var(--skin)"/>
+  <ellipse cx="121" cy="68" rx="21" ry="26" style="fill:var(--skin)"/>
+  <path d="M98 70 Q94 32 121 30 Q150 32 144 70 Q138 50 121 50 Q106 50 98 70Z" style="fill:var(--hair)"/>
+  <path d="M101 56 L95 100 L114 64Z" style="fill:var(--hair)"/>
+  <path d="M143 60 L164 34 L149 82Z" style="fill:var(--hair)"/>
+  <path d="M112 72 h8 M127 72 h8" stroke="#2a1a14" stroke-width="2.4" stroke-linecap="round"/>
+</svg>`;
+
+/* ---- state ---- */
+const S = {char:27, theme:0, scope:"one", dmg:3, guard:true, stun:true, avatar:true};
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const root = document.documentElement.style;
+$("#figure").innerHTML = FIGURE;
+
+/* ---- skin page ---- */
+function applyTheme(){
+  const t = THEMES[S.theme];
+  root.setProperty("--coat",t.coat); root.setProperty("--shirt",t.shirt);
+  root.setProperty("--hair",t.hair); root.setProperty("--pants",t.pants);
+  root.setProperty("--shoes",t.shoes); root.setProperty("--glow",t.hair);
+  $$(".card").forEach((c,i)=>c.classList.toggle("on",i===S.theme));
+}
+function applyChar(){
+  $("#nm").textContent = CHARS[S.char]; $("#bigtxt").textContent = CHARS[S.char];
+  $$("#menu div").forEach((d,i)=>d.classList.toggle("on",i===S.char));
+}
+THEMES.forEach((t,i)=>{
+  const c=document.createElement("div"); c.className="card";
+  c.innerHTML=`<div class="chips"><i style="background:${t.coat}"></i><i style="background:${t.shirt}"></i><i style="background:${t.hair}"></i><i style="background:${t.pants}"></i></div><span>${t.n}</span>`;
+  c.onclick=()=>{S.theme=i;applyTheme()};
+  $("#themes").insertBefore(c,$(".tog"));
+});
+CHARS.forEach((c,i)=>{
+  const d=document.createElement("div"); d.textContent=c;
+  d.onclick=()=>{S.char=i;applyChar();$("#menu").classList.remove("open")}; $("#menu").appendChild(d);
+});
+$("#prev").onclick=()=>{S.char=(S.char+35)%36;applyChar()};
+$("#next").onclick=()=>{S.char=(S.char+1)%36;applyChar()};
+$("#nm").onclick=e=>{e.stopPropagation();$("#menu").classList.toggle("open")};
+document.addEventListener("click",()=>$("#menu").classList.remove("open"));
+$$("#scope button").forEach(b=>b.onclick=()=>{$$("#scope button").forEach(x=>x.classList.toggle("on",x===b));S.scope=b.dataset.v});
+$$(".tog .sw").forEach(s=>s.onclick=()=>{s.classList.toggle("on");S[s.dataset.k]=s.classList.contains("on")});
+
+/* ---- combat page ---- */
+$$(".tcard").forEach(c=>c.onclick=()=>{
+  const on=!c.classList.contains("on"); c.classList.toggle("on",on);
+  c.querySelector(".sw").classList.toggle("on",on); S[c.dataset.k]=on;
+});
+const n=DMG.length;
+DMG.forEach((m,i)=>{
+  const s=document.createElement("div"); s.className="stop"; s.style.left=(i/(n-1)*100)+"%"; s.onclick=()=>setDmg(i); $("#stops").appendChild(s);
+  const l=document.createElement("span"); l.textContent=m[0]; l.onclick=()=>setDmg(i); $("#labels").appendChild(l);
+});
+function setDmg(i){
+  S.dmg=i; $("#dmgVal").textContent=DMG[i][1]; $("#fill").style.width=(i/(n-1)*100)+"%";
+  $$(".stop").forEach((s,j)=>{s.classList.toggle("on",j===i);s.classList.toggle("pass",j<i)});
+  $$("#labels span").forEach((s,j)=>s.classList.toggle("on",j===i));
+}
+
+/* ---- navigation ---- */
+$$(".nav").forEach(b=>b.onclick=()=>{
+  $$(".nav").forEach(x=>x.classList.toggle("on",x===b));
+  $$(".page").forEach(p=>p.classList.toggle("on",p.id==="pg-"+b.dataset.p));
+});
+
+/* ---- log + actions ---- */
+function log(m,ok){
+  const p=document.createElement("p"); if(ok)p.className="ok";
+  p.innerHTML=`<span>${new Date().toLocaleTimeString("zh-CN",{hour12:false})}</span>${m}`;
+  $("#logsheet").prepend(p); $("#tickText").textContent=m;
+}
+$("#ticker").onclick=()=>$("#logsheet").classList.toggle("open");
+$("#save").onclick=()=>log("已保存",true);
+$("#start").onclick=()=>log("启动中",true);
+$("#pack").onclick=()=>{const p=$("#pack .p");p.style.transition="none";p.style.width="0";
+  requestAnimationFrame(()=>{p.style.transition="width 1.2s";p.style.width="100%"});
+  log("打包中");setTimeout(()=>{log("打包完成",true);p.style.width="0"},1300)};
+$$(".big").forEach(b=>b.onclick=()=>log(b.dataset.a,true));
+
+applyTheme();applyChar();setDmg(S.dmg);log("就绪");
+</script>
+</body>
+</html>
+

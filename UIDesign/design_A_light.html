@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOF97 Studio - Design A (Light)</title>
+<style>
+  :root{
+    --bg:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --mute:#8E8E93; --line:#E7E7EC;
+    --accent:#5B6CFF; --accent-ink:#fff; --ok:#34C759;
+    --coat:#3A3A4A; --shirt:#F7F7FF; --hair:#DE3A21; --pants:#AD2910; --shoes:#191929; --skin:#F7C584;
+    --glow:#DE3A21;
+    --r:20px;
+    font-family:"Segoe UI","Microsoft YaHei UI","PingFang SC",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#E9EAF0;display:grid;place-items:center;color:var(--ink);padding:24px}
+
+  /* app window */
+  .app{position:relative;width:min(1180px,100%);height:min(740px,calc(100vh - 48px));min-height:620px;
+    background:var(--bg);border-radius:28px;box-shadow:0 30px 80px -20px rgba(30,30,60,.25),0 0 0 1px rgba(0,0,0,.04);
+    overflow:hidden;display:flex;flex-direction:column}
+
+  /* top bar */
+  .top{display:flex;align-items:center;justify-content:space-between;padding:22px 30px;position:relative;z-index:3}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.3px}
+  .brand i{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px rgba(91,108,255,.15)}
+  .status{display:flex;align-items:center;gap:8px;color:var(--mute);font-size:13px}
+  .status b{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+
+  .picker{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:4px;
+    background:var(--card);border-radius:999px;padding:5px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -10px rgba(0,0,0,.12)}
+  .picker button{width:36px;height:36px;border:0;border-radius:50%;background:transparent;cursor:pointer;font-size:18px;color:var(--mute);transition:.2s}
+  .picker button:hover{background:#F0F0F4;color:var(--ink)}
+  .picker .name{min-width:150px;text-align:center;font-weight:600;font-size:15px;cursor:pointer;padding:8px 6px;border-radius:999px;user-select:none}
+  .picker .name:hover{background:#F6F6F9}
+  .menu{position:absolute;top:62px;left:50%;transform:translateX(-50%) translateY(-6px);width:300px;max-height:340px;overflow:auto;
+    background:var(--card);border-radius:18px;padding:8px;box-shadow:0 20px 50px -12px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:.2s;z-index:6}
+  .menu.open{opacity:1;pointer-events:auto;transform:translateX(-50%)}
+  .menu div{padding:9px 14px;border-radius:12px;font-size:14px;cursor:pointer}
+  .menu div:hover{background:#F3F3F7}
+  .menu div.on{background:var(--accent);color:#fff}
+
+  .tools{display:flex;gap:10px;align-items:center}
+  .icon-btn{width:40px;height:40px;border-radius:50%;border:0;background:var(--card);cursor:pointer;display:grid;place-items:center;
+    box-shadow:0 1px 2px rgba(0,0,0,.05);transition:.2s;color:var(--ink)}
+  .icon-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px -6px rgba(0,0,0,.2)}
+  .icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  /* stage */
+  .stage{flex:1;position:relative;display:grid;place-items:center;min-height:0;padding:0 0 84px}
+  .blob{position:absolute;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle at 50% 50%,var(--glow) 0%,transparent 68%);opacity:.22;filter:blur(30px);transition:background .5s}
+  .ring{position:absolute;width:330px;height:330px;border-radius:50%;border:1px solid rgba(0,0,0,.06)}
+  .ring.r2{width:430px;height:430px}
+  .figure{position:relative;height:100%;max-height:400px;aspect-ratio:240/400;filter:drop-shadow(0 22px 22px rgba(0,0,0,.18));transition:.3s}
+  .figure svg{width:100%;height:100%;overflow:visible}
+  .figure svg *{transition:fill .45s}
+  .tname{position:absolute;bottom:128px;left:50%;transform:translateX(-50%);font-size:13px;color:var(--mute);letter-spacing:1px}
+
+  /* theme dots */
+  .themes{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:14px;
+    background:rgba(255,255,255,.75);backdrop-filter:blur(12px);padding:10px 16px;border-radius:999px;box-shadow:0 8px 24px -12px rgba(0,0,0,.2)}
+  .dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid #fff;transition:.2s;position:relative;
+    box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+  .dot:hover{transform:scale(1.12)}
+  .dot.on{box-shadow:0 0 0 2px var(--accent);transform:scale(1.12)}
+
+  /* action bar */
+  .bar{display:flex;align-items:center;justify-content:center;gap:12px;padding:0 30px 26px;position:relative;z-index:3}
+  .seg{display:flex;background:#E4E4EA;border-radius:999px;padding:4px;margin-right:12px}
+  .seg button{border:0;background:transparent;padding:9px 18px;border-radius:999px;cursor:pointer;font-size:14px;color:var(--mute);font-family:inherit;transition:.2s}
+  .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .btn{border:0;border-radius:999px;padding:13px 26px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+  .btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+  .btn.ghost:hover{box-shadow:0 8px 20px -10px rgba(0,0,0,.25);transform:translateY(-1px)}
+  .btn.main{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 24px -8px rgba(91,108,255,.7)}
+  .btn.main:hover{transform:translateY(-1px);filter:brightness(1.05)}
+  .btn .p{position:absolute;left:0;bottom:0;height:3px;width:0;background:currentColor;opacity:.5}
+
+  /* side sheet */
+  .scrim{position:absolute;inset:0;background:rgba(20,20,40,.18);opacity:0;pointer-events:none;transition:.25s;z-index:4}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .sheet{position:absolute;top:12px;right:12px;bottom:12px;width:380px;background:var(--card);border-radius:24px;z-index:5;
+    transform:translateX(110%);transition:transform .35s cubic-bezier(.2,.8,.2,1);padding:22px;display:flex;flex-direction:column;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.3)}
+  .sheet.open{transform:none}
+  .tabs{display:flex;background:#F1F1F5;border-radius:999px;padding:4px;margin-bottom:22px}
+  .tabs button{flex:1;border:0;background:transparent;padding:9px;border-radius:999px;cursor:pointer;font-size:14px;color:var(--mute);font-family:inherit}
+  .tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .pane{display:none;flex:1;min-height:0;overflow:auto}
+  .pane.on{display:block}
+
+  .row{display:flex;align-items:center;justify-content:space-between;padding:16px 4px;border-bottom:1px solid var(--line);font-size:15px}
+  .row:last-child{border:0}
+  .sw{width:46px;height:28px;border-radius:999px;background:#D9D9DF;position:relative;cursor:pointer;transition:.25s;flex:none}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.25);transition:.25s}
+  .sw.on{background:var(--ok)}
+  .sw.on::after{left:21px}
+
+  .lbl{font-size:13px;color:var(--mute);margin:22px 4px 12px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .steps button{border:1.5px solid var(--line);background:#fff;border-radius:14px;padding:14px 0;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);transition:.2s}
+  .steps button:hover{border-color:#C9CCFF}
+  .steps button.on{border-color:var(--accent);background:rgba(91,108,255,.08);color:var(--accent)}
+
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{border:0;background:#F6F6F9;border-radius:18px;padding:22px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:14px;font-family:inherit;color:var(--ink);transition:.2s}
+  .tile:hover{background:#EEEEF4;transform:translateY(-2px)}
+  .tile svg{width:24px;height:24px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  .log{font:12.5px/1.8 "Cascadia Mono",Consolas,monospace;color:#555}
+  .log p span{color:var(--mute);margin-right:8px}
+  .log p.ok{color:#1E9E4A}
+
+  .toast{position:absolute;left:50%;top:84px;transform:translate(-50%,-20px);background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;
+    font-size:14px;opacity:0;transition:.3s;z-index:9;pointer-events:none}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="top">
+    <div class="brand"><i></i>KOF97</div>
+
+    <div class="picker">
+      <button id="prev" aria-label="prev">&#8249;</button>
+      <div class="name" id="charName">八神庵</div>
+      <button id="next" aria-label="next">&#8250;</button>
+    </div>
+    <div class="menu" id="menu"></div>
+
+    <div class="tools">
+      <div class="status"><b></b>就绪</div>
+      <button class="icon-btn" id="openSheet" aria-label="settings">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.4" fill="#fff"/><circle cx="15" cy="17" r="2.4" fill="#fff"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="ring r2"></div><div class="ring"></div><div class="blob"></div>
+    <div class="figure" id="figure"></div>
+    <div class="themes" id="themes"></div>
+  </main>
+
+  <footer class="bar">
+    <div class="seg" id="scope"><button class="on" data-v="one">当前角色</button><button data-v="all">全员</button></div>
+    <button class="btn ghost" id="save">保存</button>
+    <button class="btn ghost" id="pack">打包<span class="p"></span></button>
+    <button class="btn main" id="start">开始游戏</button>
+  </footer>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="sheet" id="sheet">
+    <div class="tabs" id="tabs"><button class="on" data-t="combat">战斗</button><button data-t="tools">工具</button><button data-t="log">日志</button></div>
+
+    <section class="pane on" id="p-combat">
+      <div class="row">免破防<div class="sw on" data-k="guard"></div></div>
+      <div class="row">免眩晕<div class="sw on" data-k="stun"></div></div>
+      <div class="row">同步头像<div class="sw on" data-k="avatar"></div></div>
+      <div class="lbl">受到伤害</div>
+      <div class="steps" id="dmg"></div>
+    </section>
+
+    <section class="pane" id="p-tools">
+      <div class="tiles">
+        <button class="tile" data-a="解包完成"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>解包</button>
+        <button class="tile" data-a="已还原官方原版"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>还原</button>
+        <button class="tile" data-a="自检通过"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>自检</button>
+        <button class="tile" data-a="已打开输出目录"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>输出</button>
+      </div>
+    </section>
+
+    <section class="pane" id="p-log"><div class="log" id="log"></div></section>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---- data ---- */
+const CHARS = ["草薙京","二阶堂红丸","大门五郎","特瑞","安迪","东丈","坂崎良","罗伯特","坂崎百合","莉安娜","拉尔夫","克拉克","麻宫雅典娜","椎拳崇","镇元斋","神乐千鹤","不知火舞","琼","金家藩","陈国汉","蔡宝奇","七枷社","谢尔美","克里斯","山崎龙二","布鲁玛丽","比利","八神庵","矢吹真吾","暴走八神庵","暴走莉安娜","真七枷社","真谢尔美","真克里斯","大蛇","经典草薙京"];
+const THEMES = [
+  {n:"原版", coat:"#3A3A4A", shirt:"#F7F7FF", hair:"#DE3A21", pants:"#AD2910", shoes:"#191929"},
+  {n:"黑金", coat:"#212129", shirt:"#3A3A3A", hair:"#FFDE3A", pants:"#DEAD19", shoes:"#101010"},
+  {n:"幽紫", coat:"#25202E", shirt:"#E6E0F5", hair:"#A855F7", pants:"#7E22CE", shoes:"#100D16"},
+  {n:"极地", coat:"#1E293B", shirt:"#F0F9FF", hair:"#38BDF8", pants:"#0284C7", shoes:"#080D1A"},
+  {n:"白银", coat:"#CBD5E1", shirt:"#334155", hair:"#EF4444", pants:"#B91C1C", shoes:"#1E293B"},
+  {n:"翡翠", coat:"#14241B", shirt:"#ECFDF5", hair:"#10B981", pants:"#059669", shoes:"#070E0A"},
+  {n:"纯白", coat:"#E2E8F0", shirt:"#FFFFFF", hair:"#334155", pants:"#1E293B", shoes:"#020617"},
+  {n:"炽炎", coat:"#2E2E38", shirt:"#FFEDD5", hair:"#F59E0B", pants:"#D97706", shoes:"#101016"},
+];
+const DMG = ["无敌","1/8","1/4","1/2","正常","2倍"];
+
+/* ---- character figure (pure SVG, driven by CSS variables) ---- */
+const FIGURE = `
+<svg viewBox="0 0 240 400" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="121" cy="392" rx="70" ry="8" fill="rgba(0,0,0,.12)"/>
+  <path d="M88 210 L121 210 L119 366 L92 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L123 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L137 366Z" fill="rgba(0,0,0,.14)"/>
+  <path d="M84 366 L120 366 L126 386 L78 386Z" style="fill:var(--shoes)"/>
+  <path d="M122 366 L158 366 L166 386 L118 386Z" style="fill:var(--shoes)"/>
+  <path d="M92 112 L150 112 L156 222 L86 222Z" style="fill:var(--shirt)"/>
+  <rect x="112" y="90" width="18" height="26" rx="6" style="fill:var(--skin)"/>
+  <path d="M76 112 Q92 104 108 112 L112 292 L68 300Z" style="fill:var(--coat)"/>
+  <path d="M166 112 Q150 104 134 112 L130 292 L174 300Z" style="fill:var(--coat)"/>
+  <path d="M134 112 L130 292 L174 300 L166 112Z" fill="rgba(0,0,0,.16)"/>
+  <path d="M78 112 L56 204 L74 210 L98 132Z" style="fill:var(--coat)"/>
+  <path d="M164 112 L186 204 L168 210 L144 132Z" style="fill:var(--coat)"/>
+  <circle cx="63" cy="216" r="10" style="fill:var(--skin)"/>
+  <circle cx="179" cy="216" r="10" style="fill:var(--skin)"/>
+  <ellipse cx="121" cy="68" rx="21" ry="26" style="fill:var(--skin)"/>
+  <path d="M98 70 Q94 32 121 30 Q150 32 144 70 Q138 50 121 50 Q106 50 98 70Z" style="fill:var(--hair)"/>
+  <path d="M101 56 L95 100 L114 64Z" style="fill:var(--hair)"/>
+  <path d="M143 60 L164 34 L149 82Z" style="fill:var(--hair)"/>
+  <path d="M112 72 h8 M127 72 h8" stroke="#2a1a14" stroke-width="2.4" stroke-linecap="round"/>
+</svg>`;
+
+/* ---- state ---- */
+const S = {char:27, theme:0, scope:"one", dmg:3, guard:true, stun:true, avatar:true};
+const $ = s => document.querySelector(s);
+const root = document.documentElement.style;
+
+$("#figure").innerHTML = FIGURE;
+
+function applyTheme(){
+  const t = THEMES[S.theme];
+  root.setProperty("--coat",t.coat); root.setProperty("--shirt",t.shirt);
+  root.setProperty("--hair",t.hair); root.setProperty("--pants",t.pants);
+  root.setProperty("--shoes",t.shoes); root.setProperty("--glow",t.hair);
+  document.querySelectorAll(".dot").forEach((d,i)=>d.classList.toggle("on",i===S.theme));
+}
+function applyChar(){ $("#charName").textContent = CHARS[S.char];
+  document.querySelectorAll("#menu div").forEach((d,i)=>d.classList.toggle("on",i===S.char)); }
+
+/* build ui */
+THEMES.forEach((t,i)=>{
+  const d=document.createElement("div"); d.className="dot"; d.title=t.n;
+  d.style.background=`linear-gradient(135deg,${t.coat} 50%,${t.hair} 50%)`;
+  d.onclick=()=>{S.theme=i;applyTheme()}; $("#themes").appendChild(d);
+});
+CHARS.forEach((c,i)=>{
+  const d=document.createElement("div"); d.textContent=c;
+  d.onclick=()=>{S.char=i;applyChar();$("#menu").classList.remove("open")}; $("#menu").appendChild(d);
+});
+DMG.forEach((m,i)=>{
+  const b=document.createElement("button"); b.textContent=m; if(i===S.dmg)b.classList.add("on");
+  b.onclick=()=>{S.dmg=i;document.querySelectorAll("#dmg button").forEach((x,j)=>x.classList.toggle("on",j===i))};
+  $("#dmg").appendChild(b);
+});
+
+/* events */
+$("#prev").onclick=()=>{S.char=(S.char+35)%36;applyChar()};
+$("#next").onclick=()=>{S.char=(S.char+1)%36;applyChar()};
+$("#charName").onclick=e=>{e.stopPropagation();$("#menu").classList.toggle("open")};
+document.addEventListener("click",()=>$("#menu").classList.remove("open"));
+document.querySelectorAll("#scope button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#scope button").forEach(x=>x.classList.toggle("on",x===b)); S.scope=b.dataset.v});
+document.querySelectorAll(".sw").forEach(s=>s.onclick=()=>{s.classList.toggle("on");S[s.dataset.k]=s.classList.contains("on")});
+
+const sheet=$("#sheet"), scrim=$("#scrim");
+const toggleSheet=o=>{sheet.classList.toggle("open",o);scrim.classList.toggle("open",o)};
+$("#openSheet").onclick=()=>toggleSheet(!sheet.classList.contains("open"));
+scrim.onclick=()=>toggleSheet(false);
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="p-"+b.dataset.t))});
+
+function log(m,ok){const p=document.createElement("p");if(ok)p.className="ok";
+  p.innerHTML=`<span>${new Date().toLocaleTimeString("zh-CN",{hour12:false})}</span>${m}`;$("#log").prepend(p)}
+let tt;function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1800);log(m,true)}
+
+$("#save").onclick=()=>toast("已保存");
+$("#start").onclick=()=>toast("启动中");
+$("#pack").onclick=()=>{const p=$("#pack .p");p.style.transition="none";p.style.width="0";
+  requestAnimationFrame(()=>{p.style.transition="width 1.2s";p.style.width="100%"});
+  setTimeout(()=>{toast("打包完成");p.style.width="0"},1300)};
+document.querySelectorAll(".tile").forEach(t=>t.onclick=()=>toast(t.dataset.a));
+
+applyTheme();applyChar();log("就绪");
+</script>
+</body>
+</html>
+

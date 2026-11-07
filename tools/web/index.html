@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOF97 Mod Studio</title>
+<style>
+  :root {
+    --bg: #0A0B0E;
+    --panel: #121319;
+    --panel2: #181A22;
+    --panel3: #20232E;
+    --ink: #F2F3F7;
+    --mute: #72768A;
+    --line: rgba(255, 255, 255, 0.08);
+    --accent: #FFB319;
+    --accent-glow: rgba(255, 179, 25, 0.35);
+    --ok: #34D399;
+    --danger: #F87171;
+    --warn: #FBBF24;
+    --coat: #3A3A4A;
+    --shirt: #F7F7FF;
+    --hair: #DE3A21;
+    --pants: #AD2910;
+    --shoes: #191929;
+    --skin: #F7C584;
+    --glow: #DE3A21;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", sans-serif;
+    user-select: none;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg); color: var(--ink); }
+
+  /* App Layout */
+  .app {
+    display: grid;
+    grid-template-columns: 74px 1fr;
+    height: 100vh;
+    width: 100vw;
+    background: var(--bg);
+    position: relative;
+  }
+
+  /* Left Rail */
+  .rail {
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0 16px;
+    gap: 12px;
+    border-right: 1px solid var(--line);
+    z-index: 10;
+  }
+  .logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #FFC038, #FF9500);
+    margin-bottom: 20px;
+    display: grid;
+    place-items: center;
+    color: #111;
+    font-weight: 900;
+    font-size: 16px;
+    box-shadow: 0 8px 20px -4px rgba(255, 160, 0, 0.5);
+    cursor: default;
+  }
+  .nav {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    border: 0;
+    background: transparent;
+    color: var(--mute);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.22s ease;
+    position: relative;
+  }
+  .nav:hover {
+    color: var(--ink);
+    background: var(--panel2);
+    transform: translateY(-1px);
+  }
+  .nav.on {
+    color: #111;
+    background: var(--accent);
+    box-shadow: 0 6px 18px -4px var(--accent-glow);
+  }
+  .nav svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .rail-spacer { flex: 1; }
+  .status-led {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 10px var(--ok);
+    transition: 0.3s;
+  }
+
+  /* Main Viewport */
+  .main {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .page {
+    display: none;
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .page.on {
+    display: block;
+    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ========================================================================= */
+  /* Page 1: Skin & Palette Stage (3-Column Layout)                            */
+  /* ========================================================================= */
+  .skin-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 270px;
+    height: calc(100vh - 76px);
+  }
+
+  /* Left Column: Character List */
+  .char-list-col {
+    background: var(--panel);
+    border-right: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+  }
+  .char-list-header {
+    padding: 18px 18px 14px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--mute);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    flex: none;
+  }
+  .char-list-header .badge {
+    background: rgba(255, 255, 255, 0.08);
+    color: #C2C5D6;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .char-scroll-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 8px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 0;
+  }
+  .char-scroll-box::-webkit-scrollbar, .theme-sidebar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .char-scroll-box::-webkit-scrollbar-thumb, .theme-sidebar::-webkit-scrollbar-thumb {
+    background: #282B38;
+    border-radius: 5px;
+  }
+
+  .char-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all 0.18s ease;
+  }
+  .char-row:hover {
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .char-row.on {
+    background: #1B1E29;
+    border-color: rgba(255, 179, 25, 0.7);
+    box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.6);
+  }
+  .char-row-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  .char-row .idx {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--mute);
+    width: 18px;
+    flex: none;
+    font-family: "Cascadia Mono", Consolas, monospace;
+  }
+  .char-row.on .idx { color: var(--accent); font-weight: 800; }
+  .char-row .name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #DDE0EC;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .char-row.on .name { color: #FFF; font-weight: 700; }
+
+  /* Current skin badge on character row */
+  .char-skin-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    color: #A4A8BC;
+    flex: none;
+    transition: 0.2s;
+    border: 1px solid transparent;
+  }
+  .char-skin-tag.modded {
+    background: rgba(255, 179, 25, 0.16);
+    color: #FFC038;
+    font-weight: 700;
+    border: 1px solid rgba(255, 179, 25, 0.45);
+    box-shadow: 0 0 10px rgba(255, 179, 25, 0.15);
+  }
+  .char-skin-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Center Column: Hero Stage */
+  .hero-stage {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 50% 50%, #151720 0%, var(--bg) 80%);
+  }
+  .watermark {
+    position: absolute;
+    left: 28px;
+    top: 48%;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    font-size: clamp(60px, 10vw, 110px);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.06);
+    letter-spacing: 12px;
+    pointer-events: none;
+    line-height: 1;
+    white-space: nowrap;
+    transition: 0.3s;
+  }
+  .halo-glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 64%);
+    opacity: 0.28;
+    filter: blur(55px);
+    transition: background 0.5s ease;
+    pointer-events: none;
+  }
+  .figure-box {
+    position: relative;
+    height: 82%;
+    max-height: 480px;
+    aspect-ratio: 240 / 400;
+    filter: drop-shadow(0 30px 34px rgba(0, 0, 0, 0.7));
+    transition: transform 0.3s ease;
+  }
+  .figure-box svg { width: 100%; height: 100%; overflow: visible; }
+  .figure-box svg * { transition: fill 0.35s ease; }
+
+  /* Current Character Active Pill (Center Bottom) */
+  .active-char-banner {
+    position: absolute;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(24, 26, 34, 0.88);
+    backdrop-filter: blur(12px);
+    padding: 7px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.6);
+  }
+  .active-char-banner .cname {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .active-char-banner .tname {
+    font-size: 12.5px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Scope switch (Top Right of Stage) */
+  .scope-pill {
+    position: absolute;
+    right: 24px;
+    top: 20px;
+    display: flex;
+    background: rgba(24, 26, 34, 0.88);
+    backdrop-filter: blur(12px);
+    border-radius: 999px;
+    padding: 4px;
+    border: 1px solid var(--line);
+    z-index: 5;
+  }
+  .scope-pill button {
+    border: 0;
+    background: transparent;
+    color: var(--mute);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: 0.2s;
+  }
+  .scope-pill button.on {
+    background: var(--ink);
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Right Column: Palette Theme Sidebar */
+  .theme-sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    padding: 18px 16px 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .sidebar-header {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--mute);
+    margin-bottom: 2px;
+    font-weight: 700;
+  }
+  .theme-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: var(--panel2);
+    transition: all 0.2s ease;
+  }
+  .theme-card:hover {
+    border-color: rgba(255, 255, 255, 0.16);
+    transform: translateX(-2px);
+  }
+  .theme-card.on {
+    border-color: var(--accent);
+    background: rgba(255, 179, 25, 0.1);
+  }
+  .color-chips {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 52px;
+    height: 30px;
+    flex: none;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12);
+  }
+  .color-chips i { flex: 1; height: 100%; display: block; }
+  .theme-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .theme-info .title {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+  .theme-info .sub {
+    font-size: 11px;
+    color: var(--mute);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #D1D4DE;
+  }
+
+  /* Minimal Switch */
+  .switch {
+    width: 42px;
+    height: 24px;
+    border-radius: 999px;
+    background: #2C2E3C;
+    position: relative;
+    cursor: pointer;
+    transition: 0.25s;
+    flex: none;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #9094A6;
+    transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { left: 20px; background: #111; }
+
+  /* ========================================================================= */
+  /* Page 2: Combat Page                                                       */
+  /* ========================================================================= */
+  .combat-layout {
+    height: calc(100vh - 76px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 0 40px;
+    gap: 30px;
+  }
+  .combat-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .combat-card {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .combat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+  .combat-card.on {
+    background: linear-gradient(160deg, rgba(255, 179, 25, 0.15), rgba(255, 179, 25, 0.02));
+    border-color: rgba(255, 179, 25, 0.5);
+  }
+  .combat-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .combat-card-top svg {
+    width: 34px;
+    height: 34px;
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .combat-card h3 {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .combat-card p {
+    font-size: 13px;
+    color: var(--mute);
+  }
+
+  /* Damage Multiplier Box */
+  .damage-box {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px 34px 30px;
+  }
+  .damage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+  .damage-header .title-grp h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .damage-header .title-grp p {
+    font-size: 13px;
+    color: var(--mute);
+  }
+  .damage-header .val-badge {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .slider-rail {
+    position: relative;
+    height: 8px;
+    background: #272A38;
+    border-radius: 999px;
+    margin: 18px 12px 14px;
+  }
+  .slider-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, #FFB319, #FF7B00);
+    border-radius: 999px;
+    transition: width 0.28s ease;
+  }
+  .slider-stops {
+    position: absolute;
+    inset: 0;
+  }
+  .slider-stop {
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border-radius: 50%;
+    background: #272A38;
+    border: 3px solid var(--panel2);
+    cursor: pointer;
+    transition: all 0.22s ease;
+  }
+  .slider-stop.pass { background: var(--accent); }
+  .slider-stop.on {
+    background: #fff;
+    transform: scale(1.3);
+    box-shadow: 0 0 0 5px var(--accent-glow);
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 24px;
+    font-size: 13.5px;
+    color: var(--mute);
+  }
+  .slider-labels span {
+    width: 60px;
+    text-align: center;
+    cursor: pointer;
+    margin: 0 -16px;
+    transition: 0.2s;
+  }
+  .slider-labels span.on {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  /* ========================================================================= */
+  /* Page 3: Tools Page                                                        */
+  /* ========================================================================= */
+  .tools-layout {
+    height: calc(100vh - 76px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 50px 40px;
+    align-content: center;
+  }
+  .tool-tile {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 30px 26px;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    height: 160px;
+    font-family: inherit;
+    transition: all 0.25s ease;
+    text-align: left;
+  }
+  .tool-tile:hover {
+    background: #20222D;
+    transform: translateY(-3px);
+    border-color: rgba(255, 179, 25, 0.4);
+    box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.5);
+  }
+  .tool-tile-top {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: rgba(255, 179, 25, 0.12);
+    display: grid;
+    place-items: center;
+  }
+  .tool-tile-top svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .tool-tile-body h4 {
+    font-size: 17.5px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .tool-tile-body p {
+    font-size: 12.5px;
+    color: var(--mute);
+  }
+
+  /* ========================================================================= */
+  /* Bottom Global Control Dock                                                */
+  /* ========================================================================= */
+  .dock {
+    height: 76px;
+    flex: none;
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 24px;
+    position: relative;
+    z-index: 10;
+  }
+  .ticker {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font: 13px "Cascadia Mono", Consolas, monospace;
+    color: var(--mute);
+    cursor: pointer;
+    min-width: 0;
+    height: 44px;
+    padding: 0 12px;
+    border-radius: 12px;
+    transition: 0.2s;
+  }
+  .ticker:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink);
+  }
+  .ticker-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 8px var(--ok);
+    flex: none;
+  }
+  .ticker-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ticker-arrow {
+    font-size: 11px;
+    opacity: 0.5;
+  }
+
+  .btn {
+    border: 0;
+    border-radius: 14px;
+    padding: 0 22px;
+    height: 44px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn.outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+  }
+  .btn.outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 179, 25, 0.05);
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, #FFC038, #FF9500);
+    color: #111;
+    padding: 0 30px;
+    box-shadow: 0 8px 22px -6px rgba(255, 160, 0, 0.5);
+  }
+  .btn.primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px -6px rgba(255, 160, 0, 0.7);
+  }
+  .btn.primary:active { transform: translateY(0); }
+  .btn .progress-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 0;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+
+  /* Log Drawer Sheet */
+  .log-drawer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 76px;
+    height: 270px;
+    background: rgba(14, 15, 20, 0.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line);
+    padding: 16px 26px;
+    overflow-y: auto;
+    transform: translateY(110%);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9;
+    font: 12.5px / 1.8 "Cascadia Mono", Consolas, monospace;
+    color: #9AA0B4;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .log-drawer.open { transform: none; pointer-events: auto; }
+  .log-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 8px;
+    flex: none;
+    font-size: 12px;
+    color: var(--mute);
+    text-transform: uppercase;
+  }
+  .log-drawer-header button {
+    background: transparent;
+    border: 0;
+    color: var(--mute);
+    cursor: pointer;
+    font: inherit;
+  }
+  .log-drawer-header button:hover { color: var(--ink); }
+  .log-content { flex: 1; overflow-y: auto; }
+  .log-content p { display: flex; gap: 12px; margin: 2px 0; }
+  .log-content p .time { color: #535868; flex: none; }
+  .log-content p.ok { color: var(--ok); }
+  .log-content p.err { color: var(--danger); }
+  .log-content p.warn { color: var(--warn); }
+
+  /* Toast Notification */
+  .toast {
+    position: absolute;
+    left: 50%;
+    top: 24px;
+    transform: translate(-50%, -20px);
+    background: #242734;
+    color: #fff;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+    box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Left Icon Rail Navigation -->
+  <nav class="rail">
+    <div class="logo">97</div>
+    <button class="nav on" data-p="skin" title="角色外观与皮肤定制"><svg viewBox="0 0 24 24"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></svg></button>
+    <button class="nav" data-p="combat" title="战斗与防御属性强化"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></button>
+    <button class="nav" data-p="tools" title="一键工程维护与工具"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></button>
+    <div class="rail-spacer"></div>
+    <div class="status-led" id="statusLed" title="ROM 状态正常"></div>
+  </nav>
+
+  <!-- Main Viewport -->
+  <div class="main">
+
+    <!-- PAGE 1: SKIN (3-COLUMN LAYOUT) -->
+    <section class="page on" id="pg-skin">
+      <div class="skin-layout">
+
+        <!-- Column 1: Character List -->
+        <div class="char-list-col">
+          <div class="char-list-header">
+            <span>全员角色</span>
+            <span class="badge" id="charCountBadge">36 位</span>
+          </div>
+          <div class="char-scroll-box" id="charScrollBox"></div>
+        </div>
+
+        <!-- Column 2: Center Hero Stage -->
+        <div class="hero-stage">
+          <div class="watermark" id="watermark">八神庵</div>
+          <div class="halo-glow"></div>
+          <div class="figure-box" id="figureBox"></div>
+
+          <!-- Scope Switcher -->
+          <div class="scope-pill" id="scopePill">
+            <button class="on" data-v="SINGLE">当前角色</button>
+            <button data-v="ALL">全员</button>
+          </div>
+
+          <!-- Active Character & Theme Banner -->
+          <div class="active-char-banner">
+            <span class="cname" id="bannerCharName">八神庵</span>
+            <span style="color:var(--line);">|</span>
+            <span class="tname" id="bannerThemeName">原版经典</span>
+          </div>
+        </div>
+
+        <!-- Column 3: Palette Theme Sidebar -->
+        <div class="theme-sidebar">
+          <div class="sidebar-header">和谐配色库 (8套精选)</div>
+          <div id="themeList" style="display:flex;flex-direction:column;gap:9px;"></div>
+          <div class="sidebar-footer">
+            <span>同步头像立绘</span>
+            <div class="switch on" id="swAvatar"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- PAGE 2: COMBAT -->
+    <section class="page" id="pg-combat">
+      <div class="combat-layout">
+        <div class="combat-cards">
+          <div class="combat-card on" id="cardGuard">
+            <div class="combat-card-top">
+              <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+              <div class="switch on" id="swGuard"></div>
+            </div>
+            <div>
+              <h3>免破防</h3>
+              <p>Guard 防御槽锁死 103 点满值</p>
+            </div>
+          </div>
+
+          <div class="combat-card on" id="cardStun">
+            <div class="combat-card-top">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/></svg>
+              <div class="switch on" id="swStun"></div>
+            </div>
+            <div>
+              <h3>免眩晕</h3>
+              <p>Stun 眩晕槽锁死 103 点满值</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="damage-box">
+          <div class="damage-header">
+            <div class="title-grp">
+              <h3>受到伤害倍率</h3>
+              <p id="damageDesc">掉血减半，格斗手感极佳，容错率倍增</p>
+            </div>
+            <div class="val-badge" id="damageVal">1/2</div>
+          </div>
+          <div class="slider-rail">
+            <div class="slider-fill" id="sliderFill"></div>
+            <div class="slider-stops" id="sliderStops"></div>
+          </div>
+          <div class="slider-labels" id="sliderLabels"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: TOOLS -->
+    <section class="page" id="pg-tools">
+      <div class="tools-layout">
+        <button class="tool-tile" data-act="unpack">
+          <div class="tool-tile-top"><svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>
+          <div class="tool-tile-body">
+            <h4>重新解包</h4>
+            <p>从原生 ROM 刷新工作区二进制</p>
+          </div>
+        </button>
+
+        <button class="tool-tile" data-act="restore">
+          <div class="tool-tile-top"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></div>
+          <div class="tool-tile-body">
+            <h4>还原基线</h4>
+            <p>一键重置为官方原版风云再起</p>
+          </div>
+        </button>
+
+        <button class="tool-tile" data-act="selftest">
+          <div class="tool-tile-top"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+          <div class="tool-tile-body">
+            <h4>全局自检</h4>
+            <p>测试 bswap16 / LSPC2 / 瓦片流</p>
+          </div>
+        </button>
+
+        <button class="tool-tile" data-act="openoutput">
+          <div class="tool-tile-top"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+          <div class="tool-tile-body">
+            <h4>输出目录</h4>
+            <p>打开 output/roms 交付结果目录</p>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Slide-Up Log Drawer -->
+    <div class="log-drawer" id="logDrawer">
+      <div class="log-drawer-header">
+        <span>运行与构建日志</span>
+        <div style="display:flex;gap:14px;">
+          <button id="btnClearLog">清空</button>
+          <button id="btnCloseLog">收起 ▲</button>
+        </div>
+      </div>
+      <div class="log-content" id="logContent"></div>
+    </div>
+
+    <!-- Bottom Action Dock -->
+    <footer class="dock">
+      <div class="ticker" id="tickerBtn">
+        <i class="ticker-dot"></i>
+        <span class="ticker-text" id="tickerText">系统就绪</span>
+        <span class="ticker-arrow">▲ 日志</span>
+      </div>
+      <button class="btn outline" id="btnSave">保存设置</button>
+      <button class="btn outline" id="btnPack">打包 ROM<span class="progress-bar" id="packProgress"></span></button>
+      <button class="btn primary" id="btnStartGame">
+        <svg style="width:18px;height:18px;fill:currentColor;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        开始游戏
+      </button>
+    </footer>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========================================================================= */
+/* KOF97 Characters & Themes Data Model                                      */
+/* ========================================================================= */
+const CHARACTERS = [
+  {id: 0x00, name: "草薙京", en: "Kyo Kusanagi"},
+  {id: 0x01, name: "二阶堂红丸", en: "Benimaru Nikaido"},
+  {id: 0x02, name: "大门五郎", en: "Goro Daimon"},
+  {id: 0x03, name: "特瑞·伯加德", en: "Terry Bogard"},
+  {id: 0x04, name: "安迪·伯加德", en: "Andy Bogard"},
+  {id: 0x05, name: "东丈", en: "Joe Higashi"},
+  {id: 0x06, name: "坂崎良", en: "Ryo Sakazaki"},
+  {id: 0x07, name: "罗伯特·加西亚", en: "Robert Garcia"},
+  {id: 0x08, name: "坂崎百合", en: "Yuri Sakazaki"},
+  {id: 0x09, name: "莉安娜·哈迪兰", en: "Leona Heidern"},
+  {id: 0x0A, name: "拉尔夫·琼斯", en: "Ralf Jones"},
+  {id: 0x0B, name: "克拉克·斯提尔", en: "Clark Still"},
+  {id: 0x0C, name: "麻宫雅典娜", en: "Athena Asamiya"},
+  {id: 0x0D, name: "椎拳崇", en: "Sie Kensou"},
+  {id: 0x0E, name: "镇元斋", en: "Chin Gentsai"},
+  {id: 0x0F, name: "神乐千鹤", en: "Chizuru Kagura"},
+  {id: 0x10, name: "不知火舞", en: "Mai Shiranui"},
+  {id: 0x11, name: "琼", en: "King"},
+  {id: 0x12, name: "金家藩", en: "Kim Kaphwan"},
+  {id: 0x13, name: "陈国汉", en: "Chang Koehan"},
+  {id: 0x14, name: "蔡宝奇", en: "Choi Bounge"},
+  {id: 0x15, name: "七枷社", en: "Yashiro Nanakase"},
+  {id: 0x16, name: "谢尔美", en: "Shermie"},
+  {id: 0x17, name: "克里斯", en: "Chris"},
+  {id: 0x18, name: "山崎龙二", en: "Ryuji Yamazaki"},
+  {id: 0x19, name: "布鲁·玛丽", en: "Blue Mary"},
+  {id: 0x1A, name: "比利·凯恩", en: "Billy Kane"},
+  {id: 0x1B, name: "八神庵", en: "Iori Yagami"},
+  {id: 0x1C, name: "矢吹真吾", en: "Shingo Yabuki"},
+  {id: 0x1D, name: "暴走八神庵", en: "Orochi Iori"},
+  {id: 0x1E, name: "暴走莉安娜", en: "Orochi Leona"},
+  {id: 0x1F, name: "真七枷社", en: "Orochi Yashiro"},
+  {id: 0x20, name: "真谢尔美", en: "Orochi Shermie"},
+  {id: 0x21, name: "真克里斯", en: "Orochi Chris"},
+  {id: 0x22, name: "大蛇", en: "Orochi"},
+  {id: 0x23, name: "经典草薙京", en: "'94 Kyo"}
+];
+
+const THEMES = [
+  {
+    id: "classic",
+    name: "原版经典",
+    shortName: "原版",
+    sub: "深渊紫黑 + 血月绯红",
+    coat: "#3A3A4A", shirt: "#F7F7FF", hair: "#DE3A21", pants: "#AD2910", shoes: "#191929",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#DE3A21","#AD2910","#7B1908","#4A0000","#3A3A4A","#29293A","#191929","#000008"]
+  },
+  {
+    id: "black_gold",
+    name: "奢华黑金",
+    shortName: "黑金",
+    sub: "黑曜纯黑 + 璨金流光",
+    coat: "#212129", shirt: "#3A3A3A", hair: "#FFDE3A", pants: "#DEAD19", shoes: "#101010",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#4A4A4A","#303030","#181818","#FFDE3A","#DEAD19","#A57308","#634200","#292929","#1A1A1A","#101010","#000000"]
+  },
+  {
+    id: "nether_purple",
+    name: "幽冥暗紫",
+    shortName: "幽紫",
+    sub: "虚空幽黑 + 皇家紫罗兰",
+    coat: "#25202E", shirt: "#E6E0F5", hair: "#A855F7", pants: "#7E22CE", shoes: "#100D16",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#E6E0F5","#B8AED4","#7B6E9E","#A855F7","#7E22CE","#581C87","#3B0764","#25202E","#1A1622","#100D16","#000000"]
+  },
+  {
+    id: "glacial_cyan",
+    name: "极地幽蓝",
+    shortName: "极地",
+    sub: "深渊藏青 + 极光钻青",
+    coat: "#1E293B", shirt: "#F0F9FF", hair: "#38BDF8", pants: "#0284C7", shoes: "#080D1A",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F0F9FF","#BAE6FD","#7DD3FC","#38BDF8","#0284C7","#0369A1","#0C4A6E","#1E293B","#0F172A","#080D1A","#000000"]
+  },
+  {
+    id: "silver_knight",
+    name: "白银骑士",
+    shortName: "白银",
+    sub: "高贵白银 + 猩红血月",
+    coat: "#CBD5E1", shirt: "#334155", hair: "#EF4444", pants: "#B91C1C", shoes: "#1E293B",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#334155","#1E293B","#0F172A","#EF4444","#B91C1C","#7F1D1D","#450A0A","#F1F5F9","#CBD5E1","#94A3B8","#475569"]
+  },
+  {
+    id: "emerald_ghost",
+    name: "翡翠幽灵",
+    shortName: "翡翠",
+    sub: "暗夜森绿 + 碧玉荧光",
+    coat: "#14241B", shirt: "#ECFDF5", hair: "#10B981", pants: "#059669", shoes: "#070E0A",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#ECFDF5","#A7F3D0","#6EE7B7","#10B981","#059669","#047857","#064E3B","#14241B","#0D1913","#070E0A","#000000"]
+  },
+  {
+    id: "monochrome_ivory",
+    name: "纯白誓约",
+    shortName: "纯白",
+    sub: "极简纯白 + 极夜石墨黑",
+    coat: "#E2E8F0", shirt: "#FFFFFF", hair: "#334155", pants: "#1E293B", shoes: "#020617",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F8FAFC","#E2E8F0","#CBD5E1","#334155","#1E293B","#0F172A","#020617","#FFFFFF","#E2E8F0","#94A3B8","#475569"]
+  },
+  {
+    id: "solar_flare",
+    name: "炽炎烈火",
+    shortName: "炽炎",
+    sub: "玄武炭灰 + 烈阳赤金",
+    coat: "#2E2E38", shirt: "#FFEDD5", hair: "#F59E0B", pants: "#D97706", shoes: "#101016",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFEDD5","#FED7AA","#FDBA74","#F59E0B","#D97706","#B45309","#78350F","#2E2E38","#1C1C24","#101016","#000000"]
+  }
+];
+
+const DAMAGE_MODES = [
+  {id: "god", label: "无敌", badge: "0%", desc: "完全无敌：掉血量直接清零，锁血神模式"},
+  {id: "eighth", label: "1/8", badge: "12.5%", desc: "肉盾坦克：掉血除以8，耐受极度强化"},
+  {id: "quarter", label: "1/4", badge: "25%", desc: "四倍生命：掉血除以4，耐打度极高"},
+  {id: "halved", label: "1/2", badge: "50%", desc: "受创减半：掉血除以2，格斗手感极佳（推荐）"},
+  {id: "normal", label: "正常", badge: "100%", desc: "正常伤害：保持 SNK 原版数值，无修改"},
+  {id: "hell", label: "翻倍", badge: "200%", desc: "地狱模式：受到伤害翻倍，两套连招暴毙"}
+];
+
+/* SVG Character Figure Template */
+const SVG_FIGURE = `
+<svg viewBox="0 0 240 400" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="121" cy="392" rx="72" ry="8" fill="rgba(0,0,0,0.55)"/>
+  <!-- Pants -->
+  <path d="M88 210 L121 210 L119 366 L92 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L123 366Z" style="fill:var(--pants)"/>
+  <path d="M121 210 L154 210 L150 366 L137 366Z" fill="rgba(0,0,0,0.18)"/>
+  <!-- Shoes -->
+  <path d="M84 366 L120 366 L126 386 L78 386Z" style="fill:var(--shoes)"/>
+  <path d="M122 366 L158 366 L166 386 L118 386Z" style="fill:var(--shoes)"/>
+  <!-- Inner Shirt -->
+  <path d="M92 112 L150 112 L156 222 L86 222Z" style="fill:var(--shirt)"/>
+  <!-- Neck -->
+  <rect x="112" y="90" width="18" height="26" rx="6" style="fill:var(--skin)"/>
+  <!-- Coat Outer -->
+  <path d="M76 112 Q92 104 108 112 L112 292 L68 300Z" style="fill:var(--coat)"/>
+  <path d="M166 112 Q150 104 134 112 L130 292 L174 300Z" style="fill:var(--coat)"/>
+  <path d="M134 112 L130 292 L174 300 L166 112Z" fill="rgba(0,0,0,0.22)"/>
+  <!-- Arms / Sleeves -->
+  <path d="M78 112 L56 204 L74 210 L98 132Z" style="fill:var(--coat)"/>
+  <path d="M164 112 L186 204 L168 210 L144 132Z" style="fill:var(--coat)"/>
+  <!-- Hands -->
+  <circle cx="63" cy="216" r="10" style="fill:var(--skin)"/>
+  <circle cx="179" cy="216" r="10" style="fill:var(--skin)"/>
+  <!-- Head & Face -->
+  <ellipse cx="121" cy="68" rx="21" ry="26" style="fill:var(--skin)"/>
+  <!-- Signature Iori Hair Bangs -->
+  <path d="M98 70 Q94 32 121 30 Q150 32 144 70 Q138 50 121 50 Q106 50 98 70Z" style="fill:var(--hair)"/>
+  <path d="M101 56 L95 100 L114 64Z" style="fill:var(--hair)"/>
+  <path d="M143 60 L164 34 L149 82Z" style="fill:var(--hair)"/>
+  <path d="M112 72 h8 M127 72 h8" stroke="#251610" stroke-width="2.4" stroke-linecap="round"/>
+</svg>`;
+
+/* ========================================================================= */
+/* Application State & Per-Character Skin Store                              */
+/* ========================================================================= */
+const state = {
+  activeCharId: 0x1B, // Default: Iori Yagami (0x1B)
+  scope: "SINGLE",    // "SINGLE" or "ALL"
+  guard: true,
+  stun: true,
+  damageIdx: 3,       // Default: "halved" (50%)
+  syncAvatar: true,
+  // Per-character skin mapping: charId -> { themeId: string, colors: array }
+  characterSkins: {}
+};
+
+// Initialize all 36 characters to default "classic" theme
+CHARACTERS.forEach(c => {
+  state.characterSkins[c.id] = {
+    themeId: "classic",
+    colors: [...THEMES[0].colors]
+  };
+});
+
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const rootStyle = document.documentElement.style;
+
+// Mount SVG Figure
+$("#figureBox").innerHTML = SVG_FIGURE;
+
+/* Helper to get theme by ID */
+function getThemeById(themeId) {
+  return THEMES.find(t => t.id === themeId) || THEMES[0];
+}
+
+/* ========================================================================= */
+/* UI Rendering & State Sync                                                 */
+/* ========================================================================= */
+
+// Render the 36-character list in the left column
+function renderCharacterList() {
+  const container = $("#charScrollBox");
+  container.innerHTML = "";
+
+  CHARACTERS.forEach((c, idx) => {
+    const skinInfo = state.characterSkins[c.id] || { themeId: "classic" };
+    const theme = getThemeById(skinInfo.themeId);
+    const isModded = theme.id !== "classic";
+    const isActive = c.id === state.activeCharId;
+
+    const row = document.createElement("div");
+    row.className = "char-row" + (isActive ? " on" : "");
+    row.id = `char-row-${c.id}`;
+
+    row.innerHTML = `
+      <div class="char-row-left">
+        <span class="idx">${String(idx + 1).padStart(2, '0')}</span>
+        <span class="name">${c.name}</span>
+      </div>
+      <div class="char-skin-tag ${isModded ? 'modded' : ''}" id="skin-tag-${c.id}">
+        <span class="char-skin-dot" style="background:${theme.hair};"></span>
+        <span>${theme.shortName}</span>
+      </div>
+    `;
+
+    row.onclick = () => selectCharacter(c.id);
+    container.appendChild(row);
+  });
+}
+
+// Select a character and update the center stage & right theme sidebar
+function selectCharacter(charId, silent = false) {
+  state.activeCharId = charId;
+  const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[27];
+  const skinInfo = state.characterSkins[charId] || { themeId: "classic" };
+  const theme = getThemeById(skinInfo.themeId);
+
+  // Update Left List Highlights
+  $$(".char-row").forEach(r => r.classList.remove("on"));
+  const activeRow = $(`#char-row-${charId}`);
+  if (activeRow) {
+    activeRow.classList.add("on");
+    // Ensure active row is smoothly visible in scroll
+    activeRow.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
+  // Update Center Stage
+  $("#watermark").textContent = char.name;
+  $("#bannerCharName").textContent = char.name;
+  $("#bannerThemeName").textContent = theme.name;
+
+  // Update Figure Colors
+  updateFigureColors(theme);
+
+  // Update Right Theme Cards selection
+  $$(".theme-card").forEach(c => {
+    c.classList.toggle("on", c.dataset.tid === theme.id);
+  });
+
+  // Notify backend of active character switch
+  if (!silent) {
+    callBackend("update_active_character", { char_id: char.id });
+  }
+}
+
+// Update SVG figure and stage glow colors
+function updateFigureColors(theme) {
+  rootStyle.setProperty("--coat", theme.coat);
+  rootStyle.setProperty("--shirt", theme.shirt);
+  rootStyle.setProperty("--hair", theme.hair);
+  rootStyle.setProperty("--pants", theme.pants);
+  rootStyle.setProperty("--shoes", theme.shoes);
+  rootStyle.setProperty("--glow", theme.hair);
+}
+
+// Apply theme to current character or all characters
+function applyTheme(themeId) {
+  const theme = getThemeById(themeId);
+
+  if (state.scope === "ALL") {
+    // Bulk apply to all 36 characters
+    CHARACTERS.forEach(c => {
+      state.characterSkins[c.id] = {
+        themeId: theme.id,
+        colors: [...theme.colors]
+      };
+      // Update badge in character list
+      const tag = $(`#skin-tag-${c.id}`);
+      if (tag) {
+        tag.className = `char-skin-tag ${theme.id !== 'classic' ? 'modded' : ''}`;
+        tag.innerHTML = `<span class="char-skin-dot" style="background:${theme.hair};"></span><span>${theme.shortName}</span>`;
+      }
+    });
+
+    toast(`已批量应用【${theme.name}】至全部 36 位角色`);
+    log(`已批量应用调色板【${theme.name}】至全员 36 角色`, "INFO");
+
+  } else {
+    // Apply specifically to the current active character
+    state.characterSkins[state.activeCharId] = {
+      themeId: theme.id,
+      colors: [...theme.colors]
+    };
+
+    // Update single character badge in left list
+    const tag = $(`#skin-tag-${state.activeCharId}`);
+    if (tag) {
+      tag.className = `char-skin-tag ${theme.id !== 'classic' ? 'modded' : ''}`;
+      tag.innerHTML = `<span class="char-skin-dot" style="background:${theme.hair};"></span><span>${theme.shortName}</span>`;
+    }
+
+    const char = CHARACTERS.find(c => c.id === state.activeCharId);
+    toast(`已为【${char ? char.name : ''}】设置皮肤：${theme.name}`);
+    log(`角色【${char ? char.name : ''}】皮肤已更新为: ${theme.name}`, "INFO");
+  }
+
+  // Update center stage
+  $("#bannerThemeName").textContent = theme.name;
+  updateFigureColors(theme);
+
+  // Update theme card active styles
+  $$(".theme-card").forEach(c => {
+    c.classList.toggle("on", c.dataset.tid === theme.id);
+  });
+
+  // Sync to Python backend per-character store
+  callBackend("set_character_skin", {
+    char_id: state.activeCharId,
+    theme_id: theme.id,
+    scope: state.scope,
+    colors: theme.colors
+  });
+}
+
+// Build Right Theme Cards
+THEMES.forEach((t) => {
+  const card = document.createElement("div");
+  card.className = "theme-card";
+  card.dataset.tid = t.id;
+  card.innerHTML = `
+    <div class="color-chips">
+      <i style="background:${t.coat}"></i>
+      <i style="background:${t.shirt}"></i>
+      <i style="background:${t.hair}"></i>
+      <i style="background:${t.pants}"></i>
+    </div>
+    <div class="theme-info">
+      <div class="title">${t.name}</div>
+      <div class="sub">${t.sub}</div>
+    </div>
+  `;
+  card.onclick = () => applyTheme(t.id);
+  $("#themeList").appendChild(card);
+});
+
+// Scope Switcher
+$$("#scopePill button").forEach(b => {
+  b.onclick = () => {
+    $$("#scopePill button").forEach(x => x.classList.toggle("on", x === b));
+    state.scope = b.dataset.v;
+    callBackend("update_scope", { scope: state.scope });
+    toast(state.scope === "ALL" ? "当前模式：批量应用全员 36 角色" : "当前模式：仅应用当前选定角色");
+  };
+});
+
+// Avatar Portrait Sync Switch
+$("#swAvatar").onclick = () => {
+  state.syncAvatar = !state.syncAvatar;
+  $("#swAvatar").classList.toggle("on", state.syncAvatar);
+  callBackend("update_sync_avatar", { sync: state.syncAvatar });
+  toast(state.syncAvatar ? "已开启头像发色联动同步" : "已关闭头像发色联动同步");
+};
+
+// Combat Page Switches
+function bindCombatToggle(cardId, switchId, key, label) {
+  const card = $(cardId);
+  const sw = $(switchId);
+  const toggle = () => {
+    state[key] = !state[key];
+    card.classList.toggle("on", state[key]);
+    sw.classList.toggle("on", state[key]);
+    callBackend("update_combat_rule", { rule: key, value: state[key] });
+    toast((state[key] ? "已启用" : "已禁用") + "：" + label);
+  };
+  card.onclick = toggle;
+}
+bindCombatToggle("#cardGuard", "#swGuard", "guard", "免破防 (Guard 锁死 103 点)");
+bindCombatToggle("#cardStun", "#swStun", "stun", "免眩晕 (Stun 锁死 103 点)");
+
+// Damage Multiplier Slider
+const nModes = DAMAGE_MODES.length;
+DAMAGE_MODES.forEach((m, i) => {
+  const stop = document.createElement("div");
+  stop.className = "slider-stop";
+  stop.style.left = (i / (nModes - 1) * 100) + "%";
+  stop.onclick = () => setDamage(i);
+  $("#sliderStops").appendChild(stop);
+
+  const label = document.createElement("span");
+  label.textContent = m.label;
+  label.onclick = () => setDamage(i);
+  $("#sliderLabels").appendChild(label);
+});
+
+function setDamage(idx) {
+  state.damageIdx = idx;
+  const m = DAMAGE_MODES[idx];
+  $("#damageVal").textContent = m.badge;
+  $("#damageDesc").textContent = m.desc;
+  $("#sliderFill").style.width = (idx / (nModes - 1) * 100) + "%";
+
+  $$(".slider-stop").forEach((s, j) => {
+    s.classList.toggle("on", j === idx);
+    s.classList.toggle("pass", j < idx);
+  });
+  $$("#sliderLabels span").forEach((l, j) => {
+    l.classList.toggle("on", j === idx);
+  });
+
+  callBackend("update_damage_mode", { mode_id: m.id });
+}
+
+// Left Icon Rail Navigation
+$$(".nav").forEach(b => {
+  b.onclick = () => {
+    $$(".nav").forEach(x => x.classList.toggle("on", x === b));
+    $$(".page").forEach(p => p.classList.toggle("on", p.id === "pg-" + b.dataset.p));
+  };
+});
+
+// Tool Tiles
+$$(".tool-tile").forEach(t => {
+  t.onclick = () => {
+    const act = t.dataset.act;
+    if (act === "unpack") {
+      log("正在执行原生 ROM 重新解包...", "INFO");
+      callBackend("unpack_rom");
+    } else if (act === "restore") {
+      log("正在还原官方原版基准风云再起...", "INFO");
+      callBackend("restore_baseline").then(() => {
+        // Reset all local skin mappings to classic
+        CHARACTERS.forEach(c => {
+          state.characterSkins[c.id] = { themeId: "classic", colors: [...THEMES[0].colors] };
+        });
+        renderCharacterList();
+        selectCharacter(state.activeCharId);
+        toast("已成功还原官方原版基准！全员皮肤已复原。");
+      });
+    } else if (act === "selftest") {
+      log("正在执行全局工具链自检 (bswap16/LSPC2/瓦片)...", "INFO");
+      callBackend("run_self_test");
+    } else if (act === "openoutput") {
+      log("正在打开 ROM 输出交付目录...", "INFO");
+      callBackend("open_output_dir");
+    }
+  };
+});
+
+// Logs & Ticker
+const logDrawer = $("#logDrawer");
+$("#tickerBtn").onclick = () => logDrawer.classList.toggle("open");
+$("#btnCloseLog").onclick = () => logDrawer.classList.remove("open");
+$("#btnClearLog").onclick = () => {
+  $("#logContent").innerHTML = "";
+  $("#tickerText").textContent = "日志已清空";
+};
+
+function log(msg, level = "INFO") {
+  const p = document.createElement("p");
+  if (level === "SUCCESS" || level === "PASS") p.className = "ok";
+  else if (level === "ERROR" || level === "FAIL") p.className = "err";
+  else if (level === "WARN") p.className = "warn";
+
+  const timeStr = new Date().toLocaleTimeString("zh-CN", { hour12: false });
+  p.innerHTML = `<span class="time">${timeStr}</span><span>${msg}</span>`;
+  $("#logContent").prepend(p);
+  $("#tickerText").textContent = msg;
+}
+
+// Toast
+let toastTimer;
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+// Core Action Buttons
+$("#btnSave").onclick = () => {
+  log("正在保存全员配置与皮肤列表...", "INFO");
+  callBackend("save_skin").then(res => {
+    toast(res && res.msg ? res.msg : "所有角色配置保存成功");
+  });
+};
+
+$("#btnPack").onclick = () => {
+  const bar = $("#packProgress");
+  bar.style.transition = "none";
+  bar.style.width = "0%";
+  requestAnimationFrame(() => {
+    bar.style.transition = "width 1.2s ease";
+    bar.style.width = "100%";
+  });
+  log("=== 开始执行【打包Rom】全量流水线 ===", "INFO");
+  callBackend("pack_rom").then(res => {
+    setTimeout(() => {
+      bar.style.width = "0%";
+      if (res && res.success) {
+        toast("ROM 打包成功！CRC32: 0x" + res.crc32);
+        log("ROM 打包成功: " + res.crc32, "SUCCESS");
+      } else {
+        toast("打包失败: " + (res ? res.error : "未知错误"));
+      }
+    }, 1200);
+  });
+};
+
+$("#btnStartGame").onclick = () => {
+  log("正在启动沙盒模拟器 WinKawaks...", "INFO");
+  toast("启动模拟器中...");
+  callBackend("start_game").then(res => {
+    if (res && res.success) {
+      log("WinKawaks 模拟器已成功启动！(PID=" + res.pid + ")", "SUCCESS");
+      toast("模拟器启动成功！");
+    } else {
+      toast("启动失败: " + (res ? res.error : "未知错误"));
+    }
+  });
+};
+
+/* ========================================================================= */
+/* PyWebView Bridge Integration                                              */
+/* ========================================================================= */
+function callBackend(fn, args = {}) {
+  if (window.pywebview && window.pywebview.api && typeof window.pywebview.api[fn] === "function") {
+    return window.pywebview.api[fn](args).catch(err => {
+      log("调用失败 [" + fn + "]: " + err, "ERROR");
+      return { success: false, error: String(err) };
+    });
+  }
+  // Fallback for standalone browser testing
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ success: true, msg: "操作成功 (本地预览模式)" });
+    }, 150);
+  });
+}
+
+// Push log callback called from Python
+window.onBackendLog = function(msg, level) {
+  log(msg, level);
+};
+
+// Initial state sync callback from Python
+window.onBackendState = function(s) {
+  if (s.character_skins) {
+    Object.keys(s.character_skins).forEach(cidStr => {
+      const cid = parseInt(cidStr, 10);
+      state.characterSkins[cid] = s.character_skins[cidStr];
+    });
+  }
+  if (s.char_id !== undefined) {
+    state.activeCharId = s.char_id;
+  }
+  if (s.guard !== undefined) {
+    state.guard = !!s.guard;
+    $("#cardGuard").classList.toggle("on", state.guard);
+    $("#swGuard").classList.toggle("on", state.guard);
+  }
+  if (s.stun !== undefined) {
+    state.stun = !!s.stun;
+    $("#cardStun").classList.toggle("on", state.stun);
+    $("#swStun").classList.toggle("on", state.stun);
+  }
+  if (s.damage_mode !== undefined) {
+    const idx = DAMAGE_MODES.findIndex(d => d.id === s.damage_mode);
+    if (idx >= 0) setDamage(idx);
+  }
+  if (s.sync_avatar !== undefined) {
+    state.syncAvatar = !!s.sync_avatar;
+    $("#swAvatar").classList.toggle("on", state.syncAvatar);
+  }
+  if (s.scope !== undefined) {
+    state.scope = s.scope;
+    $$("#scopePill button").forEach(b => b.classList.toggle("on", b.dataset.v === s.scope));
+  }
+
+  // Refresh character list and stage
+  renderCharacterList();
+  selectCharacter(state.activeCharId, true);
+  log("工作台已与全员 ROM 后端配置同步就绪。", "INFO");
+};
+
+// Listen for PyWebView ready event
+window.addEventListener("pywebviewready", () => {
+  callBackend("get_initial_state").then(s => {
+    if (s && window.onBackendState) window.onBackendState(s);
+  });
+});
+
+// Initial boot
+renderCharacterList();
+selectCharacter(state.activeCharId, true);
+setDamage(state.damageIdx);
+log("拳皇97 逆向魔改工作台 (深色舞台 B 版) 已加载完毕。", "INFO");
+</script>
+</body>
+</html>

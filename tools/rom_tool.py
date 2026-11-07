@@ -1490,6 +1490,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_crom_imp.add_argument("--even-rom", type=Path, required=True, help="Target Even C-ROM binary path")
     p_crom_imp.add_argument("--tile", type=int, required=True, help="Target tile index to overwrite")
 
+    # gui
+    subparsers.add_parser("gui", help="Launch KOF97 Mod Studio Desktop GUI")
+
     return parser
 
 
@@ -1633,6 +1636,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.command == "crom-import-tile":
         crom_tool.import_tile_png(args.image, args.odd_rom, args.even_rom, args.tile)
         print(f"[SUCCESS] Imported {args.image} into tile index {args.tile}")
+        return 0
+
+    if args.command == "gui":
+        from tools import kof97_gui
+        kof97_gui.main()
         return 0
 
     return 1

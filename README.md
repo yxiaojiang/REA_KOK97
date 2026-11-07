@@ -74,9 +74,22 @@ REA_KOF97/
 - **Python**：Python 3.10+（仅使用标准库，无需额外安装第三方依赖）
 - **宿主模拟器**：`C:\Program Files (x86)\KOF97`（含 `WinKawaks.exe` 及 `roms\kof97.ZIP`、`roms\neogeo.zip`）
 
-### 常用命令
+### 常用命令与桌面工作台
 
-1. **运行工具链内置单元测试（验证 `bswap16` 可逆性与头部校验）**
+1. **直接启动可视化现代化桌面工作台（深色舞台版）**
+   - **方式一（免安装单文件 EXE）**：直接在根目录双击运行 [`KOF97ModStudio.exe`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/KOF97ModStudio.exe)。
+   - **方式二（一键脚本启动）**：双击运行根目录 [`launch_mod_studio.bat`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/launch_mod_studio.bat)。
+   - **方式三（Python 源码调试）**：
+     ```powershell
+     python tools/kof97_webview_app.py
+     ```
+
+2. **重新构建独立 Windows EXE 可执行程序**
+   ```powershell
+   python tools/build_exe.py
+   ```
+
+3. **运行工具链内置单元测试（验证 `bswap16` 可逆性与头部校验）**
    ```powershell
    python tools/rom_tool.py self-test
    ```

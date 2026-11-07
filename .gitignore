@@ -6,6 +6,10 @@ __pycache__/
 venv/
 env/
 
+# PyInstaller build artifacts
+build_pyinstaller/
+dist/
+
 # Unpacked ROM binaries & packaged ROM archives (copyrighted / generated artifacts)
 build/
 output/
@@ -18,6 +22,7 @@ output/
 sandbox/*.exe
 sandbox/*.dll
 sandbox/*.rom
+sandbox/*.png
 sandbox/blend/
 sandbox/cheats/
 sandbox/eeprom/
