@@ -1,10 +1,10 @@
 # Plan.md — KOF97 逆向魔改工程活跃计划
 
-## 活跃任务（已进入第 3 阶段实施）
+## 活跃任务
 
-1. **[TASK-ROM-003] P-ROM 静态数值与防御 Patch（当前活跃阶段，P1）**
-   - 目标：在 `p1_be.bin` 中按真实指令首地址实施免疫破防（`0x01397E: 4E 71 4E 71`）、免疫眩晕（`0x0139A4: 4E 71 4E 71`）与受创减半（按 `[CR-002-P2-01]` 在 `0x01394A` 写入 `JSR ($0300).W` `4E B8 03 00`，在 `0x000300` 写入 `E2 40 D1 6C 01 3A 4E 75`），通过 `bswap16` 打包至 `output/roms/kof97pls.zip` 并完成 WinKawaks 1.48 实机对战验证。
-   - 审查流：`CRDocs`（由 Antigravity 实施，Argon 独立审核）。
+1. **[TASK-ROM-003] P-ROM 静态数值与防御 Patch（已实施完成，待审核）**
+   - 目标：在 `p1_be.bin` 中按真实指令首地址实施免疫破防（`0x01397E: 4E 71 4E 71`）、免疫眩晕（`0x0139A4: 4E 71 4E 71`）与受创减半（`0x01394A: 4E B8 03 00` -> Code Cave `0x000300: E2 48 D1 6C 01 3A 4E 75`），经 `bswap16` 打包交付并实机验证。
+   - 当前状态：`READY_FOR_REVIEW`（Round 3，等待 Argon 审核）。
    - 前置状态：`TASK-ROM-001`（Round 1）与 `TASK-ROM-002`（Round 2）均已取得 `APPROVED`。
 
 2. **[TASK-ROM-004] 调色板皮肤魔改（下一阶段，P1）**

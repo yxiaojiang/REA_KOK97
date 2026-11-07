@@ -48,10 +48,10 @@ flowchart TD
 
 ---
 
-## 阶段三：P-ROM 静态数值与防御 Patch（P1-当前活跃阶段）
+## 阶段三：P-ROM 静态数值与防御 Patch（P1-已实施，READY_FOR_REVIEW）
 
 * **目标**：完成全局免疫破防、免疫眩晕以及等效双倍血量（受创减半）的静态 Patch。
-* **Task ID**：`TASK-ROM-003`
+* **Task ID**：`TASK-ROM-003`（Round 3 实施完成，待 Argon 审查）
 * **细分步骤**：
   1. **免破防 Patch**：
      - 在 `232-p1p.bin` 逻辑地址 **`0x01397E`**（`0x013980` 为位移字 `01 3E`）将 `SUB.W D0, $013E(A4)`（`91 6C 01 3E`）替换为 `NOP; NOP`（`4E 71 4E 71`）；
