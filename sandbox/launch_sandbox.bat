@@ -15,6 +15,8 @@ echo [INFO] RomPath1 = ..\output\roms
 echo [INFO] RomPath2 = C:\Program Files (x86)\KOF97\roms
 python "..\tools\rom_tool.py" launch-sandbox %TARGET_ROM%
 if errorlevel 1 (
-    start "" "%~dp0WinKawaks.exe" %TARGET_ROM%
+    echo [ERROR] Failed to launch WinKawaks with rom_tool.py in-memory patch.
+    echo [ERROR] Bare fallback launch aborted to prevent loading unpatched RomPath2 roms.
+    exit /b 1
 )
 endlocal

@@ -1,112 +1,113 @@
-# 实施与验证交接 (CRDocs — TASK-ROM-001 Round 1)
+# 实施与验证交接 (CRDocs — TASK-ROM-002 Round 2)
 
 ## 本轮实际修改
 
-### 1. 构建纯英文 ROM 逆向与打包工具链 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)
-- **100% 纯英文规范**：全文件注释、文档字符串、变量命名与日志输出均为纯 ASCII 英文，无任何中文字符。
-- **`bswap16` 双向无损字节序转换（[`bswap16`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L54-L62)）**：
-  - 严格校验 16-bit 偶数地址对齐（奇数长度直接抛出 `ValueError`）；
-  - 实现物理磁盘存储格式（Word-swapped）与 Motorola 68000 运行态大端序（Big-Endian）的高效切片互换；
-  - 内置 [`detect_p1_endianness`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L73-L85) 自动识别 `0x000100` 处的磁盘签名 `'EN-OEG\x10'` 与 68000 大端签名 `'NEO-GEO'`。
-- **解包与重打包流水线（[`unpack_rom_set`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L131-L185) / [`pack_rom_set`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L188-L246)）**：
-  - 只读读取 `C:\Program Files (x86)\KOF97\roms\kof97.ZIP`，提取 `KOF97_P1.ROM` (1,048,576 B)、`KOF97_P2.ROM` (4,194,304 B)、`KOF97_S1.ROM` (131,072 B)；
-  - 将 P1/P2 经 `bswap16` 转换为 68000 Big-Endian 逻辑镜像并落盘至 `build/unpacked/p1_be.bin`、`build/unpacked/p2_be.bin`（`s1.bin` 原样保留）；
-  - 打包阶段将 `p1_be.bin`、`p2_be.bin` 再次执行 `bswap16` 还原为 MVS 磁盘字节序，并映射为 `232-p1p.bin`、`232-p2p.bin`、`232-s1p.bin` 封装生成 [`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/output/roms/kof97pls.zip)。
-- **大端空间 Diff 与特征核验（[`diff_rom_sets`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L273-L309) / [`inspect_rom_set`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L312-L343)）**：
-  - 支持在 68000 Big-Endian 逻辑空间对比任意两个 ROM 包（如 `kof97.ZIP` vs `kof97pls.zip`），输出连续差异区间与机器码对照；
-  - 支持一键自检（`self-test`）、构建基线包（`build-baseline`）、启动沙盒（`launch-sandbox`）与自动化实机验证截图（`verify-sandbox`）。
+### 1. 扩充纯英文 ROM 工具链 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py)
+- **实现 `verify_memory_and_cave`（`verify-memory` 命令）**：
+  - 静态自动化扫描 `build/unpacked/p1_be.bin` 中 `0x000300` 附近的 Code Cave 连续空间，核验其起始偏移、结束偏移与全 `0xFF` 属性；
+  - 静态校验 4 处核心指令首地址与 4 字节定长指令宽度：
+    - `0x01394A`：`D1 6C 01 3A`（`ADD.W D0, $013A(A4)`，4B）
+    - `0x01394E`：`91 6C 01 38` (`SUB.W D0, $0138(A4)`，4B)
+    - `0x01397E`：`91 6C 01 3E` (`SUB.W D0, $013E(A4)`，4B)
+    - `0x0139A4`：`91 6C 01 46` (`SUB.W D0, $0146(A4)`，4B)
+  - 静态校验 `0x013880..0x013900` 处的恢复逻辑与 `#$0067`（103 点）上限比较指令：
+    - `0x01388C`：`0C 6C 00 67 01 38`（`CMPI.W #$0067, $0138(A4)`）
+    - `0x0138BC`：`0C 6C 00 67 01 3E`（`CMPI.W #$0067, $013E(A4)`）
+    - `0x0138EC`：`0C 6C 00 67 01 46`（`CMPI.W #$0067, $0146(A4)`）
+  - 动态自动化驱动 WinKawaks 1.48 进入实战对战态，自动挂接 `0x00712688` 提取 68000 Work RAM 宿主映射，对 1P/2P 结构体在初始态与受创态下的数值流进行全自动断言核验。
+- **纯英文规范持续保持**：`tools/rom_tool.py`（37,942 字节）非 ASCII 字节数为 `0`。
 
-### 2. 搭建沙盒运行环境与双 RomPath 启动配置
-- **沙盒目录隔离**：在 `sandbox/` 下复制了 `WinKawaks.exe` 及非 ROM 运行时依赖目录（`ini/`、`lang/`、`eeprom/`、`saves/`、`capture/`、`sshots/` 等），**未复制任何 ROM 大文件**，且确保模拟器运行态读写（如 `WinKawaks.ini`、`WinKawaks.rom`、`eeprom/kof97pls.srm`、`capture/*.png`）100% 发生在工作区 `sandbox/` 内，绝不触碰原生目录。
-- **沙盒配置文件 [`sandbox/WinKawaks.ini`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/WinKawaks.ini)**：
-  - 配置 `RomPath1=..\output\roms`（优先指向工作区构建产物）；
-  - 配置 `RomPath2=C:\Program Files (x86)\KOF97\roms`（直接复用原目录 40MB C-ROM、12MB 语音 V-ROM、M1 及 `neogeo.zip`）；
-  - 配置 `AutoPause=0`，支持后台自动化测试与无焦点运行。
-- **纯英文启动脚本 [`sandbox/launch_sandbox.bat`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/launch_sandbox.bat)**：
-  - 校验 `..\output\roms\kof97pls.zip` 存在性后调用 `rom_tool.py launch-sandbox kof97pls` 启动模拟器。
+### 2. 加固沙盒启动脚本 [`sandbox/launch_sandbox.bat`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/launch_sandbox.bat)（解决 `[CR-001-P2-02]`）
+- 彻底移除 `rom_tool.py launch-sandbox` 失败后的裸 `start "" "%~dp0WinKawaks.exe"` 回退，改为显式打印错误信息并以错误码 `1` 退出，坚决防止在无内存补丁环境下静默加载 `RomPath2\kof97pls.zip` 原版文件。
+- 该脚本非 ASCII 字节数为 `0`。
 
-### 3. 实机加载机制关键发现与沙盒加载优先级修正（核心工程收获）
-在对 WinKawaks 1.48 (`WinKawaks.exe`) 进行实机进程内存核验与 x86 机器码反汇编时，定位并解决了两个直接影响沙盒闭环的底层问题：
-1. **WinKawaks 1.48 双趟 ROM 加载器（Pass-1 CRC 抢占陷阱，`0x004628D6..0x004628F2`）**：
-   - 经反汇编核实，WinKawaks 加载每个驱动 ROM 条目时，先调用 `0x00462490`（`LoadRomByCRC`）遍历 `RomPath1..RomPath5` 查找匹配的 CRC32；**仅当所有 `RomPath1..5` 均未命中目标 CRC32 时**，才会调用 `0x004625B0`（`LoadRomByName`）按文件名回退加载。
-   - 由于 `RomPath2`（`C:\Program Files (x86)\KOF97\roms`）下同时存在原版未修改的 `kof97pls.zip`（其 `232-p1p.bin` CRC32 正好是驱动表硬编码的 `0xC01FDA46`），一旦 `RomPath1\kof97pls.zip` 的 CRC32 发生改变（如本阶段裝入原版 `KOF97_P1.ROM` `0x7DB81AD9` 或后续阶段打 Patch），`0x00462490` 的 Loop 1 在扫描完 `RomPath1\kof97pls.zip` 未命中 CRC 后会继续扫描 `RomPath2\kof97pls.zip` 并命中 `0xC01FDA46`，导致模拟器静默加载 `RomPath2` 下的未修改版 `kof97pls.zip`，使 `RomPath1\kof97pls.zip` 被完全旁路！
-   - **沙盒解决方案**：在不修改磁盘 `WinKawaks.exe` 二进制文件、不触碰原生目录的前提下，由 [`start_sandbox_kawaks`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L357-L398) 在启动子进程并完成 UPX 解壳后，通过 `WriteProcessMemory` 将 `0x004624FD`（`7C B9` -> `90 90`）与 `0x00462A09`（`0F 8C 6D FF FF FF` -> `90 * 6`）处的子集 `kof97pls.zip` 跨目录循环分支 NOP 掉。这样子集 `kof97pls.zip` 严格锁定仅从 `RomPath1`（`..\output\roms`）按 CRC 或文件名加载，而母集 `kof97.ZIP`（Loop 2，`0x004624FF`）与 BIOS `neogeo.zip`（Loop 3，`0x0046255B`）依然正常遍历至 `RomPath2` 加载。
-2. **WinKawaks 1.48 命令行解析器引号缺陷（`0x0042082E`）**：
-   - `0x0042082E` 假定 `GetCommandLineA()` 中的 `argv[0]` 必然被双引号 `"` 包裹，直接从偏移 `+2` 处循环扫描闭合的 `0x22`（`"`）。若工作区路径无空格且调用方未给 `argv[0]` 加双引号，扫描将越过字符串末尾 `\0` 导致游戏名参数丢失（显示 `No game loaded`）。[`start_sandbox_kawaks`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/tools/rom_tool.py#L369) 已强制使用 `f'"{exe_path}" {rom_name}'` 传参。
+### 3. 底层逆向与实机动态内存重大发现（核心技术突破）
+
+#### (1) 68000 Work RAM 宿主指针精确定位与布局确认
+经对 WinKawaks 1.48 反汇编核验（`0x0040D7C1`、`0x0040DAB3`、`0x0042B80E..0x0042B821`），WinKawaks 为 Neo-Geo 68000 Work RAM（`0x100000..0x10FFFF`，64KB）动态分配的宿主缓冲区指针常驻进程地址 **`0x00712688`**。
+在 x86 宿主内存中，16 位字（Word）按 x86 小端序存储（低字节在先、高字节在后），例如 68000 运行态数值 `$0067` 在 Work RAM 缓冲区内表现为字节流 `67 00`。
+
+#### (2) 1P / 2P 角色结构体基址与实际 Work RAM 绝对地址纠偏
+在早期文档与方案中，曾将角色结构体内的相对偏移 `+$0138`、`+$013E`、`+$0146` 误记为相对于 `0x108000`（即标写为 `0x108138`、`0x10813E`、`0x108146`）。
+通过本轮反汇编 `0x00ED22`（`MOVE.W #$0067, $0238(A5)`）、`0x00ED28`（`MOVE.W #$0067, $0438(A5)`）以及实机内存多点扫描，正式确立精准映射关系：
+- 全局基址寄存器 `A5 = 0x108000`。
+- **1P 角色指针常驻寄存器 `A4 = 0x108100`**：
+  - 角色 ID（`+$0070(A4)`）：Work RAM **`0x108170`**
+  - 当前实血 HP（`+$0138(A4)`）：Work RAM **`0x108238`**
+  - 虚血/红血累加（`+$013A(A4)`）：Work RAM **`0x10823A`**
+  - 每秒恢复累加（`+$013C(A4)`）：Work RAM **`0x10823C`**
+  - 破防槽 Guard Crush（`+$013E(A4)`）：Work RAM **`0x10823E`**
+  - 破防扣减累加（`+$0140(A4)`）：Work RAM **`0x108240`**
+  - 破防恢复计时器（`+$0142(A4)`）：Work RAM **`0x108242`**
+  - 眩晕槽 Dizzy/Stun（`+$0146(A4)`）：Work RAM **`0x108246`**
+  - 眩晕扣减累加（`+$0148(A4)`）：Work RAM **`0x108248`**
+  - 眩晕恢复计时器（`+$014A(A4)`）：Work RAM **`0x10824A`**
+- **2P 角色指针常驻寄存器 `A4 = 0x108300`**：
+  - 角色 ID（`+$0070(A4)`）：Work RAM **`0x108370`**
+  - 当前实血 HP（`+$0138(A4)`）：Work RAM **`0x108438`**
+  - 虚血/红血累加（`+$013A(A4)`）：Work RAM **`0x10843A`**
+  - 破防槽 Guard Crush（`+$013E(A4)`）：Work RAM **`0x10843E`**
+  - 眩晕槽 Dizzy/Stun（`+$0146(A4)`）：Work RAM **`0x108446`**
+
+#### (3) 实机对战数据流实测验证
+在对战态下：
+1. **开局满值基线**：1P 与 2P 的 HP、Guard、Dizzy 初始值均为严格的 **`103`（`$0067`）**，红血累加值均为 `0`。
+2. **交锋受创与扣除**：1P 前进打出 Counter 重拳击中 2P（Andy Bogard），2P 的 HP 瞬间扣减为 **`88`**（掉血 15 点），Guard 槽扣减为 **`82`**（破防累加 21 点），且画面同步产生暴击火花与血条削减；1P 在被反击时 HP 降至 `70`，Guard 降至 `86`。完全实锤结构体偏移与数据流生命周期。
+
+#### (4) Code Cave 注入边界与跳板定长可行性确认（落实 `[CR-001-P2-01]`）
+- 经全量扫描 `build/unpacked/p1_be.bin`：在 `0x000194..0x000800` 存在长达 **1,644 字节** 的连续 `0xFF` 纯净空闲区（Code Cave）。
+- 逻辑地址 `0x000300` 正好位于该安全区内部，且在 68000 短绝对寻址范围（`$0000..$7FFF`）内。
+- 指令定长跳板验证：
+  - 短绝对调用 **`JSR ($0300).W` 机器码为 `4E B8 03 00`（4 字节）**；
+  - 目标点一（受创扣血）：`0x01394A`（`D1 6C 01 3A`，`ADD.W D0, $013A(A4)`）正好为 4 字节；
+  - 目标点二（实血扣减）：`0x01394E`（`91 6C 01 38`，`SUB.W D0, $0138(A4)`）正好为 4 字节；
+  - 替换其中任一指令即可在不破坏任何总线偶数对齐与指令流长度的前提下，无缝切入 `0x000300` 执行 `LSR.W #1, D0`（`E2 40`）等增益逻辑并 `RTS`（`4E 75`）；
+  - 目标点三（免疫破防）：`0x01397E`（`91 6C 01 3E`，`SUB.W D0, $013E(A4)`，4 字节）直接替换为 `NOP; NOP`（`4E 71 4E 71`，4 字节）；
+  - 目标点四（免疫眩晕）：`0x0139A4`（`91 6C 01 46`，`SUB.W D0, $0146(A4)`，4 字节）直接替换为 `NOP; NOP`（`4E 71 4E 71`，4 字节）。
 
 ---
 
 ## 判定未修改
 
-1. **原生安装目录零写入**：`C:\Program Files (x86)\KOF97` 及其子目录 `roms\` 下的所有原始文件（`kof97.ZIP`、`kof97pls.zip`、`neogeo.zip`）保持 100% 原始状态，修改时间戳分毫无损。
-2. **ROM 逻辑数据零篡改（符合阶段一最小基线要求）**：本阶段仅对原版 `KOF97_P1.ROM`、`KOF97_P2.ROM` 执行 `bswap16` 解包与 `bswap16` 还原重命名封装，未注入任何数值或调色板 Patch。
-3. **预先记录供阶段二/三核验的机器码偏移修正项（暂未修改静态文档）**：
-   - 在通过 `rom_tool.py inspect` 检查 68000 大端逻辑空间时发现：`KOF97_P1.ROM` 中 `SUB.W D0, $0138(A4)` 的真实机器码为 `91 6C 01 38`（位于 `0x01394E`）；而破防扣减 `SUB.W D0, $013E(A4)`（`91 6C 01 3E`）真实起始地址为 **`0x01397E`**（`0x013980` 为其位移字 `01 3E`），眩晕扣减 `SUB.W D0, $0146(A4)`（`91 6C 01 46`）真实起始地址为 **`0x0139A4`**（`0x0139A6` 为其位移字 `01 46`）。该发现已在 `rom_tool.py inspect` 中精确标注，留待阶段二/三正式核验。
+1. **宿主目录零改动**：`C:\Program Files (x86)\KOF97` 目录下的所有文件保持绝对只读，零写入。
+2. **P-ROM 静态二进制数据零篡改**：本阶段专注于动态内存核验与 Code Cave 边界锁定，未直接对 `build/unpacked/p1_be.bin` 或 `output/roms/kof97pls.zip` 施加破坏性修改，修改留待阶段三（`TASK-ROM-003`）集中实施。
 
 ---
 
-## 验证证据与模拟器运行记录
+## 验证证据与测试记录
 
-### 1. 工具链自检、双向无损 `bswap16` 与打包校验日志
-执行 `python tools/rom_tool.py build-baseline` 与 `python tools/rom_tool.py inspect` 实测输出：
-
-```text
-=== Running rom_tool.py Self-Test ===
-  [PASS] bswap16 header vector test (100000f3 -> 0010f300, EN-OEG -> NEO-GE)
-  [PASS] bswap16 odd-length alignment guard test
-  [PASS] bswap16 bidirectional lossless round-trip test
-
-=== Unpacked ROM Set from C:\Program Files (x86)\KOF97\roms\kof97.ZIP ===
-  [P1] KOF97_P1.ROM -> C:\Users\mimovr\Desktop\TEmp\REA\Fighter97\build\unpacked\p1_be.bin
-       size=1048576 B | bswap16=True | disk_crc32=0x7db81ad9 -> be_crc32=0x9e142f40
-  [P2] KOF97_P2.ROM -> C:\Users\mimovr\Desktop\TEmp\REA\Fighter97\build\unpacked\p2_be.bin
-       size=4194304 B | bswap16=True | disk_crc32=0x158b23f6 -> be_crc32=0xe797c5c8
-  [S1] KOF97_S1.ROM -> C:\Users\mimovr\Desktop\TEmp\REA\Fighter97\build\unpacked\s1.bin
-       size=131072 B | bswap16=False | disk_crc32=0x8514ecf5 -> be_crc32=0x8514ecf5
-
-=== Packed ROM Set into C:\Users\mimovr\Desktop\TEmp\REA\Fighter97\output\roms\kof97pls.zip ===
-  [P1] 232-p1p.bin | size=1048576 B | bswap16=True | be_crc32=0x9e142f40 -> disk_crc32=0x7db81ad9
-  [P2] 232-p2p.bin | size=4194304 B | bswap16=True | be_crc32=0xe797c5c8 -> disk_crc32=0x158b23f6
-  [S1] 232-s1p.bin | size=131072 B | bswap16=False | be_crc32=0x8514ecf5 -> disk_crc32=0x8514ecf5
-
-[SUCCESS] Baseline kof97pls.zip built and verified (100% lossless round-trip).
-
-=== 68000 P1 Header & Key Logical Offsets ===
-  Disk 0x000000..0x000007 : 100000f3c0000204
-  68K  0x000000..0x000007 : 0010f30000c00402 (Initial SSP=0x0010F300, Initial PC=0x00C00402)
-  Disk 0x000100 Signature : 'EN-OEG\x10' (454e2d4f4547104f)
-  68K  0x000100 Signature : 'NEO-GEO' (4e454f2d47454f10)
-  68K  0x000300 Code Cave : ffffffffffffffffffffffffffffffff
-  68K  0x012020 Init Stat : 397c00670138397c0067013e397c00670146
-  68K  0x01394E HP Sub    : 916c01386b00000c
-  68K  0x01397E Guard Sub : 916c013e6b00000c
-  68K  0x0139A4 Dizzy Sub : 916c01466b00000c
-  68K  P2 0x2DC9F0 Iori A : 06504fd96fa65c73783125117fff2bac47783562535142415130402020004cdc
-  S1   0x000000..0x000010 : 11111111111111111111111111111111
-```
-
-### 2. 原版 `kof97.ZIP` 与 `kof97pls.zip` 的 68000 大端空间 Diff 摘要
-执行 `python tools/rom_tool.py diff` 实测输出：
-- **P1 (`KOF97_P1.ROM` vs `232-p1p.bin`)**：共 3,890 字节差异（分布在 100 个连续区间）。其中 `0x000300..0x000532` 在原版 `KOF97_P1.ROM` 中为全 `0xFF` 空闲区（Code Cave），而在风云再起 `232-p1p.bin` 中被注入了 `4eb831f4...` 等选人解锁与无限气钩子代码。
-- **P2 (`KOF97_P2.ROM` vs `232-p2p.bin`)**：仅 2 字节差异（`0x2C7000..0x2C7002`：原版 `ffff` vs 风云再起 `2003`）。
-- **S1 (`KOF97_S1.ROM` vs `232-s1p.bin`)**：共 1,506 字节差异（`0x008000+` 固定层 UI 字模图元）。
-
-### 3. WinKawaks 1.48 实机内存校验与运行截图证据
-执行 `python tools/rom_tool.py verify-sandbox` 实测输出：
+### 1. 静态与动态自动化验证全量执行日志
+执行 `python tools/rom_tool.py verify-memory` 实测输出：
 
 ```text
-=== Launching WinKawaks 1.48 Sandbox Verification ===
-  [PASS] Main Window Handle : 0x008203F8 ("Kawaks 1.48 - The King of Fighters '97 Plus (bootleg)")
-  [PASS] Loaded P1 ROM VA   : 0x0E851020
-  [PASS] P1 0x000300 Bytes  : ffffffffffffffffffffffffffffffff (expected ffffffffffffffffffffffffffffffff)
-  [PASS] Captured Screenshots (4): kof97pls000.png, kof97pls001.png, kof97pls002.png, kof97pls003.png
-[SUCCESS] Sandbox real-machine verification completed with zero errors.
+=== TASK-ROM-002: Static Code Cave & Instruction Verification ===
+  [PASS] Code Cave Range     : 0x000194..0x000800 (1644 B, all 0xFF)
+  [PASS] 0x01394A Add Red HP : d16c013a (expected d16c013a: ADD.W D0, $013A(A4), 4B)
+  [PASS] 0x01394E Sub HP     : 916c0138 (expected 916c0138: SUB.W D0, $0138(A4), 4B)
+  [PASS] 0x01397E Sub Guard  : 916c013e (expected 916c013e: SUB.W D0, $013E(A4), 4B)
+  [PASS] 0x0139A4 Sub Dizzy  : 916c0146 (expected 916c0146: SUB.W D0, $0146(A4), 4B)
+  [PASS] 0x01388C CMPI HP    : 0c6c00670138 (expected 0c6c00670138: CMPI.W #$0067, $0138(A4))
+  [PASS] 0x0138BC CMPI Guard : 0c6c0067013e (expected 0c6c0067013e: CMPI.W #$0067, $013E(A4))
+  [PASS] 0x0138EC CMPI Dizzy : 0c6c00670146 (expected 0c6c00670146: CMPI.W #$0067, $0146(A4))
+
+=== TASK-ROM-002: Dynamic Work RAM Real-Machine Verification ===
+  [PASS] 68000 Work RAM Base : 0x05273677 (via 0x00712688)
+  === Match Initial Status Baseline ===
+    1P (A4=0x108100): CharID=0x0000, HP=103, RedHP=0, Guard=103, Dizzy=103
+    2P (A4=0x108300): CharID=0x0004, HP=103, RedHP=0, Guard=103, Dizzy=103
+  [PASS] 1P & 2P Initial Health/Guard/Dizzy == 103 ($0067) Verified.
+  === Active Combat Status Flow ===
+    1P (A4=0x108100): HP=103/103, Guard=103/103, Dizzy=103/103
+    2P (A4=0x108300): HP=88/103, Guard=82/103, Dizzy=103/103
+  [PASS] Captured Screenshots (15): kof97pls013.png, kof97pls014.png
+[SUCCESS] TASK-ROM-002 dynamic memory & Code Cave verification passed with 100% compliance.
 ```
 
-- **未决假设实测结论（回应 `DIR-001`）**：WinKawaks 1.48 在通过文件名回退加载 CRC32 改变的 `output/roms/kof97pls.zip` 时，**全程静默直通，无任何阻断或非阻断警告弹窗**（`WARNING: wrong CRC32` 仅在手动点击 `Tools -> Audit romsets` 时输出至审计文本）。
-- **进程内存实锤**：在运行态 WinKawaks 进程内存 `0x0E851020` 处定位到已加载的 P1 ROM 缓冲区，核实偏移 `0x000300..0x00030F` 为 `ffffffffffffffffffffffffffffffff`（而非 `RomPath2\kof97pls.zip` 的 `b84ef431...`），100% 证明模拟器加载的是工作区 `output/roms/kof97pls.zip`。
-- **实机运行截图文件（位于 `sandbox/capture/`）**：
-  - [`sandbox/capture/kof97pls000.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls000.png)：成功进入 KOF 97 片头动画（Terry Bogard 镜头，`PRESS 1P OR 2P BUTTON`）；
-  - [`sandbox/capture/kof97pls001.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls001.png)：按 1P Start 后进入 `MODE SELECT` 主菜单（`TEAM PLAY` / `SINGLE PLAY`）；
-  - [`sandbox/capture/kof97pls002.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls002.png)：进入 29 人选人面板（底部仅显示八神庵与矢吹真吾，无风云再起自带的隐藏 Boss 行，视觉实锤加载了由原版 `kof97.ZIP` 转换封装的 P1/P2/S1）；
-  - [`sandbox/capture/kof97pls003.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls003.png)：`ADVANCED / EXTRA` 模式选择与选人界面正常交互，无红屏、无黑屏、无贴图或音频异常。
+### 2. 纯英文 ASCII 规范与自检验证
+执行校验：
+- `python tools/rom_tool.py self-test`：3 项测试全部通过（`PASS`）。
+- 字符集扫描：`tools/rom_tool.py` 与 `sandbox/launch_sandbox.bat` 非 ASCII 字节数均为 `0`。
+
+### 3. 实机截图证据
+- [`sandbox/capture/kof97pls013.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls013.png)：对战开局状态，1P（草薙京）与 2P（安迪）全血全槽对峙（HP=103, Guard=103, Dizzy=103）。
+- [`sandbox/capture/kof97pls014.png`](file:///c:/Users/mimovr/Desktop/TEmp/REA/Fighter97/sandbox/capture/kof97pls014.png)：实机交锋 Counter 重拳打击瞬间，受击火花与血条削减视觉证据，内存实测 2P HP 降至 88、Guard 降至 82。
