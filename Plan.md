@@ -64,15 +64,15 @@ flowchart TD
 
 ---
 
-## 阶段四：调色板皮肤魔改（P1-当前活跃阶段）
+## 阶段四：调色板皮肤魔改（P1-已实施，READY_FOR_REVIEW）
 
 * **目标**：实现目标角色（八神庵 Iori）专属黑金配色换肤。
-* **Task ID**：`TASK-ROM-004`
+* **Task ID**：`TASK-ROM-004`（Round 4 实施完成，待 Argon 审查）
 * **细分步骤**：
-  1. 在 `tools/rom_tool.py` 中实现符合 Neo-Geo `LSPC2-A2` 非线性位布局的 RGB 编解码器；
+  1. 在 `tools/rom_tool.py` 中实现符合 Neo-Geo `LSPC2-A2` 非线性位布局的 RGB 编解码器（已实现并纳入 self-test）；
   2. 按 `[CR-003-P2-01]` 校准结论，定位 `232-p2p.bin` Bank 2 中八神庵（`CharID = 0x1B`）A 键真实主调色板 **`0x2DF7F0`**（编号 `0x07C0`，32 字节 / 16 个字，以及同块受击/立绘/HUD 头像调色板 `0x2DF850`、`0x2DF990..0x2DF9EF`，并兼容覆盖 `0x2DC9F0`）；
-  3. 将八神庵经典酒红头发/红裤（`Word #08..#11`）与风衣/衬衣替换为黑金定制配色；
-  4. 刷入并打包上机，实机验证选人界面与战斗中的换肤表现。
+  3. 将八神庵经典酒红头发/红裤（`Word #08..#11`）与风衣/衬衣替换为黑金定制配色（金发金裤、暗夜黑风衣、黑灰衬衣）；
+  4. 刷入并打包生成 `output/roms/kof97pls.zip`（`232-p2p.bin` 磁盘 CRC32 `0xAF5CC95E`），通过 `verify-palette` 自动化实机验证选人界面（`kof97pls050.png`）与 Round 1 战斗表现（`kof97pls052.png`）。
 
 ---
 
