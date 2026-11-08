@@ -994,6 +994,11 @@ def theme_hsv(theme_id: str) -> Tuple[float, float, float, float]:
     return ph, ps, ah, a_sat
 
 
+# Mid gray in the same 0..1 luma as _unit_luma. Official Iori red sits
+# under this (about 0.41). Brighter saturated cloth is a highlight.
+_LIT_CLOTH_LUMA = 0.5
+
+
 def _v_for_luma(hue: float, sat: float, target_y: float, cap: bool) -> float:
     """
     Pick V so HSV luma lands on target_y.
@@ -1027,6 +1032,27 @@ def _v_for_luma(hue: float, sat: float, target_y: float, cap: bool) -> float:
     return (lo + hi) * 0.5
 
 
+def _ease_sat_to_luma(hue: float, sat: float, target_y: float) -> float:
+    """
+    Drop saturation until value 1 can reach target_y.
+
+    A darker hue is dimmer than yellow at the same saturation and value.
+    Lowering saturation mixes in white so a highlight can keep its luma.
+    Returns the highest saturation that still reaches target_y, or the
+    input saturation when that hue is already bright enough.
+    """
+    if _unit_luma(*_hsv_to_rgb_unit(hue, sat, 1.0)) + 1e-4 >= target_y:
+        return sat
+    slo, shi = 0.0, sat
+    for _ in range(12):
+        mid = (slo + shi) * 0.5
+        if _unit_luma(*_hsv_to_rgb_unit(hue, mid, 1.0)) < target_y:
+            shi = mid
+        else:
+            slo = mid
+    return slo
+
+
 def recolor_match_shade(
     r5: int,
     g5: int,
@@ -1039,12 +1065,16 @@ def recolor_match_shade(
     Move a palette entry onto a theme hue without inventing a new shade.
 
     SNK cloth is shaded in the pixel art. A natural recolor keeps that
-    entry's luma and saturation, and only changes hue. Saturated pigment
-    (Iori red) is not allowed to get brighter, so it cannot turn into a
-    pastel highlight. Soft cloth (Daimon gi, Kyo uniform) keeps its even
-    luma steps, including a light top that stays pale and a shadow that
-    stays a color instead of falling to black. Outlines and pure white
-    cloth are left alone.
+    entry's luma and only changes hue. Highlights preserve luma: if the
+    new hue is darker and cannot reach that luma at the original
+    saturation (bright yellow cloth shifted to red), saturation is
+    lowered so the highlight stays lit and reads as pink or white cloth
+    instead of a dull mid red. Dark saturated pigment (Iori red hair and
+    pants) keeps its saturation and is never brighter than the sprite
+    shade, so it cannot turn into a pastel highlight. Soft cloth keeps
+    its even luma steps, including a light top that stays pale and a
+    shadow that stays a color instead of falling to black. Outlines and
+    pure white cloth are left alone.
     """
     hue_now, sat, val = _rgb5_to_hsv(r5, g5, b5)
     if val <= 0.06:
@@ -1063,36 +1093,28 @@ def recolor_match_shade(
             use_sat = 0.04 if theme_sat < 0.12 else min(sat, 0.16)
             use_v = val
         else:
-            use_sat = min(sat, 0.16)
+            use_sat = _ease_sat_to_luma(hue, min(sat, 0.16), target_y)
             use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
-            if _unit_luma(*_hsv_to_rgb_unit(hue, use_sat, 1.0)) + 1e-4 < target_y:
-                slo, shi = 0.0, use_sat
-                for _ in range(12):
-                    mid = (slo + shi) * 0.5
-                    if _unit_luma(*_hsv_to_rgb_unit(hue, mid, 1.0)) < target_y:
-                        shi = mid
-                    else:
-                        slo = mid
-                use_sat = slo
-                use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
     elif sat >= 0.50:
-        # Pigment: hold saturation, never brighter than the sprite shade.
+        # Saturated slots split on perceptual luma.
+        # Highlights (brighter than mid gray) keep luma. If the new hue
+        # cannot reach it, ease saturation so lit cloth stays bright.
+        # Dark pigment keeps saturation and must not get brighter, so
+        # Iori red cannot grow a pastel highlight.
         use_sat = sat
-        use_v = _v_for_luma(hue, use_sat, target_y, cap=True)
+        can_reach = (
+            _unit_luma(*_hsv_to_rgb_unit(hue, use_sat, 1.0)) + 1e-4 >= target_y
+        )
+        if target_y > _LIT_CLOTH_LUMA and not can_reach:
+            use_sat = _ease_sat_to_luma(hue, use_sat, target_y)
+            use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
+        else:
+            use_v = _v_for_luma(hue, use_sat, target_y, cap=True)
     else:
         # Soft cloth: match luma, hold saturation, ease S only if this hue
         # cannot reach the original brightness (a saturated blue is darker
         # than a saturated yellow at the same value).
-        use_sat = sat
-        if _unit_luma(*_hsv_to_rgb_unit(hue, use_sat, 1.0)) + 1e-4 < target_y:
-            slo, shi = 0.0, use_sat
-            for _ in range(12):
-                mid = (slo + shi) * 0.5
-                if _unit_luma(*_hsv_to_rgb_unit(hue, mid, 1.0)) < target_y:
-                    shi = mid
-                else:
-                    slo = mid
-            use_sat = slo
+        use_sat = _ease_sat_to_luma(hue, sat, target_y)
         use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
 
     rf, gf, bf = _hsv_to_rgb_unit(hue, use_sat, use_v)
@@ -1129,10 +1151,12 @@ def generate_harmonious_character_palette(
     """
     Recolor a character with a theme hue while keeping SNK's original shade.
 
-    Each costume slot keeps the luma and saturation the sprite was drawn
-    with. Skin, white cloth, natural hair and outlines stay official.
-    Orochi Iori uses normal Iori's shade curve, because the official Orochi
-    ramp is a pastel highlight over a crushed shadow.
+    Each costume slot keeps the luma the sprite was drawn with. Highlights
+    preserve that luma and ease saturation when the new hue is darker.
+    Dark pigment keeps its saturation and must not get brighter. Skin,
+    white cloth, natural hair and outlines stay official. Orochi Iori
+    uses normal Iori's shade curve, because the official Orochi ramp is
+    a pastel highlight over a crushed shadow.
     """
     _, _, pal_idx = get_char_engine_info(cid)
     base_off = 0x483E + pal_idx * 8
@@ -1167,7 +1191,9 @@ def generate_harmonious_character_palette(
 
     res = list(orig_words)
     # Skin, white cloth and natural hair stay on the official words.
-    # Costume groups take the theme hue at the original shade.
+    # Costume groups take the theme hue. Highlights keep luma (saturation
+    # eases when the hue is darker). Dark pigment keeps saturation and
+    # does not get brighter.
     if "primary" in schema:
         for idx in schema["primary"]:
             _paint_slot(res, orig_words, idx, primary_h, primary_s)
