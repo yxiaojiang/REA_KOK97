@@ -8,6 +8,7 @@ HTML5/CSS3 frontend and Python ROM hacking backend.
 All comments, identifiers, and variables strictly follow 100% English specification (Rules.md).
 """
 
+import ctypes
 import json
 import os
 import struct
@@ -636,7 +637,11 @@ def async_log(message: str, level: str = "INFO") -> None:
     Dispatch a live log message in a separate thread.
     Never blocks or deadlocks the pywebview RPC message loop!
     """
-    print(f"[{level}] {message}")
+    try:
+        print(f"[{level}] {message}")
+    except UnicodeEncodeError:
+        safe_msg = message.encode(getattr(sys.stdout, "encoding", "utf-8") or "utf-8", errors="replace").decode(getattr(sys.stdout, "encoding", "utf-8") or "utf-8")
+        print(f"[{level}] {safe_msg}")
 
     def _worker() -> None:
         if _APP_WINDOW:
@@ -681,6 +686,11 @@ class KOF97BridgeApi:
         self._sync_avatar = True
         self._infinite_power = True
         self._dizzy_duration = 5.0
+
+        # Running emulator handle & P2 Base cache
+        self._running_proc: Optional[subprocess.Popen] = None
+        self._cached_p2_base: Optional[int] = None
+        self._cached_p2_pid: Optional[int] = None
 
         # Per-character skin store: char_id -> {"themeId": str, "colors": List[str]}
         self._character_skins: Dict[int, Dict[str, Any]] = {}
@@ -1031,6 +1041,16 @@ class KOF97BridgeApi:
             p1_data[0x022334:0x02234C] = bytes.fromhex("1b6d284b27ed1b6d284c27ee1b6d284d27ef1b6d285727f0")
             p1_data[0x000350:0x000450] = bytes([0xFF] * 256)
 
+            # Unlock all hidden characters directly on character select screen
+            # 1. 0x009976: Set $6c34(a5) = 0x1F (move.b #$1f, $6c34(a5); NOP)
+            p1_data[0x009976:0x00997E] = bytes.fromhex("4e711b7c001f6c34")
+            # 2. 0x01F7C8: Guarantee $6c34(a5) = 0x1F is always set during character select
+            p1_data[0x01F7C8:0x01F7CA] = bytes.fromhex("4e71")
+            # 3. Add Orochi (0x1E) into Row 3 Col 4 of all 8 select screen grid tables
+            for orochi_off in [0x0A9499, 0x0A94C6, 0x0A94F3, 0x0A9520, 0x0A954D, 0x0A957A, 0x0A95A7, 0x0A95D4]:
+                p1_data[orochi_off] = 0x1E
+            async_log("  [P1] \u5df2\u5168\u9762\u89e3\u9501\u9009\u4eba\u754c\u9762\u9690\u85cf\u4eba\u7269 (\u66b4\u8d70\u516b\u795e\u3001\u66b4\u8d70\u8389\u5b89\u5a1c\u3001\u771f\u5927\u86c7\u961f\u4e09\u4eba\u7ec4\u3001\u5927\u86c7\u53ca\u7ecf\u5178\u8349\u8599\u4eac)", "INFO")
+
             p1_path.write_bytes(p1_data)
 
             # 3. Apply Palette & Skin for customized characters to p2_be.bin
@@ -1128,12 +1148,262 @@ class KOF97BridgeApi:
 
                 async_log(f"\u6b63\u5728\u542f\u52a8\u6c99\u76d2\u6a21\u62df\u5668 WinKawaks (\u6302\u8f7d RomPath1={self._output_zip.parent})...", "INFO")
                 proc = start_sandbox_kawaks(self._sandbox_dir, rom_name="kof97pls", enable_bg_input=False)
+                self._running_proc = proc
+                self._cached_p2_base = None
+                self._cached_p2_pid = None
                 async_log(f"WinKawaks \u6a21\u62df\u5668\u5df2\u6210\u529f\u542f\u52a8\uff01(PID={proc.pid})\uff0c\u5df2\u65bd\u52a0\u5185\u5b58\u53cd\u906e\u853d Patch\uff01", "SUCCESS")
             except Exception as exc:
                 async_log(f"\u542f\u52a8\u6a21\u62df\u5668\u5931\u8d25: {exc}", "ERROR")
 
         threading.Thread(target=_launch, daemon=True).start()
         return {"success": True, "pid": 0}
+
+    def _find_kawaks_pid(self) -> Optional[int]:
+        """Locate running WinKawaks process PID from managed handle or system process snapshot."""
+        if self._running_proc is not None:
+            if self._running_proc.poll() is None:
+                return self._running_proc.pid
+            self._running_proc = None
+
+        TH32CS_SNAPPROCESS = 0x00000002
+        class PROCESSENTRY32(ctypes.Structure):
+            _fields_ = [
+                ("dwSize", ctypes.c_ulong),
+                ("cntUsage", ctypes.c_ulong),
+                ("th32ProcessID", ctypes.c_ulong),
+                ("th32DefaultHeapID", ctypes.POINTER(ctypes.c_ulong)),
+                ("th32ModuleID", ctypes.c_ulong),
+                ("cntThreads", ctypes.c_ulong),
+                ("th32ParentProcessID", ctypes.c_ulong),
+                ("pcPriClassBase", ctypes.c_long),
+                ("dwFlags", ctypes.c_ulong),
+                ("szExeFile", ctypes.c_char * 260),
+            ]
+        k32 = ctypes.WinDLL("kernel32")
+        h_snap = k32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
+        if h_snap == -1:
+            return None
+        pe = PROCESSENTRY32()
+        pe.dwSize = ctypes.sizeof(PROCESSENTRY32)
+        success = k32.Process32First(h_snap, ctypes.byref(pe))
+        found_pid = None
+        while success:
+            exe_name = pe.szExeFile.decode("latin1", errors="ignore").lower()
+            if "winkawaks" in exe_name:
+                found_pid = int(pe.th32ProcessID)
+                break
+            success = k32.Process32Next(h_snap, ctypes.byref(pe))
+        k32.CloseHandle(h_snap)
+        return found_pid
+
+    def _find_p2_base_in_process(self, h_proc: int, pid: int) -> Optional[int]:
+        """Locate the 4MB decrypted P2 ROM buffer in WinKawaks memory by unique palette signature."""
+        if self._cached_p2_base is not None and self._cached_p2_pid == pid:
+            k32 = ctypes.WinDLL("kernel32")
+            test_buf = ctypes.create_string_buffer(4)
+            read = ctypes.c_size_t(0)
+            if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(self._cached_p2_base + 0x2CFFF0), test_buf, 4, ctypes.byref(read)):
+                if read.value == 4:
+                    return self._cached_p2_base
+
+        k32 = ctypes.WinDLL("kernel32")
+        class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+            _fields_ = [
+                ("BaseAddress", ctypes.c_void_p),
+                ("AllocationBase", ctypes.c_void_p),
+                ("AllocationProtect", ctypes.c_ulong),
+                ("RegionSize", ctypes.c_size_t),
+                ("State", ctypes.c_ulong),
+                ("Protect", ctypes.c_ulong),
+                ("Type", ctypes.c_ulong),
+            ]
+        sig_le = bytes.fromhex("0000ff7f0000b45fa25f806f704f502f")
+        mbi = MEMORY_BASIC_INFORMATION()
+        addr = 0
+        read = ctypes.c_size_t(0)
+        while k32.VirtualQueryEx(h_proc, ctypes.c_void_p(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)):
+            base = mbi.BaseAddress or 0
+            size = mbi.RegionSize
+            if mbi.State == 0x1000 and (mbi.Protect & 0xFF) in (2, 4, 0x20, 0x40):
+                buf = ctypes.create_string_buffer(size)
+                if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(base), buf, size, ctypes.byref(read)):
+                    raw = buf.raw[:read.value]
+                    idx = raw.find(sig_le)
+                    if idx != -1:
+                        found_base = (base + idx) - 0x2CFFF0
+                        self._cached_p2_base = found_base
+                        self._cached_p2_pid = pid
+                        return found_base
+            addr = base + size
+            if addr >= 0x7FFF0000:
+                break
+        return None
+
+    def _live_inject_active_palette(self, h_proc: int, p2_addr_base: int, lspc_bytes_le: bytearray) -> int:
+        """Scan committed memory regions for active on-screen Palette RAM and overwrite immediately."""
+        k32 = ctypes.WinDLL("kernel32")
+        class MEMORY_BASIC_INFORMATION(ctypes.Structure):
+            _fields_ = [
+                ("BaseAddress", ctypes.c_void_p),
+                ("AllocationBase", ctypes.c_void_p),
+                ("AllocationProtect", ctypes.c_ulong),
+                ("RegionSize", ctypes.c_size_t),
+                ("State", ctypes.c_ulong),
+                ("Protect", ctypes.c_ulong),
+                ("Type", ctypes.c_ulong),
+            ]
+        mbi = MEMORY_BASIC_INFORMATION()
+        addr = 0
+        read = ctypes.c_size_t(0)
+        written = ctypes.c_size_t(0)
+        prev_buf = ctypes.create_string_buffer(8)
+        k32.ReadProcessMemory(h_proc, ctypes.c_void_p(p2_addr_base), prev_buf, 8, ctypes.byref(read))
+        search_sig = bytes(prev_buf.raw)
+        if len(search_sig) < 8 or search_sig == b"\x00" * 8:
+            return 0
+
+        injected = 0
+        while k32.VirtualQueryEx(h_proc, ctypes.c_void_p(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)):
+            base = mbi.BaseAddress or 0
+            size = mbi.RegionSize
+            if mbi.State == 0x1000 and (mbi.Protect & 0xFF) in (2, 4, 0x20, 0x40) and size <= 0x200000:
+                buf = ctypes.create_string_buffer(size)
+                if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(base), buf, size, ctypes.byref(read)):
+                    raw = buf.raw[:read.value]
+                    pos = 0
+                    while True:
+                        p = raw.find(search_sig, pos)
+                        if p == -1:
+                            break
+                        target_va = base + p
+                        if target_va != p2_addr_base:
+                            k32.WriteProcessMemory(h_proc, ctypes.c_void_p(target_va), bytes(lspc_bytes_le), 30, ctypes.byref(written))
+                            injected += 1
+                        pos = p + 1
+            addr = base + size
+            if addr >= 0x7FFF0000:
+                break
+        return injected
+
+    def get_emulator_status(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Check whether WinKawaks emulator is currently active in process tree."""
+        pid = self._find_kawaks_pid()
+        return {"running": pid is not None, "pid": pid or 0}
+
+    def apply_skin_live(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Dynamically inject character palette directly into running WinKawaks process memory.
+        Updates both the active on-screen Palette RAM and the loaded P2 ROM memory buffer.
+        """
+        params = params or {}
+        cid = params.get("char_id", self._char_id)
+        theme_id = params.get("theme_id", "classic")
+        scope = params.get("scope", self._scope)
+
+        # 1. Update internal state and persist to disk
+        self.set_character_skin(params)
+
+        # 2. Check if WinKawaks is running
+        pid = self._find_kawaks_pid()
+        if not pid:
+            return {
+                "success": True,
+                "running": False,
+                "message": "\u914d\u7f6e\u5df2\u4fdd\u5b58\uff01\u5f53\u524d\u6a21\u62df\u5668\u672a\u5728\u8fd0\u884c\uff0c\u70b9\u51fb\u300c\u5f00\u59cb\u6e38\u620f\u300d\u6216\u300c\u6253\u5305ROM\u300d\u5373\u53ef\u751f\u6548\u3002"
+            }
+
+        # 3. Read p1 and clean p2 baseline
+        p1_path = self._workdir / "p1_be.bin"
+        if not p1_path.exists():
+            return {"success": False, "running": True, "message": "\u5de5\u4f5c\u533a\u7f3a\u5c11 p1_be.bin"}
+        p1_data = p1_path.read_bytes()
+
+        with zipfile.ZipFile(self._source_zip) as z_src:
+            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+
+        # 4. Open process handle
+        k32 = ctypes.WinDLL("kernel32")
+        PROCESS_ALL = 0x001F0FFF
+        h_proc = k32.OpenProcess(PROCESS_ALL, False, pid)
+        if not h_proc:
+            return {"success": False, "running": True, "message": f"\u65e0\u6cd5\u6302\u8f7d\u6a21\u62df\u5668\u8fdb\u7a0b (PID={pid})"}
+
+        try:
+            p2_base = self._find_p2_base_in_process(h_proc, pid)
+            if not p2_base:
+                return {"success": False, "running": True, "message": "\u672a\u80fd\u5b9a\u4f4d\u6a21\u62df\u5668\u4e2d\u7684 P2 ROM \u5185\u5b58\u6620\u5c04\u533a"}
+
+            # Determine list of characters to inject
+            target_cids = [c["id"] for c in CHARACTER_ROSTER] if scope == "ALL" else [cid]
+            injected_total = 0
+            written = ctypes.c_size_t(0)
+
+            for target_cid in target_cids:
+                skin_entry = self._character_skins.get(target_cid, {})
+                t_id = skin_entry.get("themeId", "classic")
+                if t_id == "classic":
+                    _, _, pal_idx = get_char_engine_info(target_cid)
+                    base_off = 0x483E + pal_idx * 8
+                    base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+                    lspc_words = [struct.unpack(">H", p2_clean[0x2CFFF0 + base_pid * 32 + i * 2 : 0x2CFFF0 + base_pid * 32 + i * 2 + 2])[0] for i in range(1, 16)]
+                    burst_words = lspc_words
+                else:
+                    lspc_words = generate_harmonious_character_palette(target_cid, t_id, p1_data, p2_clean)
+                    burst_words = generate_burst_character_palette(target_cid, t_id, lspc_words)
+
+                lspc_bytes_le = bytearray()
+                for w in lspc_words:
+                    lspc_bytes_le += struct.pack("<H", w)
+
+                burst_bytes_le = bytearray()
+                for w in burst_words:
+                    burst_bytes_le += struct.pack("<H", w)
+
+                _, _, pal_idx = get_char_engine_info(target_cid)
+                base_off = 0x483E + pal_idx * 8
+                base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+
+                # Update active on-screen Palette RAM
+                p2_addr_base = p2_base + 0x2CFFF0 + base_pid * 32 + 2
+                self._live_inject_active_palette(h_proc, p2_addr_base, lspc_bytes_le)
+
+                # Overwrite all 4 color button slots (A, B, C, D) in P2 ROM buffer
+                for btn_idx in range(4):
+                    btn_off = base_off + btn_idx * 2
+                    pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
+                    btn_p2_base = p2_base + 0x2CFFF0 + pal_id * 32 + 2
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_p2_base), bytes(lspc_bytes_le), 30, ctypes.byref(written))
+                    btn_p2_burst = p2_base + 0x2CFFF0 + (pal_id + 3) * 32 + 2
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_p2_burst), bytes(burst_bytes_le), 30, ctypes.byref(written))
+
+                # Synchronize portraits if enabled
+                if self._sync_avatar:
+                    p2_temp = bytearray(p2_clean)
+                    sync_character_portraits(target_cid, t_id, base_pid, lspc_words, p2_temp, p2_clean)
+                    for port_pal in [base_pid + 13, base_pid + 14, base_pid + 15]:
+                        port_off = 0x2CFFF0 + port_pal * 32 + 2
+                        port_words_be = [struct.unpack(">H", p2_temp[port_off + i*2 : port_off + i*2 + 2])[0] for i in range(15)]
+                        port_bytes_le = bytearray()
+                        for pw in port_words_be:
+                            port_bytes_le += struct.pack("<H", pw)
+                        k32.WriteProcessMemory(h_proc, ctypes.c_void_p(p2_base + port_off), bytes(port_bytes_le), 30, ctypes.byref(written))
+
+                injected_total += 1
+
+            char_info = next((c for c in CHARACTER_ROSTER if c["id"] == cid), None)
+            cname = char_info["name_cn"] if char_info else f"0x{cid:02X}"
+            target_desc = f"\u3010{cname}\u3011" if scope == "SINGLE" else f"\u5168\u5458 {injected_total} \u4f4d\u89d2\u8272"
+            async_log(f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] \u76ae\u80a4\u3010{theme_id}\u3011\u5df2\u6210\u529f\u5b9e\u65f6\u6ce8\u5165\u8fd0\u884c\u4e2d\u7684\u6e38\u620f (PID={pid}, {target_desc})\uff01\u753b\u9762\u5df2\u5373\u65f6\u53d8\u8272\uff01", "SUCCESS")
+            return {
+                "success": True,
+                "running": True,
+                "message": f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] \u76ae\u80a4\u5df2\u5b9e\u65f6\u70ed\u66f4\u65b0\u5230\u6e38\u620f\u4e2d\uff01{target_desc}\u753b\u9762\u5df2\u5373\u523b\u53d8\u8272\uff01"
+            }
+        except Exception as exc:
+            async_log(f"\u5b9e\u65f6\u70ed\u66f4\u65b0\u5931\u8d25: {exc}", "ERROR")
+            return {"success": False, "running": True, "message": str(exc)}
+        finally:
+            k32.CloseHandle(h_proc)
 
     # ------------------------------------------------------------------------
     # Maintenance Actions

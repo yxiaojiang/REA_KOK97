@@ -777,6 +777,68 @@
     transition: width 0.3s ease;
   }
 
+  /* Live Apply Button & Emulator Status */
+  .emu-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--line);
+    color: var(--mute);
+    transition: all 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .emu-status.running {
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.45);
+    color: var(--ok);
+  }
+  .emu-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--mute);
+    transition: all 0.3s ease;
+  }
+  .emu-status.running .emu-status-dot {
+    background: var(--ok);
+    box-shadow: 0 0 10px var(--ok);
+    animation: emuDotPulse 1.6s infinite ease-in-out;
+  }
+  @keyframes emuDotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.35); opacity: 0.6; }
+  }
+
+  .btn.live-btn {
+    background: linear-gradient(135deg, #00C6FF, #0072FF);
+    color: #fff;
+    box-shadow: 0 6px 20px -4px rgba(0, 150, 255, 0.5);
+    border: 0;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .btn.live-btn:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px -4px rgba(0, 150, 255, 0.75);
+  }
+  .btn.live-btn:active {
+    transform: translateY(0);
+  }
+  .btn.live-btn.pulse {
+    animation: liveBtnPulse 2.4s infinite ease-in-out;
+  }
+  @keyframes liveBtnPulse {
+    0%, 100% { box-shadow: 0 4px 16px -2px rgba(0, 198, 255, 0.4); }
+    50% { box-shadow: 0 6px 28px 4px rgba(0, 198, 255, 0.85); }
+  }
+
   /* Log Drawer Sheet */
   .log-drawer {
     position: absolute;
@@ -911,6 +973,10 @@
             <span>同步头像立绘</span>
             <div class="switch on" id="swAvatar"></div>
           </div>
+          <div class="sidebar-footer" style="margin-top: 8px;">
+            <span title="选皮肤时若游戏正在运行，自动实时注入生效">换肤即刻生效</span>
+            <div class="switch on" id="swAutoLive"></div>
+          </div>
         </div>
 
       </div>
@@ -1042,6 +1108,14 @@
         <span class="ticker-text" id="tickerText">系统就绪</span>
         <span class="ticker-arrow">▲ 日志</span>
       </div>
+      <div class="emu-status" id="emuStatus">
+        <span class="emu-status-dot"></span>
+        <span class="emu-status-text" id="emuStatusText">游戏未运行</span>
+      </div>
+      <button class="btn live-btn" id="btnLiveApply" title="无需重启游戏，将当前选定皮肤实时注入正在运行的游戏画面中">
+        <svg style="width:16px;height:16px;fill:currentColor;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        实时应用皮肤
+      </button>
       <button class="btn outline" id="btnSave">保存设置</button>
       <button class="btn outline" id="btnPack">打包 ROM<span class="progress-bar" id="packProgress"></span></button>
       <button class="btn primary" id="btnStartGame">
@@ -1244,6 +1318,8 @@ const state = {
   dizzyDuration: 5.0,
   damageIdx: 3,       // Default: "halved" (50%)
   syncAvatar: true,
+  autoLive: true,
+  isEmulatorRunning: false,
   // Per-character skin mapping: charId -> { themeId: string, colors: array }
   characterSkins: {}
 };
@@ -1405,6 +1481,16 @@ function applyTheme(themeId) {
     scope: state.scope,
     colors: theme.colors
   });
+
+  // If emulator is running and autoLive is enabled, hot-reload in real-time!
+  if (state.autoLive && state.isEmulatorRunning) {
+    callBackend("apply_skin_live", {
+      char_id: state.activeCharId,
+      theme_id: theme.id,
+      scope: state.scope,
+      colors: theme.colors
+    });
+  }
 }
 
 // Build Right Theme Cards
@@ -1444,6 +1530,13 @@ $("#swAvatar").onclick = () => {
   $("#swAvatar").classList.toggle("on", state.syncAvatar);
   callBackend("update_sync_avatar", { sync: state.syncAvatar });
   toast(state.syncAvatar ? "已开启头像发色联动同步" : "已关闭头像发色联动同步");
+};
+
+// Auto Live Skin Sync Switch
+$("#swAutoLive").onclick = () => {
+  state.autoLive = !state.autoLive;
+  $("#swAutoLive").classList.toggle("on", state.autoLive);
+  toast(state.autoLive ? "已开启【换肤即刻生效】：切换皮肤时游戏将秒级同步变色！" : "已关闭【换肤即刻生效】：可点击底部「实时应用皮肤」手动生效");
 };
 
 // Combat Page Switches
@@ -1594,6 +1687,36 @@ function toast(msg) {
 }
 
 // Core Action Buttons
+$("#btnLiveApply").onclick = () => {
+  const currentSkin = state.characterSkins[state.activeCharId] || { themeId: "classic", colors: THEMES[0].colors };
+  const currentThemeId = currentSkin.themeId;
+  const theme = getThemeById(currentThemeId);
+  const char = CHARACTERS.find(c => c.id === state.activeCharId);
+
+  log(`正在向运行中的游戏实时注入皮肤【${theme ? theme.name : currentThemeId}】...`, "INFO");
+  toast("正在实时应用皮肤...");
+
+  callBackend("apply_skin_live", {
+    char_id: state.activeCharId,
+    theme_id: currentThemeId,
+    scope: state.scope,
+    colors: currentSkin.colors
+  }).then(res => {
+    if (res && res.running) {
+      if (res.success) {
+        toast(res.message || `⚡ 皮肤【${theme ? theme.name : currentThemeId}】已实时应用！`);
+        log(res.message || `皮肤【${theme ? theme.name : currentThemeId}】实时应用成功`, "SUCCESS");
+      } else {
+        toast(`应用失败: ${res.message || '未知错误'}`);
+        log(`实时更新失败: ${res.message}`, "ERROR");
+      }
+    } else {
+      toast("游戏未运行，已保存皮肤设置！点击【开始游戏】体验。");
+      log("游戏未在运行中，皮肤设置已安全存盘。启动游戏后即可生效。", "INFO");
+    }
+  });
+};
+
 $("#btnSave").onclick = () => {
   log("正在保存全员配置与皮肤列表...", "INFO");
   callBackend("save_skin").then(res => {
@@ -1709,11 +1832,37 @@ window.onBackendState = function(s) {
   log("工作台已与本地保存的配置同步就绪 (已恢复破防/免眩/伤害与皮肤配置)。", "INFO");
 };
 
+// Periodic emulator status check
+async function checkEmulatorStatus() {
+  try {
+    const res = await callBackend("get_emulator_status");
+    if (res && res.running !== undefined) {
+      state.isEmulatorRunning = res.running;
+      const pill = $("#emuStatus");
+      const txt = $("#emuStatusText");
+      const btn = $("#btnLiveApply");
+      if (pill && txt) {
+        if (res.running) {
+          pill.classList.add("running");
+          txt.textContent = `游戏运行中 (PID:${res.pid})`;
+          if (btn) btn.classList.add("pulse");
+        } else {
+          pill.classList.remove("running");
+          txt.textContent = "游戏未运行";
+          if (btn) btn.classList.remove("pulse");
+        }
+      }
+    }
+  } catch (err) {}
+}
+setInterval(checkEmulatorStatus, 2000);
+
 // Initial state loader
 function initBackendState() {
   callBackend("get_initial_state").then(s => {
     if (s && window.onBackendState) window.onBackendState(s);
   });
+  checkEmulatorStatus();
 }
 
 // Listen for PyWebView ready event
