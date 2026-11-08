@@ -165,26 +165,48 @@ PRESET_THEMES = [
         "id": "crimson_shura",
         "name_cn": "\u8840\u8272\u4fee\u7f57",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FF2A2A", "#DC2626", "#991B1B", "#450A0A",
-            "#383838", "#242424", "#141414", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#EF2929",
+            "#CE1919",
+            "#940808",
+            "#4A0000",
+            "#4A3A3A",
+            "#3A2929",
+            "#291919",
+            "#000000",
         ],
-        "daimon_judogi": ["#FF4D4D", "#EF4444", "#DC2626", "#B91C1C", "#7F1D1D", "#450A0A"],
+        "daimon_judogi": ["#FF6B6B", "#EF4444", "#DC2626", "#B91C1C", "#7F1D1D", "#450A0A"],
         "daimon_headband": "#FFFFFF",
-        "chang_uniform": ["#FF4D4D", "#EF4444", "#DC2626", "#B91C1C", "#450A0A"],
+        "chang_uniform": ["#FF6B6B", "#EF4444", "#DC2626", "#B91C1C", "#450A0A"],
         "chang_ball": ["#F1F5F9", "#64748B"],
     },
     {
         "id": "azure_thunder",
         "name_cn": "\u82cd\u96f7\u75be\u7535",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#38BDF8", "#0284C7", "#0369A1", "#082F49",
-            "#1E293B", "#0F172A", "#080D1A", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#197BA5",
+            "#10638C",
+            "#084263",
+            "#001929",
+            "#3A4242",
+            "#293131",
+            "#192121",
+            "#000000",
         ],
-        "daimon_judogi": ["#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#1E40AF", "#0F172A"],
+        "daimon_judogi": ["#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#172554", "#080D1A"],
         "daimon_headband": "#FDE047",
         "chang_uniform": ["#60A5FA", "#3B82F6", "#2563EB", "#1D4ED8", "#0F172A"],
         "chang_ball": ["#F8FAFC", "#94A3B8"],
@@ -193,24 +215,46 @@ PRESET_THEMES = [
         "id": "paladin_gold",
         "name_cn": "\u5723\u6bbf\u9a91\u58eb",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E2E8F0", "#94A3B8",
-            "#FFF066", "#F59E0B", "#B45309", "#602800",
-            "#FFFFFF", "#E2E8F0", "#94A3B8", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#7B6310",
+            "#635208",
+            "#423100",
+            "#191900",
+            "#424231",
+            "#313121",
+            "#212110",
+            "#000000",
         ],
-        "daimon_judogi": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
+        "daimon_judogi": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#334155"],
         "daimon_headband": "#EAB308",
-        "chang_uniform": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#64748B"],
+        "chang_uniform": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
         "chang_ball": ["#FDE047", "#CA8A04"],
     },
     {
         "id": "void_shadow",
         "name_cn": "\u865a\u7a7a\u5927\u86c7",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#34D399", "#10B981", "#059669", "#064E3B",
-            "#27272A", "#18181B", "#09090B", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#198463",
+            "#086B52",
+            "#004A31",
+            "#002119",
+            "#314242",
+            "#213131",
+            "#102121",
+            "#000000",
         ],
         "daimon_judogi": ["#6EE7B7", "#34D399", "#10B981", "#059669", "#047857", "#022C22"],
         "daimon_headband": "#FDE047",
@@ -221,10 +265,21 @@ PRESET_THEMES = [
         "id": "cyber_neon",
         "name_cn": "\u8d5b\u535a\u9713\u8679",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#67E8F9", "#06B6D4", "#0891B2",
-            "#F43F5E", "#E11D48", "#BE123C", "#700824",
-            "#2E1065", "#1E0842", "#0F0324", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#DE214A",
+            "#C5193A",
+            "#8C0821",
+            "#420010",
+            "#4A3A3A",
+            "#3A2929",
+            "#291919",
+            "#000000",
         ],
         "daimon_judogi": ["#FB7185", "#F43F5E", "#E11D48", "#BE123C", "#881337", "#4C0519"],
         "daimon_headband": "#22D3EE",
@@ -235,10 +290,21 @@ PRESET_THEMES = [
         "id": "magma_inferno",
         "name_cn": "\u7194\u5ca9\u5730\u72f1",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FF7A00", "#EA580C", "#C2410C", "#6B1D03",
-            "#333338", "#202024", "#101014", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#A54A19",
+            "#8C3A10",
+            "#5A2908",
+            "#291000",
+            "#423A3A",
+            "#312929",
+            "#211919",
+            "#000000",
         ],
         "daimon_judogi": ["#FFA040", "#FF7A00", "#EA580C", "#C2410C", "#9A3412", "#4E1402"],
         "daimon_headband": "#EF4444",
@@ -249,10 +315,21 @@ PRESET_THEMES = [
         "id": "imperial_gold",
         "name_cn": "\u5e1d\u738b\u6218\u5c0a",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FFDE17", "#E5B800", "#B38600", "#594000",
-            "#2A2725", "#1C1917", "#0C0A09", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#7B6310",
+            "#635208",
+            "#423100",
+            "#191900",
+            "#424231",
+            "#313121",
+            "#212110",
+            "#000000",
         ],
         "daimon_judogi": ["#FFF066", "#FFDE17", "#E5B800", "#B38600", "#7A5700", "#3D2900"],
         "daimon_headband": "#DC2626",
@@ -263,10 +340,21 @@ PRESET_THEMES = [
         "id": "sakura_frost",
         "name_cn": "\u6a31\u843d\u5439\u96ea",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#F472B6", "#DB2777", "#9D174D", "#500724",
-            "#3B0764", "#24043E", "#130122", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#D6216B",
+            "#BD105A",
+            "#84083A",
+            "#420019",
+            "#4A3A42",
+            "#3A2931",
+            "#291921",
+            "#000000",
         ],
         "daimon_judogi": ["#FBCFE8", "#F472B6", "#EC4899", "#BE185D", "#831843", "#460621"],
         "daimon_headband": "#FFFFFF",
@@ -277,10 +365,21 @@ PRESET_THEMES = [
         "id": "aurora_mirage",
         "name_cn": "\u6781\u5149\u5e7b\u5f71",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#5EEAD4", "#0D9488", "#075985",
-            "#A855F7", "#7E22CE", "#581C87", "#2E0A4E",
-            "#1E1B4B", "#110E38", "#07051A", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#9429FF",
+            "#8419DE",
+            "#5A08A5",
+            "#290052",
+            "#423A4A",
+            "#31293A",
+            "#211929",
+            "#000000",
         ],
         "daimon_judogi": ["#C084FC", "#A855F7", "#7E22CE", "#581C87", "#3B0764", "#1F0335"],
         "daimon_headband": "#22D3EE",
@@ -291,10 +390,21 @@ PRESET_THEMES = [
         "id": "toxic_hazard",
         "name_cn": "\u5267\u6bd2\u9178\u8680",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#A3E635", "#65A30D", "#3F6212", "#143503",
-            "#262626", "#171717", "#0A0A0A", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#4A7B10",
+            "#3A6308",
+            "#294200",
+            "#101900",
+            "#3A4231",
+            "#293121",
+            "#192110",
+            "#000000",
         ],
         "daimon_judogi": ["#BEF264", "#84CC16", "#4D7C0F", "#365314", "#1A2E05", "#0D1702"],
         "daimon_headband": "#FFFFFF",
@@ -305,10 +415,21 @@ PRESET_THEMES = [
         "id": "abyssal_frost",
         "name_cn": "\u6df1\u6e0a\u5bd2\u51b0",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E0F2FE", "#BAE6FD",
-            "#7DD3FC", "#38BDF8", "#0284C7", "#0C4A6E",
-            "#1E293B", "#0F172A", "#020617", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#197BA5",
+            "#10638C",
+            "#084263",
+            "#001929",
+            "#3A4242",
+            "#293131",
+            "#192121",
+            "#000000",
         ],
         "daimon_judogi": ["#E0F2FE", "#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1"],
         "daimon_headband": "#FFFFFF",
@@ -319,10 +440,21 @@ PRESET_THEMES = [
         "id": "phoenix_nirvana",
         "name_cn": "\u51e4\u821e\u6d85\u69c3",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FFA500", "#FF4500", "#DC143C", "#8B0000",
-            "#262626", "#1A1A1A", "#0D0D0D", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#B54221",
+            "#9C3110",
+            "#6B2108",
+            "#311000",
+            "#4A3A3A",
+            "#3A2929",
+            "#291919",
+            "#000000",
         ],
         "daimon_judogi": ["#FED7AA", "#FB923C", "#F97316", "#EA580C", "#C2410C", "#7C2D12"],
         "daimon_headband": "#FDE047",
@@ -333,10 +465,21 @@ PRESET_THEMES = [
         "id": "emerald_lotus",
         "name_cn": "\u78a7\u7389\u9752\u83b2",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#6EE7B7", "#10B981", "#047857", "#022C22",
-            "#1F2937", "#111827", "#030712", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#198463",
+            "#086B52",
+            "#004A31",
+            "#002119",
+            "#314242",
+            "#213131",
+            "#102121",
+            "#000000",
         ],
         "daimon_judogi": ["#D1FAE5", "#A7F3D0", "#6EE7B7", "#10B981", "#059669", "#022C22"],
         "daimon_headband": "#34D399",
@@ -347,10 +490,21 @@ PRESET_THEMES = [
         "id": "shadow_ninja",
         "name_cn": "\u6697\u591c\u5f71\u5203",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#E2E8F0", "#94A3B8", "#475569", "#1E293B",
-            "#27272A", "#18181B", "#09090B", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#5A636B",
+            "#4A5252",
+            "#31313A",
+            "#101919",
+            "#3A4242",
+            "#293131",
+            "#192121",
+            "#000000",
         ],
         "daimon_judogi": ["#F1F5F9", "#CBD5E1", "#94A3B8", "#64748B", "#334155", "#0F172A"],
         "daimon_headband": "#EF4444",
@@ -361,10 +515,21 @@ PRESET_THEMES = [
         "id": "sunset_overdrive",
         "name_cn": "\u66ae\u5149\u6d41\u706b",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FDBA74", "#FB923C", "#EA580C", "#7C2D12",
-            "#312E81", "#1E1B4B", "#0F0E2A", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#A54A19",
+            "#8C3A10",
+            "#5A2908",
+            "#291000",
+            "#423A3A",
+            "#312929",
+            "#211919",
+            "#000000",
         ],
         "daimon_judogi": ["#FED7AA", "#FDBA74", "#FB923C", "#F97316", "#C2410C", "#431407"],
         "daimon_headband": "#DC2626",
@@ -375,24 +540,46 @@ PRESET_THEMES = [
         "id": "amethyst_phantom",
         "name_cn": "\u7d2b\u6676\u9b45\u5f71",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#D8B4FE", "#A855F7", "#7E22CE", "#3B0764",
-            "#241438", "#170B26", "#0B0414", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#9429FF",
+            "#7B19E6",
+            "#5A08A5",
+            "#290052",
+            "#423A4A",
+            "#31293A",
+            "#211929",
+            "#000000",
         ],
-        "daimon_judogi": ["#F3E8FF", "#E9D5FF", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
+        "daimon_judogi": ["#F3E8FF", "#D8B4FE", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
         "daimon_headband": "#F0ABFC",
-        "chang_uniform": ["#F3E8FF", "#E9D5FF", "#A855F7", "#6B21A8", "#3B0764"],
+        "chang_uniform": ["#F3E8FF", "#D8B4FE", "#A855F7", "#6B21A8", "#3B0764"],
         "chang_ball": ["#C084FC", "#581C87"],
     },
     {
         "id": "ocean_tempest",
         "name_cn": "\u6012\u6d77\u72c2\u6d9b",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E0F2FE", "#BAE6FD",
-            "#38BDF8", "#0284C7", "#075985", "#082F49",
-            "#172554", "#0F172A", "#020617", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#197BA5",
+            "#10638C",
+            "#084263",
+            "#001929",
+            "#3A4242",
+            "#293131",
+            "#192121",
+            "#000000",
         ],
         "daimon_judogi": ["#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1", "#082F49"],
         "daimon_headband": "#FFFFFF",
@@ -403,24 +590,46 @@ PRESET_THEMES = [
         "id": "valkyrie_silver",
         "name_cn": "\u767d\u94f6\u88c1\u51b3",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E2E8F0", "#94A3B8",
-            "#FFFFFF", "#E2E8F0", "#94A3B8", "#475569",
-            "#F8FAFC", "#E2E8F0", "#CBD5E1", "#1E293B",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#5A636B",
+            "#4A5252",
+            "#31313A",
+            "#101919",
+            "#3A4242",
+            "#293131",
+            "#192121",
+            "#000000",
         ],
-        "daimon_judogi": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
+        "daimon_judogi": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#334155"],
         "daimon_headband": "#F59E0B",
-        "chang_uniform": ["#FFFFFF", "#F8FAFC", "#CBD5E1", "#94A3B8", "#334155"],
+        "chang_uniform": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
         "chang_ball": ["#F8FAFC", "#64748B"],
     },
     {
         "id": "crimson_dragon",
         "name_cn": "\u8840\u9f99\u7834\u519b",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#EF4444", "#DC2626", "#991B1B", "#450A0A",
-            "#2B1D1D", "#1A1010", "#0D0808", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#EF2929",
+            "#CE1919",
+            "#940808",
+            "#4A0000",
+            "#4A3A3A",
+            "#3A2929",
+            "#291919",
+            "#000000",
         ],
         "daimon_judogi": ["#FCA5A5", "#EF4444", "#DC2626", "#B91C1C", "#7F1D1D", "#450A0A"],
         "daimon_headband": "#FBBF24",
@@ -431,10 +640,21 @@ PRESET_THEMES = [
         "id": "solar_flare",
         "name_cn": "\u65e5\u8037\u98ce\u66b4",
         "colors": [
-            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
-            "#FFFFFF", "#E5E7EB", "#9CA3AF",
-            "#FDE047", "#EAB308", "#CA8A04", "#713F12",
-            "#292524", "#1C1917", "#0C0A09", "#000000",
+            "#FFF7B5",
+            "#F7C584",
+            "#EF945A",
+            "#B55229",
+            "#F7F7FF",
+            "#BDBDC5",
+            "#737B84",
+            "#7B6310",
+            "#635208",
+            "#423100",
+            "#191900",
+            "#424231",
+            "#313121",
+            "#212110",
+            "#000000",
         ],
         "daimon_judogi": ["#FEF08A", "#FDE047", "#FACC15", "#EAB308", "#A16207", "#422006"],
         "daimon_headband": "#DC2626",
@@ -508,6 +728,16 @@ def hex_to_rgb5(hex_code: str) -> Tuple[int, int, int]:
         return (0, 0, 0)
 
 
+
+def lspc2_to_hex(w: int) -> str:
+    """Convert 16-bit Neo-Geo LSPC2 word to #RRGGBB hex code."""
+    r5, g5, b5, _ = decode_lspc2(w)
+    r = round(r5 * 255 / 31)
+    g = round(g5 * 255 / 31)
+    b = round(b5 * 255 / 31)
+    return f"#{r:02X}{g:02X}{b:02X}"
+
+
 THEME_RAMPS: Dict[str, Dict[str, Any]] = {
     "void_shadow": {
         "primary": ["#A7F3D0", "#34D399", "#10B981", "#059669", "#047857", "#064E3B"],
@@ -534,7 +764,7 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
         "dark": ["#0F172A", "#080D1A", "#02040A"],
     },
     "paladin_gold": {
-        "primary": ["#FFFFFF", "#F1F5F9", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B"],
+        "primary": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#334155"],
         "accent": ["#FEF08A", "#FACC15", "#CA8A04", "#854D0E"],
         "light": ["#FFFFFF", "#F8FAFC"],
         "dark": ["#1E293B", "#0F172A", "#020617"],
@@ -600,10 +830,10 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
         "dark": ["#1E1B4B", "#0F0E2A", "#000000"],
     },
     "amethyst_phantom": {
-        "primary": ["#F3E8FF", "#E9D5FF", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
+        "primary": ["#F3E8FF", "#D8B4FE", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
         "accent": ["#FDF4FF", "#F0ABFC", "#C026D3", "#701A75"],
         "light": ["#FAF5FF", "#F3E8FF"],
-        "dark": ["#1E0B36", "#0E041A", "#000000"],
+        "dark": ["#3B1754", "#220D33", "#11061C"],
     },
     "ocean_tempest": {
         "primary": ["#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1", "#082F49"],
@@ -612,7 +842,7 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
         "dark": ["#0F172A", "#020617", "#000000"],
     },
     "valkyrie_silver": {
-        "primary": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
+        "primary": ["#FFFFFF", "#E2E8F0", "#CBD5E1", "#94A3B8", "#64748B", "#334155"],
         "accent": ["#FEF08A", "#FACC15", "#EAB308", "#854D0E"],
         "light": ["#FFFFFF", "#F8FAFC"],
         "dark": ["#334155", "#1E293B", "#0F172A"],
@@ -632,6 +862,264 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
 }
 
 
+# Disjoint-union semantic slot schema for all 36 characters in KOF97 (0x00..0x23).
+# Ensures clean color blocking, strict luminance ranking, deep dark anchor, and sharp outlines.
+CHARACTER_PALETTE_SCHEMA: Dict[int, Dict[str, List[int]]] = {
+    0x00: {"skin": [1, 2, 3, 4], "white_trim": [0], "hair": [5, 6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x01: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "dark_anchor": [6, 7, 8, 9], "contour": [10], "accent": [11, 12, 13, 14]},
+    0x02: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9, 10], "accent": [11], "white_trim": [12, 13], "contour": [14]},
+    0x03: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8], "primary": [9, 10], "accent": [11, 12], "white_trim": [13], "contour": [14]},
+    0x04: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9, 11], "accent": [10, 12, 13], "contour": [14]},
+    0x05: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "accent": [8, 9], "white_trim": [10, 11, 12, 13], "contour": [14]},
+    0x06: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9, 10], "contour": [11], "accent": [12, 13, 14]},
+    0x07: {"skin": [0, 1, 2, 3, 4], "accent": [5], "primary": [6, 7, 8, 9], "white_trim": [10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x08: {"accent": [0], "skin": [1, 2, 3, 4, 5], "white_trim": [6, 7, 8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x09: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "accent": [12, 13, 14]},
+    0x0A: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x0B: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x0C: {"skin": [0, 1, 2, 3, 4], "accent": [5, 6, 7, 8], "white_trim": [9, 10, 11], "primary": [12, 13, 14]},
+    0x0D: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x0E: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x0F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
+    0x10: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "white_trim": [8, 9, 10], "dark_anchor": [11, 12], "accent": [13], "contour": [14]},
+    0x11: {"primary": [0, 1, 2, 3], "accent": [4, 5], "white_trim": [6, 7, 8, 9], "skin": [10, 11, 12, 13, 14]},
+    0x12: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "contour": [13], "dark_anchor": [14]},
+    0x13: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11]},
+    0x14: {"skin": [0, 1, 2, 3], "primary": [4, 5, 6, 7, 8], "accent": [9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x15: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
+    0x16: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "dark_anchor": [13, 14]},
+    0x17: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
+    0x18: {"skin": [0, 1, 2, 3, 4], "accent": [5, 6, 7], "dark_anchor": [8, 9, 10, 11, 12], "contour": [13], "white_trim": [14]},
+    0x19: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "accent": [8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x1A: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "white_trim": [14]},
+    0x1B: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "accent": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
+    0x1C: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "hair": [6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x1D: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "accent": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
+    0x1E: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "accent": [12, 13, 14]},
+    0x1F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
+    0x20: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "dark_anchor": [13, 14]},
+    0x21: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
+    0x22: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9, 10, 11], "accent": [12, 13, 14]},
+    0x23: {"skin": [1, 2, 3, 4], "white_trim": [0], "hair": [5, 6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+}
+
+
+# Identity hues for the 20 skins. Primary dyes the costume; accent dyes
+# headbands, ribbons and metal. Silver themes stay below the chroma cutoff
+# so they desaturate instead of becoming a vivid tint of gray's hue.
+THEME_KEYS: Dict[str, Tuple[str, str]] = {
+    "crimson_shura": ("#DC2626", "#F8FAFC"),
+    "azure_thunder": ("#0284C7", "#FDE047"),
+    "paladin_gold": ("#EAB308", "#DC2626"),
+    "void_shadow": ("#10B981", "#FDE047"),
+    "cyber_neon": ("#E11D48", "#22D3EE"),
+    "magma_inferno": ("#EA580C", "#EF4444"),
+    "imperial_gold": ("#EAB308", "#DC2626"),
+    "sakura_frost": ("#DB2777", "#F8FAFC"),
+    "aurora_mirage": ("#7E22CE", "#22D3EE"),
+    "toxic_hazard": ("#65A30D", "#F8FAFC"),
+    "abyssal_frost": ("#0284C7", "#F8FAFC"),
+    "phoenix_nirvana": ("#FF4500", "#FDE047"),
+    "emerald_lotus": ("#059669", "#34D399"),
+    "shadow_ninja": ("#94A3B8", "#EF4444"),
+    "sunset_overdrive": ("#EA580C", "#DC2626"),
+    "amethyst_phantom": ("#A855F7", "#E879F9"),
+    "ocean_tempest": ("#0284C7", "#F8FAFC"),
+    "valkyrie_silver": ("#CBD5E1", "#F59E0B"),
+    "crimson_dragon": ("#DC2626", "#FBBF24"),
+    "solar_flare": ("#EAB308", "#DC2626"),
+}
+
+
+def _rgb5_to_hsv(r5: int, g5: int, b5: int) -> Tuple[float, float, float]:
+    """Convert Neo-Geo 5-bit RGB to HSV. Hue is degrees, S and V are 0..1."""
+    rf, gf, bf = r5 / 31.0, g5 / 31.0, b5 / 31.0
+    mx = max(rf, gf, bf)
+    mn = min(rf, gf, bf)
+    span = mx - mn
+    if span <= 1e-8 or mx <= 1e-8:
+        hue = 0.0
+        sat = 0.0
+    else:
+        if mx == rf:
+            hue = (60.0 * ((gf - bf) / span) + 360.0) % 360.0
+        elif mx == gf:
+            hue = (60.0 * ((bf - rf) / span) + 120.0) % 360.0
+        else:
+            hue = (60.0 * ((rf - gf) / span) + 240.0) % 360.0
+        sat = span / mx
+    return hue, sat, mx
+
+
+def _hsv_to_rgb_unit(hue: float, sat: float, val: float) -> Tuple[float, float, float]:
+    """Convert HSV (hue degrees, S/V 0..1) to linear RGB in 0..1."""
+    sat = min(1.0, max(0.0, sat))
+    val = min(1.0, max(0.0, val))
+    sector = (hue % 360.0) / 60.0
+    chroma = val * sat
+    mid = chroma * (1.0 - abs((sector % 2.0) - 1.0))
+    base = val - chroma
+    idx = int(sector) % 6
+    if idx == 0:
+        rf, gf, bf = chroma, mid, 0.0
+    elif idx == 1:
+        rf, gf, bf = mid, chroma, 0.0
+    elif idx == 2:
+        rf, gf, bf = 0.0, chroma, mid
+    elif idx == 3:
+        rf, gf, bf = 0.0, mid, chroma
+    elif idx == 4:
+        rf, gf, bf = mid, 0.0, chroma
+    else:
+        rf, gf, bf = chroma, 0.0, mid
+    return rf + base, gf + base, bf + base
+
+
+def _unit_luma(rf: float, gf: float, bf: float) -> float:
+    """Perceived luma of a 0..1 RGB triple."""
+    return 0.299 * rf + 0.587 * gf + 0.114 * bf
+
+
+def _hex_hsv(hex_code: str) -> Tuple[float, float, float]:
+    """HSV of a #RRGGBB swatch, quantized the same way as a palette word."""
+    r5, g5, b5 = hex_to_rgb5(hex_code)
+    return _rgb5_to_hsv(r5, g5, b5)
+
+
+def theme_hsv(theme_id: str) -> Tuple[float, float, float, float]:
+    """Return (primary_hue, primary_sat, accent_hue, accent_sat) for a skin."""
+    primary_hex, accent_hex = THEME_KEYS[theme_id]
+    ph, ps, _ = _hex_hsv(primary_hex)
+    ah, a_sat, _ = _hex_hsv(accent_hex)
+    return ph, ps, ah, a_sat
+
+
+def _v_for_luma(hue: float, sat: float, target_y: float, cap: bool) -> float:
+    """
+    Pick V so HSV luma lands on target_y.
+    cap=True never exceeds target_y (pigment must not grow a highlight).
+    """
+    def luma_at(val: float) -> float:
+        rf, gf, bf = _hsv_to_rgb_unit(hue, sat, val)
+        return _unit_luma(rf, gf, bf)
+
+    if cap:
+        if luma_at(0.0) >= target_y:
+            return 0.0
+        if luma_at(1.0) <= target_y:
+            return 1.0
+        lo, hi = 0.0, 1.0
+        for _ in range(20):
+            mid = (lo + hi) * 0.5
+            if luma_at(mid) <= target_y:
+                lo = mid
+            else:
+                hi = mid
+        return lo
+
+    lo, hi = 0.0, 1.0
+    for _ in range(20):
+        mid = (lo + hi) * 0.5
+        if luma_at(mid) < target_y:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) * 0.5
+
+
+def recolor_match_shade(
+    r5: int,
+    g5: int,
+    b5: int,
+    hue: float,
+    theme_sat: float,
+    keep_value: bool = False,
+) -> Tuple[int, int, int]:
+    """
+    Move a palette entry onto a theme hue without inventing a new shade.
+
+    SNK cloth is shaded in the pixel art. A natural recolor keeps that
+    entry's luma and saturation, and only changes hue. Saturated pigment
+    (Iori red) is not allowed to get brighter, so it cannot turn into a
+    pastel highlight. Soft cloth (Daimon gi, Kyo uniform) keeps its even
+    luma steps, including a light top that stays pale and a shadow that
+    stays a color instead of falling to black. Outlines and pure white
+    cloth are left alone.
+    """
+    hue_now, sat, val = _rgb5_to_hsv(r5, g5, b5)
+    if val <= 0.06:
+        return r5, g5, b5
+    if sat <= 0.12 and val >= 0.90:
+        return r5, g5, b5
+
+    rf, gf, bf = r5 / 31.0, g5 / 31.0, b5 / 31.0
+    target_y = _unit_luma(rf, gf, bf)
+    del hue_now
+
+    if theme_sat < 0.22:
+        # White accents keep the sprite's value, so a red headband becomes
+        # white instead of a mid gray. Silver costumes still match luma below.
+        if keep_value:
+            use_sat = 0.04 if theme_sat < 0.12 else min(sat, 0.16)
+            use_v = val
+        else:
+            use_sat = min(sat, 0.16)
+            use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
+            if _unit_luma(*_hsv_to_rgb_unit(hue, use_sat, 1.0)) + 1e-4 < target_y:
+                slo, shi = 0.0, use_sat
+                for _ in range(12):
+                    mid = (slo + shi) * 0.5
+                    if _unit_luma(*_hsv_to_rgb_unit(hue, mid, 1.0)) < target_y:
+                        shi = mid
+                    else:
+                        slo = mid
+                use_sat = slo
+                use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
+    elif sat >= 0.50:
+        # Pigment: hold saturation, never brighter than the sprite shade.
+        use_sat = sat
+        use_v = _v_for_luma(hue, use_sat, target_y, cap=True)
+    else:
+        # Soft cloth: match luma, hold saturation, ease S only if this hue
+        # cannot reach the original brightness (a saturated blue is darker
+        # than a saturated yellow at the same value).
+        use_sat = sat
+        if _unit_luma(*_hsv_to_rgb_unit(hue, use_sat, 1.0)) + 1e-4 < target_y:
+            slo, shi = 0.0, use_sat
+            for _ in range(12):
+                mid = (slo + shi) * 0.5
+                if _unit_luma(*_hsv_to_rgb_unit(hue, mid, 1.0)) < target_y:
+                    shi = mid
+                else:
+                    slo = mid
+            use_sat = slo
+        use_v = _v_for_luma(hue, use_sat, target_y, cap=False)
+
+    rf, gf, bf = _hsv_to_rgb_unit(hue, use_sat, use_v)
+    return (
+        min(31, max(0, int(round(rf * 31.0)))),
+        min(31, max(0, int(round(gf * 31.0)))),
+        min(31, max(0, int(round(bf * 31.0)))),
+    )
+
+
+def _paint_slot(
+    res: List[int],
+    source: List[int],
+    idx: int,
+    hue: float,
+    theme_sat: float,
+    keep_value: bool = False,
+) -> None:
+    """Recolor one palette word from source, keeping its shade."""
+    r5, g5, b5, _ = decode_lspc2(source[idx])
+    nr, ng, nb = recolor_match_shade(r5, g5, b5, hue, theme_sat, keep_value)
+    if (nr, ng, nb) == (r5, g5, b5):
+        res[idx] = source[idx]
+    else:
+        res[idx] = encode_lspc2(nr, ng, nb, dark=0)
+
+
 def generate_harmonious_character_palette(
     cid: int,
     theme_id: str,
@@ -639,9 +1127,12 @@ def generate_harmonious_character_palette(
     p2_clean: bytes,
 ) -> List[int]:
     """
-    Generate harmonious 15-word LSPC2 palette for any character and theme.
-    Preserves authentic skin tones and 3D luminance hierarchy to guarantee
-    clear color blocking, clean shading, and professional aesthetics.
+    Recolor a character with a theme hue while keeping SNK's original shade.
+
+    Each costume slot keeps the luma and saturation the sprite was drawn
+    with. Skin, white cloth, natural hair and outlines stay official.
+    Orochi Iori uses normal Iori's shade curve, because the official Orochi
+    ramp is a pastel highlight over a crushed shadow.
     """
     _, _, pal_idx = get_char_engine_info(cid)
     base_off = 0x483E + pal_idx * 8
@@ -649,73 +1140,46 @@ def generate_harmonious_character_palette(
     p2_addr = 0x2CFFF0 + pal_id * 32
     orig_words = list(struct.unpack(">16H", p2_clean[p2_addr : p2_addr + 32])[1:])
 
-    if theme_id == "classic":
+    if theme_id == "classic" or theme_id not in THEME_KEYS:
         return orig_words
 
-    theme = THEME_RAMPS.get(theme_id)
-    if not theme:
-        return orig_words
+    primary_h, primary_s, accent_h, accent_s = theme_hsv(theme_id)
 
-    # 1. Iori Yagami (0x1B) & Orochi Iori (0x1D UI / 0x1C Engine)
+    # Orochi Iori's official ramp is the glossy one. Both Iori forms take
+    # their shade from normal Iori, then the theme hue is applied.
+    source = orig_words
+    if cid == 0x1D or pal_idx == 0x1C:
+        iori_off = 0x483E + 0x1B * 8
+        iori_pid = struct.unpack(">H", p1_data[iori_off:iori_off + 2])[0]
+        iori_addr = 0x2CFFF0 + iori_pid * 32
+        source = list(struct.unpack(">16H", p2_clean[iori_addr:iori_addr + 32])[1:])
+
     if cid in (0x1B, 0x1D) or pal_idx in (0x1B, 0x1C):
-        preset = next((t for t in PRESET_THEMES if t["id"] == theme_id), None)
-        if preset and "colors" in preset:
-            return [hex_to_lspc2(h) for h in preset["colors"]]
+        res = list(source)
+        for idx in (7, 8, 9, 10, 11, 12, 13):
+            _paint_slot(res, source, idx, primary_h, primary_s)
+        res[14] = 0x0000
+        return res
 
-    # 2. Goro Daimon (0x02):
-    # W1..W5: Natural muscle skin tones (100% authentic SNK shading)
-    # W6..W11: Judogi 6-step gradient ramp
-    # W12: Headband accent
-    # W13..W14: Light clogs / straps
-    # W15: Black belt & outlines
-    if cid == 0x02:
-        preset = next((t for t in PRESET_THEMES if t["id"] == theme_id), None)
-        if preset and "daimon_judogi" in preset:
-            res = list(orig_words[0:5])
-            for h in preset["daimon_judogi"]:
-                res.append(encode_lspc2(*hex_to_rgb5(h)))
-            res.append(encode_lspc2(*hex_to_rgb5(preset["daimon_headband"])))
-            res.append(encode_lspc2(31, 31, 31, dark=0))
-            res.append(encode_lspc2(26, 26, 26, dark=0))
-            res.append(0x0000)
-            return res
+    schema = CHARACTER_PALETTE_SCHEMA.get(cid)
+    if not schema:
+        return orig_words
 
-    # 3. Chang Koehan (0x13):
-    # W1..W5: Natural face and body skin tones
-    # W6..W10: Prison uniform 5-step gradient ramp
-    # W11..W12: Iron ball & heavy chains
-    # W13..W15: Natural dark beard & leather straps
-    if cid == 0x13:
-        preset = next((t for t in PRESET_THEMES if t["id"] == theme_id), None)
-        if preset and "chang_uniform" in preset:
-            res = list(orig_words[0:5])
-            for h in preset["chang_uniform"]:
-                res.append(encode_lspc2(*hex_to_rgb5(h)))
-            for h in preset["chang_ball"]:
-                res.append(encode_lspc2(*hex_to_rgb5(h)))
-            res.extend(orig_words[12:15])
-            return res
-
-    # 4. Universal character synthesis:
-    # Preserve skin tones, keep dark outlines and white details,
-    # map non-skin garment words to theme primary ramp preserving relative luminance.
     res = list(orig_words)
-    non_skin_indices = []
-    for i in range(15):
-        w = orig_words[i]
-        r, g, b, _ = decode_lspc2(w)
-        lum = 0.299 * r + 0.587 * g + 0.114 * b
-        is_skin = (r >= g >= b and r >= 10 and r - b >= 3)
-        if not is_skin and lum > 2 and not (lum >= 29 and abs(r - g) <= 2 and abs(g - b) <= 2):
-            non_skin_indices.append((i, lum))
-
-    non_skin_indices.sort(key=lambda x: x[1], reverse=True)
-    n_ramp = len(theme["primary"])
-    for rank, (idx, _) in enumerate(non_skin_indices):
-        ramp_idx = min(round(rank * (n_ramp - 1) / max(1, len(non_skin_indices) - 1)), n_ramp - 1)
-        hex_c = theme["primary"][ramp_idx]
-        res[idx] = encode_lspc2(*hex_to_rgb5(hex_c))
-
+    # Skin, white cloth and natural hair stay on the official words.
+    # Costume groups take the theme hue at the original shade.
+    if "primary" in schema:
+        for idx in schema["primary"]:
+            _paint_slot(res, orig_words, idx, primary_h, primary_s)
+    if "dark_anchor" in schema:
+        for idx in schema["dark_anchor"]:
+            _paint_slot(res, orig_words, idx, primary_h, primary_s)
+    if "accent" in schema:
+        for idx in schema["accent"]:
+            _paint_slot(res, orig_words, idx, accent_h, accent_s, keep_value=True)
+    if "contour" in schema:
+        for idx in schema["contour"]:
+            res[idx] = 0x0000
     return res
 
 
@@ -856,20 +1320,24 @@ def sync_character_portraits(
             # HUD avatar: Words 6..8 uniform
             p2_data[b2 + 12: b2 + 18] = struct.pack(">3H", *u_words[:3])
 
-    # 4. Universal 36-character portrait synchronization across all 4 button slots
+    # 4. Universal portraits keep the artwork's own shade and only take the hue.
     else:
+        if theme_id not in THEME_KEYS:
+            return
+        primary_h, primary_s, _, _ = theme_hsv(theme_id)
         for btn_idx in range(4):
             for slot_off in (13, 14, 15):
                 pal_id = base_pid + slot_off + btn_idx * 16
                 addr = 0x2CFFF0 + pal_id * 32
                 p_words = list(struct.unpack(">16H", p2_clean[addr:addr + 32]))
                 for i in range(1, 16):
-                    orig_w = p_words[i]
-                    r, g, b, _ = decode_lspc2(orig_w)
+                    r, g, b, _ = decode_lspc2(p_words[i])
                     is_skin = (r >= g >= b and r >= 10 and r - b >= 3)
-                    lum = 0.299 * r + 0.587 * g + 0.114 * b
-                    if not is_skin and 2 < lum < 28:
-                        p_words[i] = lspc_words[min(i - 1, len(lspc_words) - 1)]
+                    if is_skin:
+                        continue
+                    nr, ng, nb = recolor_match_shade(r, g, b, primary_h, primary_s)
+                    if (nr, ng, nb) != (r, g, b):
+                        p_words[i] = encode_lspc2(nr, ng, nb, dark=0)
                 p2_data[addr:addr + 32] = struct.pack(">16H", *p_words)
 
 
@@ -1098,35 +1566,46 @@ class KOF97BridgeApi:
     def set_character_skin(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Set skin for a single character or bulk set for all characters.
-        Maintains independent per-character entries!
+        Maintains independent per-character entries with computed hex colors!
         """
         char_id = params.get("char_id", self._char_id)
         theme_id = params.get("theme_id", "classic")
         scope = params.get("scope", self._scope)
-        custom_colors = params.get("colors")
 
-        if not custom_colors or not isinstance(custom_colors, list):
-            preset = next((t for t in PRESET_THEMES if t["id"] == theme_id), PRESET_THEMES[0])
-            custom_colors = list(preset["colors"])
+        p1_path = self._workdir / "p1_be.bin"
+        p2_path = self._workdir / "p2_be.bin"
+        p1_data = p1_path.read_bytes() if p1_path.exists() else None
+        with zipfile.ZipFile(self._source_zip) as z_src:
+            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+            if p1_data is None:
+                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
 
         if scope == "ALL":
-            for cid in self._character_skins:
+            for char_info in CHARACTER_ROSTER:
+                cid = char_info["id"]
+                lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
                 self._character_skins[cid] = {
                     "themeId": theme_id,
-                    "colors": list(custom_colors),
+                    "colors": [lspc2_to_hex(w) for w in lspc_words],
                 }
             async_log(f"\u5df2\u5168\u91cf\u8bbe\u7f6e\u5168\u5458 36 \u89d2\u8272\u76ae\u80a4\u4e3a: \u3010{theme_id}\u3011", "INFO")
         else:
+            lspc_words = generate_harmonious_character_palette(char_id, theme_id, p1_data, p2_clean)
+            hex_colors = [lspc2_to_hex(w) for w in lspc_words]
             self._character_skins[char_id] = {
                 "themeId": theme_id,
-                "colors": list(custom_colors),
+                "colors": hex_colors,
             }
             char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
             cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
             async_log(f"\u5df2\u4fdd\u5b58\u89d2\u8272\u3010{cname}\u3011\u7684\u72ec\u7acb\u76ae\u80a4\u914d\u7f6e: \u3010{theme_id}\u3011", "INFO")
 
         self._save_config_to_disk()
-        return {"success": True}
+        return {
+            "success": True,
+            "character_skins": {str(k): v for k, v in self._character_skins.items()},
+        }
+
 
     def update_scope(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Update target application scope ('SINGLE' or 'ALL')."""
@@ -1180,6 +1659,84 @@ class KOF97BridgeApi:
         async_log(f"\u7729\u6655\u6301\u7eed\u65f6\u95f4\u5df2\u8bbe\u7f6e\u4e3a: \u3010{self._dizzy_duration:.1f} \u79d2\u3011", "INFO")
         self._save_config_to_disk()
         return {"success": True}
+
+    def randomize_other_skins(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Randomize skins for all characters EXCLUDING Iori (0x1B) and Orochi Iori (0x1D).
+        Maintains user-defined skin for Iori while giving every other fighter a distinct theme.
+        """
+        import random
+        available_themes = [t for t in PRESET_THEMES if t["id"] != "classic"]
+        if not available_themes:
+            return {"success": False, "error": "No custom themes available"}
+
+        p1_path = self._workdir / "p1_be.bin"
+        p2_path = self._workdir / "p2_be.bin"
+        p1_data = p1_path.read_bytes() if p1_path.exists() else None
+        with zipfile.ZipFile(self._source_zip) as z_src:
+            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+            if p1_data is None:
+                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
+
+        randomized_count = 0
+        # Shuffle pool to minimize duplicate consecutive themes
+        theme_pool = list(available_themes)
+        random.shuffle(theme_pool)
+        pool_idx = 0
+
+        for char_info in CHARACTER_ROSTER:
+            cid = char_info["id"]
+            # Exclude Iori (0x1B) and Orochi Iori (0x1D) - user defined!
+            if cid in (0x1B, 0x1D):
+                continue
+
+            chosen_theme = theme_pool[pool_idx % len(theme_pool)]
+            pool_idx += 1
+            theme_id = chosen_theme["id"]
+
+            lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
+            hex_colors = [lspc2_to_hex(w) for w in lspc_words]
+            self._character_skins[cid] = {
+                "themeId": theme_id,
+                "colors": hex_colors,
+            }
+            randomized_count += 1
+
+        self._save_config_to_disk()
+        async_log(f"\u5df2\u4e00\u952e\u968f\u673a\u5176\u4f59 {randomized_count} \u4f4d\u89d2\u8272\u76ae\u80a4\uff01\u516b\u795e(\u66b4\u8d70\u516b\u795e)\u4fdd\u6301\u81ea\u5b9a\u4e49\u3002", "SUCCESS")
+        return {
+            "success": True,
+            "count": randomized_count,
+            "character_skins": {str(k): v for k, v in self._character_skins.items()},
+        }
+
+    def reset_all_skins(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Reset all 36 characters to their authentic original SNK classic skins.
+        """
+        p1_path = self._workdir / "p1_be.bin"
+        p2_path = self._workdir / "p2_be.bin"
+        p1_data = p1_path.read_bytes() if p1_path.exists() else None
+        with zipfile.ZipFile(self._source_zip) as z_src:
+            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+            if p1_data is None:
+                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
+
+        for char_info in CHARACTER_ROSTER:
+            cid = char_info["id"]
+            lspc_words = generate_harmonious_character_palette(cid, "classic", p1_data, p2_clean)
+            hex_colors = [lspc2_to_hex(w) for w in lspc_words]
+            self._character_skins[cid] = {
+                "themeId": "classic",
+                "colors": hex_colors,
+            }
+
+        self._save_config_to_disk()
+        async_log("\u5df2\u5c06\u5168\u5458 36 \u4f4d\u89d2\u8272\u76ae\u80a4\u5168\u90e8\u91cd\u7f6e\u4e3a\u5b98\u65b9\u539f\u7248\u7ecf\u5178\uff01", "SUCCESS")
+        return {
+            "success": True,
+            "character_skins": {str(k): v for k, v in self._character_skins.items()},
+        }
 
     def save_skin(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Save all characters skin configurations and combat settings to disk."""

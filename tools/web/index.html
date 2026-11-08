@@ -957,6 +957,18 @@
             <button data-v="ALL">全员</button>
           </div>
 
+          <!-- Quick Action Buttons: Randomize Others & Reset All -->
+          <div class="skin-actions-bar" style="display:flex;gap:10px;margin-top:12px;z-index:10;">
+            <button class="btn outline skin-action-btn" id="btnRandomOthers" title="保持八神(暴走八神)当前自定皮肤不变，其余34位角色一键随机分配精选皮肤">
+              <svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:5px;" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="8" r="1.5"/><circle cx="16" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="8" cy="16" r="1.5"/><circle cx="16" cy="16" r="1.5"/></svg>
+              其余角色一键随机
+            </button>
+            <button class="btn outline skin-action-btn" id="btnResetAll" title="一键将全员36位角色皮肤全部重置恢复为官方原版经典">
+              <svg style="width:14px;height:14px;fill:currentColor;vertical-align:-2px;margin-right:5px;" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+              重置原皮肤
+            </button>
+          </div>
+
           <!-- Active Character & Theme Banner -->
           <div class="active-char-banner">
             <span class="cname" id="bannerCharName">八神庵</span>
@@ -1186,160 +1198,160 @@ const THEMES = [
     name: "血色修罗",
     shortName: "修罗",
     sub: "特瑞风极爽 · 鲜红白T曜黑",
-    coat: "#242424", shirt: "#FFFFFF", hair: "#FF2A2A", pants: "#DC2626", shoes: "#141414",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FF2A2A","#DC2626","#991B1B","#450A0A","#383838","#242424","#141414","#000000"]
+    coat: "#4A3A3A", shirt: "#F7F7FF", hair: "#EF2929", pants: "#CE1919", shoes: "#291919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#EF2929","#CE1919","#940808","#4A0000","#4A3A3A","#3A2929","#291919","#000000"]
   },
   {
     id: "azure_thunder",
     name: "苍雷疾电",
     shortName: "苍雷",
     sub: "牛仔蓝电光 · 纯净白衬深蓝",
-    coat: "#0F172A", shirt: "#FFFFFF", hair: "#38BDF8", pants: "#0284C7", shoes: "#080D1A",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#38BDF8","#0284C7","#0369A1","#082F49","#1E293B","#0F172A","#080D1A","#000000"]
+    coat: "#3A4242", shirt: "#F7F7FF", hair: "#197BA5", pants: "#10638C", shoes: "#192121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#197BA5","#10638C","#084263","#001929","#3A4242","#293131","#192121","#000000"]
   },
   {
     id: "paladin_gold",
     name: "圣殿骑士",
     shortName: "圣殿",
     sub: "纯白圣裁风衣 · 璀璨辉金",
-    coat: "#E2E8F0", shirt: "#FFFFFF", hair: "#FFF066", pants: "#F59E0B", shoes: "#475569",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E2E8F0","#94A3B8","#FFF066","#F59E0B","#B45309","#602800","#FFFFFF","#E2E8F0","#94A3B8","#000000"]
+    coat: "#424231", shirt: "#F7F7FF", hair: "#7B6310", pants: "#635208", shoes: "#212110",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#7B6310","#635208","#423100","#191900","#424231","#313121","#212110","#000000"]
   },
   {
     id: "void_shadow",
     name: "虚空大蛇",
     shortName: "虚空",
     sub: "高贵翡翠玉石 · 曜石暗夜黑",
-    coat: "#18181B", shirt: "#FFFFFF", hair: "#34D399", pants: "#10B981", shoes: "#09090B",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#34D399","#10B981","#059669","#064E3B","#27272A","#18181B","#09090B","#000000"]
+    coat: "#314242", shirt: "#F7F7FF", hair: "#198463", pants: "#086B52", shoes: "#102121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#198463","#086B52","#004A31","#002119","#314242","#213131","#102121","#000000"]
   },
   {
     id: "cyber_neon",
     name: "赛博霓虹",
     shortName: "霓虹",
     sub: "荧光粉红发 · 电光青蓝内衬",
-    coat: "#1E1B4B", shirt: "#67E8F9", hair: "#F43F5E", pants: "#E11D48", shoes: "#110E38",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#67E8F9","#06B6D4","#0891B2","#F43F5E","#E11D48","#BE123C","#700824","#2E1065","#1E0842","#0F0324","#000000"]
+    coat: "#4A3A3A", shirt: "#F7F7FF", hair: "#DE214A", pants: "#C5193A", shoes: "#291919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#DE214A","#C5193A","#8C0821","#420010","#4A3A3A","#3A2929","#291919","#000000"]
   },
   {
     id: "magma_inferno",
     name: "熔岩地狱",
     shortName: "熔岩",
     sub: "活力烈焰赤橙 · 玄岩炭黑",
-    coat: "#27272A", shirt: "#FFFFFF", hair: "#FF7A00", pants: "#EA580C", shoes: "#18181B",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FF7A00","#EA580C","#C2410C","#6B1D03","#333338","#202024","#101014","#000000"]
+    coat: "#423A3A", shirt: "#F7F7FF", hair: "#A54A19", pants: "#8C3A10", shoes: "#211919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#A54A19","#8C3A10","#5A2908","#291000","#423A3A","#312929","#211919","#000000"]
   },
   {
     id: "imperial_gold",
     name: "帝王战尊",
     shortName: "帝尊",
     sub: "帝皇纯正亮金 · 霸气玄黑",
-    coat: "#1C1917", shirt: "#FFFFFF", hair: "#FFDE17", pants: "#E5B800", shoes: "#0C0A09",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FFDE17","#E5B800","#B38600","#594000","#2A2725","#1C1917","#0C0A09","#000000"]
+    coat: "#424231", shirt: "#F7F7FF", hair: "#7B6310", pants: "#635208", shoes: "#212110",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#7B6310","#635208","#423100","#191900","#424231","#313121","#212110","#000000"]
   },
   {
     id: "sakura_frost",
     name: "樱落吹雪",
     shortName: "樱雪",
     sub: "清雅落樱明粉 · 深紫罗兰",
-    coat: "#2E1065", shirt: "#FFFFFF", hair: "#F472B6", pants: "#DB2777", shoes: "#1E0842",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#F472B6","#DB2777","#9D174D","#500724","#3B0764","#24043E","#130122","#000000"]
+    coat: "#4A3A42", shirt: "#F7F7FF", hair: "#D6216B", pants: "#BD105A", shoes: "#291921",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#D6216B","#BD105A","#84083A","#420019","#4A3A42","#3A2931","#291921","#000000"]
   },
   {
     id: "aurora_mirage",
     name: "极光幻影",
     shortName: "极光",
     sub: "魔幻尊贵魅紫 · 湖光青绿",
-    coat: "#1E123F", shirt: "#5EEAD4", hair: "#A855F7", pants: "#7E22CE", shoes: "#120929",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#5EEAD4","#0D9488","#075985","#A855F7","#7E22CE","#581C87","#2E0A4E","#1E1B4B","#110E38","#07051A","#000000"]
+    coat: "#423A4A", shirt: "#F7F7FF", hair: "#9429FF", pants: "#8419DE", shoes: "#211929",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#9429FF","#8419DE","#5A08A5","#290052","#423A4A","#31293A","#211929","#000000"]
   },
   {
     id: "toxic_hazard",
     name: "剧毒酸蚀",
     shortName: "剧毒",
     sub: "荧光烈柠亮绿 · 纯黑曜石风衣",
-    coat: "#1A1A1A", shirt: "#FFFFFF", hair: "#A3E635", pants: "#65A30D", shoes: "#0A0A0A",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#A3E635","#65A30D","#3F6212","#143503","#262626","#171717","#0A0A0A","#000000"]
+    coat: "#3A4231", shirt: "#F7F7FF", hair: "#4A7B10", pants: "#3A6308", shoes: "#192110",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#4A7B10","#3A6308","#294200","#101900","#3A4231","#293121","#192110","#000000"]
   },
   {
     id: "abyssal_frost",
     name: "\u6df1\u6e0a\u5bd2\u51b0",
     shortName: "\u5bd2\u51b0",
     sub: "\u6781\u5730\u5bd2\u971c\u00b7\u6df1\u6d77\u51b0\u9b44",
-    coat: "#1E293B", shirt: "#FFFFFF", hair: "#38BDF8", pants: "#0284C7", shoes: "#020617",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E0F2FE","#BAE6FD","#7DD3FC","#38BDF8","#0284C7","#0C4A6E","#1E293B","#0F172A","#020617","#000000"]
+    coat: "#3A4242", shirt: "#F7F7FF", hair: "#197BA5", pants: "#10638C", shoes: "#192121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#197BA5","#10638C","#084263","#001929","#3A4242","#293131","#192121","#000000"]
   },
   {
     id: "phoenix_nirvana",
     name: "\u51e4\u821e\u6d85\u69c3",
     shortName: "\u51e4\u821e",
     sub: "\u70c8\u7130\u6731\u96c0\u00b7\u91d1\u7fbd\u6d85\u69c3",
-    coat: "#262626", shirt: "#FFFFFF", hair: "#FFA500", pants: "#DC143C", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FFA500","#FF4500","#DC143C","#8B0000","#262626","#1A1A1A","#0D0D0D","#000000"]
+    coat: "#4A3A3A", shirt: "#F7F7FF", hair: "#B54221", pants: "#9C3110", shoes: "#291919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#B54221","#9C3110","#6B2108","#311000","#4A3A3A","#3A2929","#291919","#000000"]
   },
   {
     id: "emerald_lotus",
     name: "\u78a7\u7389\u9752\u83b2",
     shortName: "\u9752\u83b2",
     sub: "\u7fe1\u7fe0\u9f99\u9b42\u00b7\u9752\u83b2\u78a7\u7389",
-    coat: "#1F2937", shirt: "#FFFFFF", hair: "#6EE7B7", pants: "#10B981", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#6EE7B7","#10B981","#047857","#022C22","#1F2937","#111827","#030712","#000000"]
+    coat: "#314242", shirt: "#F7F7FF", hair: "#198463", pants: "#086B52", shoes: "#102121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#198463","#086B52","#004A31","#002119","#314242","#213131","#102121","#000000"]
   },
   {
     id: "shadow_ninja",
     name: "\u6697\u591c\u5f71\u5203",
     shortName: "\u5f71\u5203",
     sub: "\u949b\u94f6\u5e7d\u5f71\u00b7\u7384\u591c\u6697\u5203",
-    coat: "#27272A", shirt: "#FFFFFF", hair: "#E2E8F0", pants: "#94A3B8", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#E2E8F0","#94A3B8","#475569","#1E293B","#27272A","#18181B","#09090B","#000000"]
+    coat: "#3A4242", shirt: "#F7F7FF", hair: "#5A636B", pants: "#4A5252", shoes: "#192121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#5A636B","#4A5252","#31313A","#101919","#3A4242","#293131","#192121","#000000"]
   },
   {
     id: "sunset_overdrive",
     name: "\u66ae\u5149\u6d41\u706b",
     shortName: "\u66ae\u5149",
     sub: "\u5915\u9633\u7425\u73c0\u00b7\u66ae\u591c\u6d41\u706b",
-    coat: "#312E81", shirt: "#FFFFFF", hair: "#FDBA74", pants: "#FB923C", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FDBA74","#FB923C","#EA580C","#7C2D12","#312E81","#1E1B4B","#0F0E2A","#000000"]
+    coat: "#423A3A", shirt: "#F7F7FF", hair: "#A54A19", pants: "#8C3A10", shoes: "#211919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#A54A19","#8C3A10","#5A2908","#291000","#423A3A","#312929","#211919","#000000"]
   },
   {
     id: "amethyst_phantom",
     name: "\u7d2b\u6676\u9b45\u5f71",
     shortName: "\u7d2b\u6676",
     sub: "\u6697\u591c\u7d2b\u971e\u00b7\u7409\u7483\u9b45\u5f71",
-    coat: "#241438", shirt: "#FFFFFF", hair: "#D8B4FE", pants: "#A855F7", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#D8B4FE","#A855F7","#7E22CE","#3B0764","#241438","#170B26","#0B0414","#000000"]
+    coat: "#423A4A", shirt: "#F7F7FF", hair: "#9429FF", pants: "#7B19E6", shoes: "#211929",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#9429FF","#7B19E6","#5A08A5","#290052","#423A4A","#31293A","#211929","#000000"]
   },
   {
     id: "ocean_tempest",
     name: "\u6012\u6d77\u72c2\u6d9b",
     shortName: "\u6012\u6d77",
     sub: "\u6df1\u6d77\u6e54\u84dd\u00b7\u6d77\u738b\u72c2\u6d9b",
-    coat: "#172554", shirt: "#FFFFFF", hair: "#38BDF8", pants: "#0284C7", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E0F2FE","#BAE6FD","#38BDF8","#0284C7","#075985","#082F49","#172554","#0F172A","#020617","#000000"]
+    coat: "#3A4242", shirt: "#F7F7FF", hair: "#197BA5", pants: "#10638C", shoes: "#192121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#197BA5","#10638C","#084263","#001929","#3A4242","#293131","#192121","#000000"]
   },
   {
     id: "valkyrie_silver",
     name: "\u767d\u94f6\u88c1\u51b3",
     shortName: "\u88c1\u51b3",
     sub: "\u5973\u6b66\u795e\u94f6\u7ffc\u00b7\u5723\u94f6\u5929\u5149",
-    coat: "#F8FAFC", shirt: "#FFFFFF", hair: "#FFFFFF", pants: "#E2E8F0", shoes: "#1E293B",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E2E8F0","#94A3B8","#FFFFFF","#E2E8F0","#94A3B8","#475569","#F8FAFC","#E2E8F0","#CBD5E1","#1E293B"]
+    coat: "#3A4242", shirt: "#F7F7FF", hair: "#5A636B", pants: "#4A5252", shoes: "#192121",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#5A636B","#4A5252","#31313A","#101919","#3A4242","#293131","#192121","#000000"]
   },
   {
     id: "crimson_dragon",
     name: "\u8840\u9f99\u7834\u519b",
     shortName: "\u8840\u9f99",
     sub: "\u55dc\u8840\u6218\u9f99\u00b7\u7834\u519b\u6697\u8d64",
-    coat: "#2B1D1D", shirt: "#FFFFFF", hair: "#EF4444", pants: "#DC2626", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#EF4444","#DC2626","#991B1B","#450A0A","#2B1D1D","#1A1010","#0D0808","#000000"]
+    coat: "#4A3A3A", shirt: "#F7F7FF", hair: "#EF2929", pants: "#CE1919", shoes: "#291919",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#EF2929","#CE1919","#940808","#4A0000","#4A3A3A","#3A2929","#291919","#000000"]
   },
   {
     id: "solar_flare",
     name: "\u65e5\u8037\u98ce\u66b4",
     shortName: "\u65e5\u8037",
     sub: "\u65e5\u5195\u70bd\u91d1\u00b7\u592a\u9633\u98ce\u66b4",
-    coat: "#292524", shirt: "#FFFFFF", hair: "#FDE047", pants: "#EAB308", shoes: "#000000",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FDE047","#EAB308","#CA8A04","#713F12","#292524","#1C1917","#0C0A09","#000000"]
+    coat: "#424231", shirt: "#F7F7FF", hair: "#7B6310", pants: "#635208", shoes: "#212110",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#7B6310","#635208","#423100","#191900","#424231","#313121","#212110","#000000"]
   },
 ];
 
@@ -1801,6 +1813,50 @@ $("#btnSave").onclick = () => {
   log("正在保存全员配置与皮肤列表...", "INFO");
   callBackend("save_skin").then(res => {
     toast(res && res.msg ? res.msg : "所有角色配置保存成功");
+  });
+};
+
+// Randomize other characters' skins while keeping Iori/Orochi Iori custom
+$("#btnRandomOthers").onclick = () => {
+  log("正在一键随机其余 34 位角色皮肤 (八神/暴走八神保持自定)...", "INFO");
+  toast("🎲 正在为其余角色随机分配精选皮肤...");
+  callBackend("randomize_other_skins").then(res => {
+    if (res && res.success) {
+      if (res.character_skins) {
+        Object.keys(res.character_skins).forEach(cidStr => {
+          const cid = parseInt(cidStr, 10);
+          state.characterSkins[cid] = res.character_skins[cidStr];
+        });
+      }
+      renderCharacterList();
+      selectCharacter(state.activeCharId, true);
+      toast(`🎲 已一键随机其余 ${res.count || 34} 位角色皮肤！保存并打包后游戏全员随机。`);
+      log(`已一键随机其余 ${res.count || 34} 位角色皮肤！八神/暴走八神皮肤保持自定。`, "SUCCESS");
+    } else {
+      toast("随机分配失败: " + (res ? res.error : "未知错误"));
+    }
+  });
+};
+
+// Reset all 36 characters to authentic original classic skins
+$("#btnResetAll").onclick = () => {
+  log("正在将全员 36 位角色皮肤重置为官方原版经典...", "INFO");
+  toast("↺ 正在重置全员角色为官方原版...");
+  callBackend("reset_all_skins").then(res => {
+    if (res && res.success) {
+      if (res.character_skins) {
+        Object.keys(res.character_skins).forEach(cidStr => {
+          const cid = parseInt(cidStr, 10);
+          state.characterSkins[cid] = res.character_skins[cidStr];
+        });
+      }
+      renderCharacterList();
+      selectCharacter(state.activeCharId, true);
+      toast("↺ 已将全员 36 位角色皮肤全部重置恢复为官方原版经典！");
+      log("已成功将全员 36 角色皮肤全部重置恢复为官方原版经典。", "SUCCESS");
+    } else {
+      toast("重置失败: " + (res ? res.error : "未知错误"));
+    }
   });
 };
 
