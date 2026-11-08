@@ -1436,6 +1436,14 @@ function getThemeById(themeId) {
   return THEMES.find(t => t.id === themeId) || THEMES[0];
 }
 
+function skinPreviewColors(skinInfo) {
+  if (skinInfo && skinInfo.preview && skinInfo.preview.hair) {
+    return skinInfo.preview;
+  }
+  return getThemeById(skinInfo && skinInfo.themeId ? skinInfo.themeId : "classic");
+}
+
+
 /* ========================================================================= */
 /* UI Rendering & State Sync                                                 */
 /* ========================================================================= */
@@ -1461,7 +1469,7 @@ function renderCharacterList() {
         <span class="name">${c.name}</span>
       </div>
       <div class="char-skin-tag ${isModded ? 'modded' : ''}" id="skin-tag-${c.id}">
-        <span class="char-skin-dot" style="background:${theme.hair};"></span>
+        <span class="char-skin-dot" style="background:${skinPreviewColors(skinInfo).hair};"></span>
         <span>${theme.shortName}</span>
       </div>
     `;
@@ -1492,8 +1500,8 @@ function selectCharacter(charId, silent = false) {
   $("#bannerCharName").textContent = char.name;
   $("#bannerThemeName").textContent = theme.name;
 
-  // Update Figure Colors
-  updateFigureColors(theme);
+  // Paint the dummy from this character's generated palette
+  updateFigureColors(skinPreviewColors(skinInfo));
 
   // Update Right Theme Cards selection
   $$(".theme-card").forEach(c => {
@@ -1559,19 +1567,29 @@ function applyTheme(themeId) {
 
   // Update center stage
   $("#bannerThemeName").textContent = theme.name;
-  updateFigureColors(theme);
 
   // Update theme card active styles
   $$(".theme-card").forEach(c => {
     c.classList.toggle("on", c.dataset.tid === theme.id);
   });
 
-  // Sync to Python backend per-character store
+  // Sync to Python backend, then paint the dummy with generated colors
   callBackend("set_character_skin", {
     char_id: state.activeCharId,
     theme_id: theme.id,
     scope: state.scope,
     colors: theme.colors
+  }).then(res => {
+    if (res && res.character_skins) {
+      Object.keys(res.character_skins).forEach(cidStr => {
+        const cid = parseInt(cidStr, 10);
+        state.characterSkins[cid] = res.character_skins[cidStr];
+      });
+      renderCharacterList();
+      selectCharacter(state.activeCharId, true);
+    } else {
+      updateFigureColors(theme);
+    }
   });
 
   // If emulator is running and autoLive is enabled, hot-reload in real-time!

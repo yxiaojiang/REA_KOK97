@@ -1209,6 +1209,96 @@ def generate_harmonious_character_palette(
     return res
 
 
+def _hex_luma(hex_code: str) -> float:
+    """Perceptual luma of a #RRGGBB color in 0..1."""
+    clean = hex_code.strip().lstrip("#")
+    if len(clean) != 6:
+        return 0.0
+    try:
+        rf = int(clean[0:2], 16) / 255.0
+        gf = int(clean[2:4], 16) / 255.0
+        bf = int(clean[4:6], 16) / 255.0
+    except ValueError:
+        return 0.0
+    return _unit_luma(rf, gf, bf)
+
+
+def figure_preview_colors(cid: int, colors: List[str]) -> Dict[str, str]:
+    """Map a character's 15 gameplay palette colors onto the stage dummy."""
+    fallback = {
+        "coat": "#3A3A4A",
+        "shirt": "#F7F7FF",
+        "hair": "#DE3A21",
+        "pants": "#AD2910",
+        "shoes": "#191929",
+    }
+    if not colors or len(colors) < 15:
+        return dict(fallback)
+
+    def take(idxs: List[int], pick: str = "mid"):
+        vals: List[str] = []
+        for i in idxs:
+            if 0 <= i < len(colors):
+                hx = colors[i]
+                if isinstance(hx, str) and len(hx) == 7 and hx.upper() not in ("#000000", "#000008"):
+                    vals.append(hx)
+        if not vals:
+            return None
+        ordered = sorted(vals, key=_hex_luma)
+        if pick == "light":
+            return ordered[-1]
+        if pick == "dark":
+            return ordered[0]
+        return ordered[len(ordered) // 2]
+
+    if cid in (0x1B, 0x1D):
+        return {
+            "hair": colors[7],
+            "pants": colors[8],
+            "shirt": colors[4],
+            "coat": colors[11],
+            "shoes": colors[13],
+        }
+
+    schema = CHARACTER_PALETTE_SCHEMA.get(cid, {})
+    hair = (
+        take(schema.get("hair", []), "mid")
+        or take(schema.get("accent", []), "mid")
+        or take(schema.get("primary", []), "light")
+    )
+    coat = (
+        take(schema.get("dark_anchor", []), "dark")
+        or take(schema.get("primary", []), "dark")
+    )
+    shirt = take(schema.get("white_trim", []), "light")
+    pants = (
+        take(schema.get("primary", []), "mid")
+        or take(schema.get("dark_anchor", []), "light")
+        or take(schema.get("accent", []), "mid")
+    )
+    shoes = (
+        take(schema.get("dark_anchor", []), "dark")
+        or take(schema.get("contour", []), "dark")
+    )
+    return {
+        "hair": hair or fallback["hair"],
+        "coat": coat or fallback["coat"],
+        "shirt": shirt or fallback["shirt"],
+        "pants": pants or fallback["pants"],
+        "shoes": shoes or fallback["shoes"],
+    }
+
+
+def make_skin_entry(cid: int, theme_id: str, colors: List[str]) -> Dict[str, Any]:
+    """Store a skin together with dummy colors derived from its palette."""
+    payload = list(colors)
+    return {
+        "themeId": theme_id,
+        "colors": payload,
+        "preview": figure_preview_colors(cid, payload),
+    }
+
+
 def generate_burst_character_palette(
     cid: int,
     theme_id: str,
@@ -1440,14 +1530,13 @@ class KOF97BridgeApi:
         self._cached_p2_base: Optional[int] = None
         self._cached_p2_pid: Optional[int] = None
 
-        # Per-character skin store: char_id -> {"themeId": str, "colors": List[str]}
+        # Per-character skin store: char_id -> {themeId, colors, preview}
         self._character_skins: Dict[int, Dict[str, Any]] = {}
         classic_colors = list(PRESET_THEMES[0]["colors"])
         for char in CHARACTER_ROSTER:
-            self._character_skins[char["id"]] = {
-                "themeId": "classic",
-                "colors": list(classic_colors),
-            }
+            self._character_skins[char["id"]] = make_skin_entry(
+                char["id"], "classic", classic_colors
+            )
 
         # Load persisted settings from disk if available
         self._load_config_from_disk()
@@ -1505,10 +1594,7 @@ class KOF97BridgeApi:
                     if not colors or len(colors) != 15:
                         preset = next((t for t in PRESET_THEMES if t["id"] == t_id), PRESET_THEMES[0])
                         colors = list(preset["colors"])
-                    self._character_skins[cid] = {
-                        "themeId": t_id,
-                        "colors": list(colors),
-                    }
+                    self._character_skins[cid] = make_skin_entry(cid, t_id, colors)
 
             print(f"[INFO] Successfully loaded configuration from {cfg_path}")
             return True
@@ -1610,18 +1696,16 @@ class KOF97BridgeApi:
             for char_info in CHARACTER_ROSTER:
                 cid = char_info["id"]
                 lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
-                self._character_skins[cid] = {
-                    "themeId": theme_id,
-                    "colors": [lspc2_to_hex(w) for w in lspc_words],
-                }
+                self._character_skins[cid] = make_skin_entry(
+                    cid, theme_id, [lspc2_to_hex(w) for w in lspc_words]
+                )
             async_log(f"\u5df2\u5168\u91cf\u8bbe\u7f6e\u5168\u5458 36 \u89d2\u8272\u76ae\u80a4\u4e3a: \u3010{theme_id}\u3011", "INFO")
         else:
             lspc_words = generate_harmonious_character_palette(char_id, theme_id, p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[char_id] = {
-                "themeId": theme_id,
-                "colors": hex_colors,
-            }
+            self._character_skins[char_id] = make_skin_entry(
+                char_id, theme_id, hex_colors
+            )
             char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
             cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
             async_log(f"\u5df2\u4fdd\u5b58\u89d2\u8272\u3010{cname}\u3011\u7684\u72ec\u7acb\u76ae\u80a4\u914d\u7f6e: \u3010{theme_id}\u3011", "INFO")
@@ -1722,10 +1806,7 @@ class KOF97BridgeApi:
 
             lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[cid] = {
-                "themeId": theme_id,
-                "colors": hex_colors,
-            }
+            self._character_skins[cid] = make_skin_entry(cid, theme_id, hex_colors)
             randomized_count += 1
 
         self._save_config_to_disk()
@@ -1752,10 +1833,7 @@ class KOF97BridgeApi:
             cid = char_info["id"]
             lspc_words = generate_harmonious_character_palette(cid, "classic", p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[cid] = {
-                "themeId": "classic",
-                "colors": hex_colors,
-            }
+            self._character_skins[cid] = make_skin_entry(cid, "classic", hex_colors)
 
         self._save_config_to_disk()
         async_log("\u5df2\u5c06\u5168\u5458 36 \u4f4d\u89d2\u8272\u76ae\u80a4\u5168\u90e8\u91cd\u7f6e\u4e3a\u5b98\u65b9\u539f\u7248\u7ecf\u5178\uff01", "SUCCESS")
@@ -2237,10 +2315,9 @@ class KOF97BridgeApi:
                 # Reset all character skins to classic
                 classic_colors = list(PRESET_THEMES[0]["colors"])
                 for cid in self._character_skins:
-                    self._character_skins[cid] = {
-                        "themeId": "classic",
-                        "colors": list(classic_colors),
-                    }
+                    self._character_skins[cid] = make_skin_entry(
+                        cid, "classic", classic_colors
+                    )
                 self._save_config_to_disk()
                 unpack_rom_set(self._source_zip, self._workdir)
                 pack_rom_set(self._workdir, self._output_zip)
