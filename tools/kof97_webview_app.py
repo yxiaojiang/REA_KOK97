@@ -301,6 +301,146 @@ PRESET_THEMES = [
         "chang_uniform": ["#BEF264", "#84CC16", "#4D7C0F", "#365314", "#1A2E05"],
         "chang_ball": ["#E2E8F0", "#64748B"],
     },
+    {
+        "id": "abyssal_frost",
+        "name_cn": "\u6df1\u6e0a\u5bd2\u51b0",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E0F2FE", "#BAE6FD",
+            "#7DD3FC", "#38BDF8", "#0284C7", "#0C4A6E",
+            "#1E293B", "#0F172A", "#020617", "#000000",
+        ],
+        "daimon_judogi": ["#E0F2FE", "#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1"],
+        "daimon_headband": "#FFFFFF",
+        "chang_uniform": ["#E0F2FE", "#BAE6FD", "#38BDF8", "#0284C7", "#0C4A6E"],
+        "chang_ball": ["#38BDF8", "#075985"],
+    },
+    {
+        "id": "phoenix_nirvana",
+        "name_cn": "\u51e4\u821e\u6d85\u69c3",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#FFA500", "#FF4500", "#DC143C", "#8B0000",
+            "#262626", "#1A1A1A", "#0D0D0D", "#000000",
+        ],
+        "daimon_judogi": ["#FED7AA", "#FB923C", "#F97316", "#EA580C", "#C2410C", "#7C2D12"],
+        "daimon_headband": "#FDE047",
+        "chang_uniform": ["#FED7AA", "#FB923C", "#EA580C", "#C2410C", "#7C2D12"],
+        "chang_ball": ["#F59E0B", "#B45309"],
+    },
+    {
+        "id": "emerald_lotus",
+        "name_cn": "\u78a7\u7389\u9752\u83b2",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#6EE7B7", "#10B981", "#047857", "#022C22",
+            "#1F2937", "#111827", "#030712", "#000000",
+        ],
+        "daimon_judogi": ["#D1FAE5", "#A7F3D0", "#6EE7B7", "#10B981", "#059669", "#022C22"],
+        "daimon_headband": "#34D399",
+        "chang_uniform": ["#D1FAE5", "#A7F3D0", "#34D399", "#059669", "#022C22"],
+        "chang_ball": ["#10B981", "#064E3B"],
+    },
+    {
+        "id": "shadow_ninja",
+        "name_cn": "\u6697\u591c\u5f71\u5203",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#E2E8F0", "#94A3B8", "#475569", "#1E293B",
+            "#27272A", "#18181B", "#09090B", "#000000",
+        ],
+        "daimon_judogi": ["#F1F5F9", "#CBD5E1", "#94A3B8", "#64748B", "#334155", "#0F172A"],
+        "daimon_headband": "#EF4444",
+        "chang_uniform": ["#F1F5F9", "#CBD5E1", "#64748B", "#334155", "#0F172A"],
+        "chang_ball": ["#E2E8F0", "#475569"],
+    },
+    {
+        "id": "sunset_overdrive",
+        "name_cn": "\u66ae\u5149\u6d41\u706b",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#FDBA74", "#FB923C", "#EA580C", "#7C2D12",
+            "#312E81", "#1E1B4B", "#0F0E2A", "#000000",
+        ],
+        "daimon_judogi": ["#FED7AA", "#FDBA74", "#FB923C", "#F97316", "#C2410C", "#431407"],
+        "daimon_headband": "#DC2626",
+        "chang_uniform": ["#FED7AA", "#FB923C", "#F97316", "#C2410C", "#431407"],
+        "chang_ball": ["#F59E0B", "#78350F"],
+    },
+    {
+        "id": "amethyst_phantom",
+        "name_cn": "\u7d2b\u6676\u9b45\u5f71",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#D8B4FE", "#A855F7", "#7E22CE", "#3B0764",
+            "#241438", "#170B26", "#0B0414", "#000000",
+        ],
+        "daimon_judogi": ["#F3E8FF", "#E9D5FF", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
+        "daimon_headband": "#F0ABFC",
+        "chang_uniform": ["#F3E8FF", "#E9D5FF", "#A855F7", "#6B21A8", "#3B0764"],
+        "chang_ball": ["#C084FC", "#581C87"],
+    },
+    {
+        "id": "ocean_tempest",
+        "name_cn": "\u6012\u6d77\u72c2\u6d9b",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E0F2FE", "#BAE6FD",
+            "#38BDF8", "#0284C7", "#075985", "#082F49",
+            "#172554", "#0F172A", "#020617", "#000000",
+        ],
+        "daimon_judogi": ["#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1", "#082F49"],
+        "daimon_headband": "#FFFFFF",
+        "chang_uniform": ["#BAE6FD", "#7DD3FC", "#0284C7", "#075985", "#082F49"],
+        "chang_ball": ["#0284C7", "#0F172A"],
+    },
+    {
+        "id": "valkyrie_silver",
+        "name_cn": "\u767d\u94f6\u88c1\u51b3",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E2E8F0", "#94A3B8",
+            "#FFFFFF", "#E2E8F0", "#94A3B8", "#475569",
+            "#F8FAFC", "#E2E8F0", "#CBD5E1", "#1E293B",
+        ],
+        "daimon_judogi": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
+        "daimon_headband": "#F59E0B",
+        "chang_uniform": ["#FFFFFF", "#F8FAFC", "#CBD5E1", "#94A3B8", "#334155"],
+        "chang_ball": ["#F8FAFC", "#64748B"],
+    },
+    {
+        "id": "crimson_dragon",
+        "name_cn": "\u8840\u9f99\u7834\u519b",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#EF4444", "#DC2626", "#991B1B", "#450A0A",
+            "#2B1D1D", "#1A1010", "#0D0808", "#000000",
+        ],
+        "daimon_judogi": ["#FCA5A5", "#EF4444", "#DC2626", "#B91C1C", "#7F1D1D", "#450A0A"],
+        "daimon_headband": "#FBBF24",
+        "chang_uniform": ["#FCA5A5", "#EF4444", "#DC2626", "#7F1D1D", "#450A0A"],
+        "chang_ball": ["#991B1B", "#450A0A"],
+    },
+    {
+        "id": "solar_flare",
+        "name_cn": "\u65e5\u8037\u98ce\u66b4",
+        "colors": [
+            "#FFF7B5", "#F7C584", "#EF945A", "#B55229",
+            "#FFFFFF", "#E5E7EB", "#9CA3AF",
+            "#FDE047", "#EAB308", "#CA8A04", "#713F12",
+            "#292524", "#1C1917", "#0C0A09", "#000000",
+        ],
+        "daimon_judogi": ["#FEF08A", "#FDE047", "#FACC15", "#EAB308", "#A16207", "#422006"],
+        "daimon_headband": "#DC2626",
+        "chang_uniform": ["#FEF08A", "#FACC15", "#EAB308", "#A16207", "#422006"],
+        "chang_ball": ["#FDE047", "#854D0E"],
+    },
 ]
 
 DAMAGE_MODES = [
@@ -427,6 +567,66 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
         "primary": ["#FEF08A", "#FACC15", "#EAB308", "#CA8A04", "#854D0E", "#451A03"],
         "accent": ["#FEF3C7", "#FDE68A", "#D97706", "#78350F"],
         "light": ["#FFFBEB", "#FEF3C7"],
+        "dark": ["#1C1917", "#0C0A09", "#000000"],
+    },
+    "abyssal_frost": {
+        "primary": ["#E0F2FE", "#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0C4A6E"],
+        "accent": ["#FFFFFF", "#F1F5F9", "#94A3B8", "#475569"],
+        "light": ["#F0F9FF", "#E0F2FE"],
+        "dark": ["#0F172A", "#020617", "#000000"],
+    },
+    "phoenix_nirvana": {
+        "primary": ["#FFEDD5", "#FED7AA", "#FB923C", "#EA580C", "#C2410C", "#7C2D12"],
+        "accent": ["#FEF08A", "#FACC15", "#EAB308", "#854D0E"],
+        "light": ["#FFF7ED", "#FFEDD5"],
+        "dark": ["#1C1917", "#0C0A09", "#000000"],
+    },
+    "emerald_lotus": {
+        "primary": ["#D1FAE5", "#A7F3D0", "#6EE7B7", "#34D399", "#059669", "#022C22"],
+        "accent": ["#F0FDF4", "#BBF7D0", "#4ADE80", "#15803D"],
+        "light": ["#F0FDF4", "#DCFCE7"],
+        "dark": ["#111827", "#030712", "#000000"],
+    },
+    "shadow_ninja": {
+        "primary": ["#F8FAFC", "#E2E8F0", "#94A3B8", "#64748B", "#334155", "#0F172A"],
+        "accent": ["#EF4444", "#DC2626", "#991B1B", "#450A0A"],
+        "light": ["#FFFFFF", "#F8FAFC"],
+        "dark": ["#18181B", "#09090B", "#000000"],
+    },
+    "sunset_overdrive": {
+        "primary": ["#FFEDD5", "#FED7AA", "#FB923C", "#F97316", "#C2410C", "#431407"],
+        "accent": ["#E0E7FF", "#818CF8", "#4338CA", "#1E1B4B"],
+        "light": ["#FFF7ED", "#FFEDD5"],
+        "dark": ["#1E1B4B", "#0F0E2A", "#000000"],
+    },
+    "amethyst_phantom": {
+        "primary": ["#F3E8FF", "#E9D5FF", "#C084FC", "#9333EA", "#6B21A8", "#3B0764"],
+        "accent": ["#FDF4FF", "#F0ABFC", "#C026D3", "#701A75"],
+        "light": ["#FAF5FF", "#F3E8FF"],
+        "dark": ["#1E0B36", "#0E041A", "#000000"],
+    },
+    "ocean_tempest": {
+        "primary": ["#BAE6FD", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1", "#082F49"],
+        "accent": ["#E0F2FE", "#BAE6FD", "#0284C7", "#075985"],
+        "light": ["#F0F9FF", "#E0F2FE"],
+        "dark": ["#0F172A", "#020617", "#000000"],
+    },
+    "valkyrie_silver": {
+        "primary": ["#FFFFFF", "#F8FAFC", "#E2E8F0", "#CBD5E1", "#94A3B8", "#475569"],
+        "accent": ["#FEF08A", "#FACC15", "#EAB308", "#854D0E"],
+        "light": ["#FFFFFF", "#F8FAFC"],
+        "dark": ["#334155", "#1E293B", "#0F172A"],
+    },
+    "crimson_dragon": {
+        "primary": ["#FCA5A5", "#EF4444", "#DC2626", "#B91C1C", "#7F1D1D", "#450A0A"],
+        "accent": ["#FEF3C7", "#FDE68A", "#D97706", "#78350F"],
+        "light": ["#FEF2F2", "#FEE2E2"],
+        "dark": ["#1F1313", "#0E0707", "#000000"],
+    },
+    "solar_flare": {
+        "primary": ["#FEF08A", "#FDE047", "#FACC15", "#EAB308", "#A16207", "#422006"],
+        "accent": ["#FEE2E2", "#FCA5A5", "#DC2626", "#7F1D1D"],
+        "light": ["#FEFCE8", "#FEF9C3"],
         "dark": ["#1C1917", "#0C0A09", "#000000"],
     },
 }
@@ -565,58 +765,112 @@ def sync_character_portraits(
     p2_clean: bytes,
 ) -> None:
     """
-    Synchronize character select screen portrait and in-game HUD avatar palettes.
-    In KOF97, portrait palettes reside at base_pid + 13, 14, 15.
+    Synchronize character select screen portraits, victory/win screen portraits,
+    and in-game HUD avatar palettes across all 4 button slots (A, B, C, D).
+    In KOF97:
+      base_pid + 13 + btn*16 = Big Victory/Ending Portrait (e.g. Iori big bust on win screen)
+      base_pid + 14 + btn*16 = Member Select / Result Screen Portrait (e.g. Chang & Daimon on win screen)
+      base_pid + 15 + btn*16 = HUD Top Life Bar Avatar
     """
+    if theme_id == "classic":
+        # Restore all 4 slots from clean P2 ROM baseline
+        for btn_idx in range(4):
+            for slot_off in (13, 14, 15):
+                pal_id = base_pid + slot_off + btn_idx * 16
+                addr = 0x2CFFF0 + pal_id * 32
+                p2_data[addr:addr + 32] = p2_clean[addr:addr + 32]
+        return
+
+    # 1. Iori Yagami (0x1B) & Orochi Iori (0x1D UI / 0x1C Engine)
     if cid in (0x1B, 0x1D):
-        # Iori Yagami (0x1B) & Orochi Iori (0x1D): Avatar & Portrait Palettes
         c_high = lspc_words[7]
         c_mid = lspc_words[8]
         c_shad = lspc_words[9]
         c_deep = lspc_words[10]
+        c_shirt = lspc_words[4]
+        c_coat = lspc_words[11]
+        c_coat_dark = lspc_words[13]
 
-        b0, b1, b2 = (0x2DF990, 0x2DF9B0, 0x2DF9D0) if cid == 0x1B else (0x2E0190, 0x2E01B0, 0x2E01D0)
-        p2_data[b0 + 16: b0 + 18] = struct.pack(">H", c_high)
-        p2_data[b0 + 20: b0 + 22] = struct.pack(">H", c_mid)
-        p2_data[b0 + 22: b0 + 24] = struct.pack(">H", c_shad)
-        p2_data[b0 + 30: b0 + 32] = struct.pack(">H", c_deep)
+        target_base = 0x07C0 if cid == 0x1B else 0x0800
+        for btn_idx in range(4):
+            b0 = 0x2CFFF0 + (target_base + 13 + btn_idx * 16) * 32
+            b1 = 0x2CFFF0 + (target_base + 14 + btn_idx * 16) * 32
+            b2 = 0x2CFFF0 + (target_base + 15 + btn_idx * 16) * 32
 
-        p2_data[b1 + 14: b1 + 16] = struct.pack(">H", c_high)
-        p2_data[b1 + 16: b1 + 18] = struct.pack(">H", c_mid)
-        p2_data[b1 + 18: b1 + 20] = struct.pack(">H", c_shad)
+            # Big Victory Portrait (b0): Words 5..7 shirt, 8/10/11 hair, 13..15 coat
+            p2_data[b0 + 10: b0 + 16] = struct.pack(">3H", c_shirt, c_shirt, c_shirt)
+            p2_data[b0 + 16: b0 + 18] = struct.pack(">H", c_high)
+            p2_data[b0 + 20: b0 + 22] = struct.pack(">H", c_mid)
+            p2_data[b0 + 22: b0 + 24] = struct.pack(">H", c_shad)
+            p2_data[b0 + 26: b0 + 28] = struct.pack(">H", c_shirt)
+            p2_data[b0 + 28: b0 + 32] = struct.pack(">2H", c_coat, c_coat_dark)
 
-        p2_data[b2 + 12: b2 + 14] = struct.pack(">H", c_high)
-        p2_data[b2 + 14: b2 + 16] = struct.pack(">H", c_mid)
-        p2_data[b2 + 16: b2 + 18] = struct.pack(">H", c_shad)
-        p2_data[b2 + 28: b2 + 30] = struct.pack(">H", c_high)
+            # Mid / Result Screen Portrait (b1): Word 6 shirt, 7..9 hair, 12..13 coat, 14 hair highlight
+            p2_data[b1 + 12: b1 + 14] = struct.pack(">H", c_shirt)
+            p2_data[b1 + 14: b1 + 16] = struct.pack(">H", c_high)
+            p2_data[b1 + 16: b1 + 18] = struct.pack(">H", c_mid)
+            p2_data[b1 + 18: b1 + 20] = struct.pack(">H", c_shad)
+            p2_data[b1 + 24: b1 + 28] = struct.pack(">2H", c_coat, c_coat_dark)
+            p2_data[b1 + 28: b1 + 30] = struct.pack(">H", c_high)
 
+            # HUD Small Avatar (b2): Words 6..8 hair, 14 hair highlight
+            p2_data[b2 + 12: b2 + 14] = struct.pack(">H", c_high)
+            p2_data[b2 + 14: b2 + 16] = struct.pack(">H", c_mid)
+            p2_data[b2 + 16: b2 + 18] = struct.pack(">H", c_shad)
+            p2_data[b2 + 28: b2 + 30] = struct.pack(">H", c_high)
+
+    # 2. Goro Daimon (0x02)
     elif cid == 0x02:
-        # Goro Daimon: Judogi words in 0x2D3190 (397), 0x2D31B0 (398), 0x2D31D0 (399)
-        judogi_bytes = struct.pack(">4H", *lspc_words[5:9])
-        p2_data[0x2D3190 + 12: 0x2D3190 + 20] = judogi_bytes
-        p2_data[0x2D31D0 + 12: 0x2D31D0 + 20] = judogi_bytes
-        p2_data[0x2D31B0 + 14: 0x2D31B0 + 22] = judogi_bytes
+        judogi_words = lspc_words[5:10]
+        headband_word = lspc_words[11]
+        for btn_idx in range(4):
+            b0 = 0x2CFFF0 + (0x0180 + 13 + btn_idx * 16) * 32
+            b1 = 0x2CFFF0 + (0x0180 + 14 + btn_idx * 16) * 32
+            b2 = 0x2CFFF0 + (0x0180 + 15 + btn_idx * 16) * 32
 
+            # Big portrait: Words 6..10 judogi, Word 12 headband
+            p2_data[b0 + 12: b0 + 22] = struct.pack(">5H", *judogi_words)
+            p2_data[b0 + 24: b0 + 26] = struct.pack(">H", headband_word)
+
+            # Result screen / select screen portrait: Words 7..11 judogi, Words 12..13 headband
+            p2_data[b1 + 14: b1 + 24] = struct.pack(">5H", *judogi_words)
+            p2_data[b1 + 24: b1 + 28] = struct.pack(">2H", headband_word, headband_word)
+
+            # HUD avatar: Words 6..9 judogi
+            p2_data[b2 + 12: b2 + 20] = struct.pack(">4H", *judogi_words[:4])
+
+    # 3. Chang Koehan (0x13)
     elif cid == 0x13:
-        # Chang Koehan: Uniform words in 0x2DB990 (1485), 0x2DB9B0 (1486), 0x2DB9D0 (1487)
-        u_bytes = struct.pack(">4H", *lspc_words[5:9])
-        p2_data[0x2DB990 + 12: 0x2DB990 + 20] = u_bytes
-        p2_data[0x2DB9B0 + 20: 0x2DB9B0 + 26] = struct.pack(">3H", *lspc_words[7:10])
-        p2_data[0x2DB9D0 + 12: 0x2DB9D0 + 18] = struct.pack(">3H", *lspc_words[5:8])
+        u_words = lspc_words[5:9]
+        for btn_idx in range(4):
+            b0 = 0x2CFFF0 + (0x05C0 + 13 + btn_idx * 16) * 32
+            b1 = 0x2CFFF0 + (0x05C0 + 14 + btn_idx * 16) * 32
+            b2 = 0x2CFFF0 + (0x05C0 + 15 + btn_idx * 16) * 32
 
+            # Big portrait: Words 6..9 uniform
+            p2_data[b0 + 12: b0 + 20] = struct.pack(">4H", *u_words)
+
+            # Result screen / select screen portrait: Words 6..9 uniform (fixes yellow prison uniform on win screen!)
+            p2_data[b1 + 12: b1 + 20] = struct.pack(">4H", *u_words)
+
+            # HUD avatar: Words 6..8 uniform
+            p2_data[b2 + 12: b2 + 18] = struct.pack(">3H", *u_words[:3])
+
+    # 4. Universal 36-character portrait synchronization across all 4 button slots
     else:
-        # Universal portrait update for select screen portrait (base_pid + 14)
-        sel_pid = base_pid + 14
-        sel_addr = 0x2CFFF0 + sel_pid * 32
-        p_words = list(struct.unpack(">16H", p2_clean[sel_addr : sel_addr + 32]))
-        for i in range(1, 16):
-            orig_w = p_words[i]
-            r, g, b, _ = decode_lspc2(orig_w)
-            is_skin = (r >= g >= b and r >= 10 and r - b >= 3)
-            lum = 0.299 * r + 0.587 * g + 0.114 * b
-            if not is_skin and 2 < lum < 28:
-                p_words[i] = lspc_words[i - 1]
-        p2_data[sel_addr : sel_addr + 32] = struct.pack(">16H", *p_words)
+        for btn_idx in range(4):
+            for slot_off in (13, 14, 15):
+                pal_id = base_pid + slot_off + btn_idx * 16
+                addr = 0x2CFFF0 + pal_id * 32
+                p_words = list(struct.unpack(">16H", p2_clean[addr:addr + 32]))
+                for i in range(1, 16):
+                    orig_w = p_words[i]
+                    r, g, b, _ = decode_lspc2(orig_w)
+                    is_skin = (r >= g >= b and r >= 10 and r - b >= 3)
+                    lum = 0.299 * r + 0.587 * g + 0.114 * b
+                    if not is_skin and 2 < lum < 28:
+                        p_words[i] = lspc_words[min(i - 1, len(lspc_words) - 1)]
+                p2_data[addr:addr + 32] = struct.pack(">16H", *p_words)
 
 
 # ============================================================================
@@ -1159,141 +1413,59 @@ class KOF97BridgeApi:
         return {"success": True, "pid": 0}
 
     def _find_kawaks_pid(self) -> Optional[int]:
-        """Locate running WinKawaks process PID from managed handle or system process snapshot."""
-        if self._running_proc is not None:
-            if self._running_proc.poll() is None:
-                return self._running_proc.pid
-            self._running_proc = None
+        """Locate running WinKawaks process PID with robust multi-layered detection."""
+        try:
+            if self._running_proc is not None:
+                if self._running_proc.poll() is None:
+                    return int(self._running_proc.pid)
+                self._running_proc = None
 
-        TH32CS_SNAPPROCESS = 0x00000002
-        class PROCESSENTRY32(ctypes.Structure):
-            _fields_ = [
-                ("dwSize", ctypes.c_ulong),
-                ("cntUsage", ctypes.c_ulong),
-                ("th32ProcessID", ctypes.c_ulong),
-                ("th32DefaultHeapID", ctypes.POINTER(ctypes.c_ulong)),
-                ("th32ModuleID", ctypes.c_ulong),
-                ("cntThreads", ctypes.c_ulong),
-                ("th32ParentProcessID", ctypes.c_ulong),
-                ("pcPriClassBase", ctypes.c_long),
-                ("dwFlags", ctypes.c_ulong),
-                ("szExeFile", ctypes.c_char * 260),
-            ]
-        k32 = ctypes.WinDLL("kernel32")
-        h_snap = k32.CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0)
-        if h_snap == -1:
-            return None
-        pe = PROCESSENTRY32()
-        pe.dwSize = ctypes.sizeof(PROCESSENTRY32)
-        success = k32.Process32First(h_snap, ctypes.byref(pe))
-        found_pid = None
-        while success:
-            exe_name = pe.szExeFile.decode("latin1", errors="ignore").lower()
-            if "winkawaks" in exe_name:
-                found_pid = int(pe.th32ProcessID)
-                break
-            success = k32.Process32Next(h_snap, ctypes.byref(pe))
-        k32.CloseHandle(h_snap)
-        return found_pid
+            u32 = ctypes.WinDLL("user32")
+            found_pid: Optional[int] = None
 
-    def _find_p2_base_in_process(self, h_proc: int, pid: int) -> Optional[int]:
-        """Locate the 4MB decrypted P2 ROM buffer in WinKawaks memory by unique palette signature."""
-        if self._cached_p2_base is not None and self._cached_p2_pid == pid:
-            k32 = ctypes.WinDLL("kernel32")
-            test_buf = ctypes.create_string_buffer(4)
-            read = ctypes.c_size_t(0)
-            if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(self._cached_p2_base + 0x2CFFF0), test_buf, 4, ctypes.byref(read)):
-                if read.value == 4:
-                    return self._cached_p2_base
+            def _enum_cb(hwnd: int, _lparam: int) -> bool:
+                nonlocal found_pid
+                pid = ctypes.c_ulong()
+                u32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+                buf = ctypes.create_unicode_buffer(256)
+                u32.GetWindowTextW(hwnd, buf, 256)
+                title = buf.value.lower()
+                if "winkawaks" in title or "kawaks" in title:
+                    found_pid = int(pid.value)
+                    return False
+                return True
 
-        k32 = ctypes.WinDLL("kernel32")
-        class MEMORY_BASIC_INFORMATION(ctypes.Structure):
-            _fields_ = [
-                ("BaseAddress", ctypes.c_void_p),
-                ("AllocationBase", ctypes.c_void_p),
-                ("AllocationProtect", ctypes.c_ulong),
-                ("RegionSize", ctypes.c_size_t),
-                ("State", ctypes.c_ulong),
-                ("Protect", ctypes.c_ulong),
-                ("Type", ctypes.c_ulong),
-            ]
-        sig_le = bytes.fromhex("0000ff7f0000b45fa25f806f704f502f")
-        mbi = MEMORY_BASIC_INFORMATION()
-        addr = 0
-        read = ctypes.c_size_t(0)
-        while k32.VirtualQueryEx(h_proc, ctypes.c_void_p(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)):
-            base = mbi.BaseAddress or 0
-            size = mbi.RegionSize
-            if mbi.State == 0x1000 and (mbi.Protect & 0xFF) in (2, 4, 0x20, 0x40):
-                buf = ctypes.create_string_buffer(size)
-                if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(base), buf, size, ctypes.byref(read)):
-                    raw = buf.raw[:read.value]
-                    idx = raw.find(sig_le)
-                    if idx != -1:
-                        found_base = (base + idx) - 0x2CFFF0
-                        self._cached_p2_base = found_base
-                        self._cached_p2_pid = pid
-                        return found_base
-            addr = base + size
-            if addr >= 0x7FFF0000:
-                break
+            WNDENUM = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+            u32.EnumWindows(WNDENUM(_enum_cb), 0)
+            if found_pid is not None:
+                return found_pid
+
+            # Fallback to tasklist query
+            cmd = ['tasklist', '/FI', 'IMAGENAME eq WinKawaks.exe', '/FO', 'CSV', '/NH']
+            out = subprocess.check_output(cmd, creationflags=0x08000000).decode("latin1", errors="ignore")
+            for line in out.strip().splitlines():
+                parts = [p.strip('"' + ' ') for p in line.split('","')]
+                if len(parts) >= 2 and "winkawaks" in parts[0].lower():
+                    try:
+                        return int(parts[1])
+                    except ValueError:
+                        pass
+        except Exception:
+            pass
         return None
-
-    def _live_inject_active_palette(self, h_proc: int, p2_addr_base: int, lspc_bytes_le: bytearray) -> int:
-        """Scan committed memory regions for active on-screen Palette RAM and overwrite immediately."""
-        k32 = ctypes.WinDLL("kernel32")
-        class MEMORY_BASIC_INFORMATION(ctypes.Structure):
-            _fields_ = [
-                ("BaseAddress", ctypes.c_void_p),
-                ("AllocationBase", ctypes.c_void_p),
-                ("AllocationProtect", ctypes.c_ulong),
-                ("RegionSize", ctypes.c_size_t),
-                ("State", ctypes.c_ulong),
-                ("Protect", ctypes.c_ulong),
-                ("Type", ctypes.c_ulong),
-            ]
-        mbi = MEMORY_BASIC_INFORMATION()
-        addr = 0
-        read = ctypes.c_size_t(0)
-        written = ctypes.c_size_t(0)
-        prev_buf = ctypes.create_string_buffer(8)
-        k32.ReadProcessMemory(h_proc, ctypes.c_void_p(p2_addr_base), prev_buf, 8, ctypes.byref(read))
-        search_sig = bytes(prev_buf.raw)
-        if len(search_sig) < 8 or search_sig == b"\x00" * 8:
-            return 0
-
-        injected = 0
-        while k32.VirtualQueryEx(h_proc, ctypes.c_void_p(addr), ctypes.byref(mbi), ctypes.sizeof(mbi)):
-            base = mbi.BaseAddress or 0
-            size = mbi.RegionSize
-            if mbi.State == 0x1000 and (mbi.Protect & 0xFF) in (2, 4, 0x20, 0x40) and size <= 0x200000:
-                buf = ctypes.create_string_buffer(size)
-                if k32.ReadProcessMemory(h_proc, ctypes.c_void_p(base), buf, size, ctypes.byref(read)):
-                    raw = buf.raw[:read.value]
-                    pos = 0
-                    while True:
-                        p = raw.find(search_sig, pos)
-                        if p == -1:
-                            break
-                        target_va = base + p
-                        if target_va != p2_addr_base:
-                            k32.WriteProcessMemory(h_proc, ctypes.c_void_p(target_va), bytes(lspc_bytes_le), 30, ctypes.byref(written))
-                            injected += 1
-                        pos = p + 1
-            addr = base + size
-            if addr >= 0x7FFF0000:
-                break
-        return injected
 
     def get_emulator_status(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Check whether WinKawaks emulator is currently active in process tree."""
-        pid = self._find_kawaks_pid()
-        return {"running": pid is not None, "pid": pid or 0}
+        try:
+            pid = self._find_kawaks_pid()
+            return {"running": pid is not None, "pid": pid or 0}
+        except Exception as exc:
+            return {"running": False, "pid": 0, "error": str(exc)}
 
     def apply_skin_live(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Dynamically inject character palette directly into running WinKawaks process memory.
-        Updates both the active on-screen Palette RAM and the loaded P2 ROM memory buffer.
+        Instantly overwrites on-screen Palette RAM (0x007126B0) and loaded P2 ROM memory buffer (0x00712660 + 0x100000).
         """
         params = params or {}
         cid = params.get("char_id", self._char_id)
@@ -1329,28 +1501,60 @@ class KOF97BridgeApi:
             return {"success": False, "running": True, "message": f"\u65e0\u6cd5\u6302\u8f7d\u6a21\u62df\u5668\u8fdb\u7a0b (PID={pid})"}
 
         try:
-            p2_base = self._find_p2_base_in_process(h_proc, pid)
-            if not p2_base:
-                return {"success": False, "running": True, "message": "\u672a\u80fd\u5b9a\u4f4d\u6a21\u62df\u5668\u4e2d\u7684 P2 ROM \u5185\u5b58\u6620\u5c04\u533a"}
+            read = ctypes.c_size_t(0)
+            written = ctypes.c_size_t(0)
+            ptr_buf = ctypes.create_string_buffer(4)
 
-            # Determine list of characters to inject
+            # Read WinKawaks 1.48 Core Pointers
+            k32.ReadProcessMemory(h_proc, ctypes.c_void_p(0x00712660), ptr_buf, 4, ctypes.byref(read))
+            prom_va = struct.unpack("<I", ptr_buf.raw)[0]
+
+            k32.ReadProcessMemory(h_proc, ctypes.c_void_p(0x007126B0), ptr_buf, 4, ctypes.byref(read))
+            pal_ram_va = struct.unpack("<I", ptr_buf.raw)[0]
+
+            k32.ReadProcessMemory(h_proc, ctypes.c_void_p(0x00712688), ptr_buf, 4, ctypes.byref(read))
+            work_ram_va = struct.unpack("<I", ptr_buf.raw)[0]
+
+            if prom_va == 0 or pal_ram_va == 0:
+                return {
+                    "success": False,
+                    "running": True,
+                    "message": "\u6a21\u62df\u5668\u5c1a\u5728\u52a0\u8f7d\u6e38\u620f\u4e2d\uff0c\u8bf7\u7a0d\u5019\u518d\u70b9\u51fb\u5b9e\u65f6\u5e94\u7528\u76ae\u80a4"
+                }
+
+            p2_base = prom_va + 0x100000
+
+            # Read current active 8KB Palette RAM to scan existing slots
+            pal_ram_buf = ctypes.create_string_buffer(8192)
+            k32.ReadProcessMemory(h_proc, ctypes.c_void_p(pal_ram_va), pal_ram_buf, 8192, ctypes.byref(read))
+            pal_ram_bytes = bytearray(pal_ram_buf.raw)
+
+            # Read 1P Active Palette Index from Work RAM (0x108130 -> WorkRAM + 0x8130)
+            p1_active_slot = -1
+            if work_ram_va != 0:
+                slot_buf = ctypes.create_string_buffer(1)
+                k32.ReadProcessMemory(h_proc, ctypes.c_void_p(work_ram_va + 0x8130), slot_buf, 1, ctypes.byref(read))
+                p1_active_slot = slot_buf.raw[0]
+
             target_cids = [c["id"] for c in CHARACTER_ROSTER] if scope == "ALL" else [cid]
             injected_total = 0
-            written = ctypes.c_size_t(0)
 
             for target_cid in target_cids:
                 skin_entry = self._character_skins.get(target_cid, {})
                 t_id = skin_entry.get("themeId", "classic")
+                engine_cid, _, pal_idx = get_char_engine_info(target_cid)
+                base_off = 0x483E + pal_idx * 8
+                base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+
                 if t_id == "classic":
-                    _, _, pal_idx = get_char_engine_info(target_cid)
-                    base_off = 0x483E + pal_idx * 8
-                    base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
-                    lspc_words = [struct.unpack(">H", p2_clean[0x2CFFF0 + base_pid * 32 + i * 2 : 0x2CFFF0 + base_pid * 32 + i * 2 + 2])[0] for i in range(1, 16)]
+                    orig_p2_addr = 0x2CFFF0 + base_pid * 32
+                    lspc_words = [struct.unpack(">H", p2_clean[orig_p2_addr + i * 2 : orig_p2_addr + i * 2 + 2])[0] for i in range(1, 16)]
                     burst_words = lspc_words
                 else:
                     lspc_words = generate_harmonious_character_palette(target_cid, t_id, p1_data, p2_clean)
                     burst_words = generate_burst_character_palette(target_cid, t_id, lspc_words)
 
+                # Prepare Little-Endian packed words for WinKawaks RAM
                 lspc_bytes_le = bytearray()
                 for w in lspc_words:
                     lspc_bytes_le += struct.pack("<H", w)
@@ -1359,34 +1563,54 @@ class KOF97BridgeApi:
                 for w in burst_words:
                     burst_bytes_le += struct.pack("<H", w)
 
-                _, _, pal_idx = get_char_engine_info(target_cid)
-                base_off = 0x483E + pal_idx * 8
-                base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
-
-                # Update active on-screen Palette RAM
-                p2_addr_base = p2_base + 0x2CFFF0 + base_pid * 32 + 2
-                self._live_inject_active_palette(h_proc, p2_addr_base, lspc_bytes_le)
-
-                # Overwrite all 4 color button slots (A, B, C, D) in P2 ROM buffer
+                # A. Overwrite all 4 button slots (A, B, C, D) in loaded P2 ROM memory
                 for btn_idx in range(4):
                     btn_off = base_off + btn_idx * 2
                     pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
-                    btn_p2_base = p2_base + 0x2CFFF0 + pal_id * 32 + 2
-                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_p2_base), bytes(lspc_bytes_le), 30, ctypes.byref(written))
-                    btn_p2_burst = p2_base + 0x2CFFF0 + (pal_id + 3) * 32 + 2
-                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_p2_burst), bytes(burst_bytes_le), 30, ctypes.byref(written))
+                    # Normal skin (pal_id + 0)
+                    btn_addr = p2_base + 0x2CFFF0 + pal_id * 32 + 2
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_addr), bytes(lspc_bytes_le), 30, ctypes.byref(written))
+                    # MAX Mode Burst skin (pal_id + 3)
+                    burst_addr = p2_base + 0x2CFFF0 + (pal_id + 3) * 32 + 2
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(burst_addr), bytes(burst_bytes_le), 30, ctypes.byref(written))
 
-                # Synchronize portraits if enabled
+                # B. Synchronize all portrait and avatar palettes in P2 ROM
                 if self._sync_avatar:
                     p2_temp = bytearray(p2_clean)
                     sync_character_portraits(target_cid, t_id, base_pid, lspc_words, p2_temp, p2_clean)
-                    for port_pal in [base_pid + 13, base_pid + 14, base_pid + 15]:
-                        port_off = 0x2CFFF0 + port_pal * 32 + 2
-                        port_words_be = [struct.unpack(">H", p2_temp[port_off + i*2 : port_off + i*2 + 2])[0] for i in range(15)]
-                        port_bytes_le = bytearray()
-                        for pw in port_words_be:
-                            port_bytes_le += struct.pack("<H", pw)
-                        k32.WriteProcessMemory(h_proc, ctypes.c_void_p(p2_base + port_off), bytes(port_bytes_le), 30, ctypes.byref(written))
+                    for btn_idx in range(4):
+                        for slot_off in (13, 14, 15):
+                            port_pal = base_pid + slot_off + btn_idx * 16
+                            port_addr = 0x2CFFF0 + port_pal * 32
+                            port_words_be = [struct.unpack(">H", p2_temp[port_addr + i * 2 : port_addr + i * 2 + 2])[0] for i in range(16)]
+                            port_bytes_le = bytearray()
+                            for pw in port_words_be:
+                                port_bytes_le += struct.pack("<H", pw)
+                            k32.WriteProcessMemory(h_proc, ctypes.c_void_p(p2_base + port_addr), bytes(port_bytes_le), 32, ctypes.byref(written))
+
+                # C. Instant On-Screen Hot-Update (8KB Palette RAM)
+                # 1. Directly overwrite 1P Active Slot if matched
+                if p1_active_slot != -1 and p1_active_slot < 256:
+                    target_va = pal_ram_va + p1_active_slot * 32 + 2
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(target_va), bytes(lspc_bytes_le), 30, ctypes.byref(written))
+                    # Also write +3 for MAX burst
+                    if p1_active_slot + 3 < 256:
+                        target_burst_va = pal_ram_va + (p1_active_slot + 3) * 32 + 2
+                        k32.WriteProcessMemory(h_proc, ctypes.c_void_p(target_burst_va), bytes(burst_bytes_le), 30, ctypes.byref(written))
+
+                # 2. Scan entire Palette RAM (all 256 slots) for matching character signature
+                # Read baseline skin signature (words 1..4 in LE) to match and replace
+                clean_addr = 0x2CFFF0 + base_pid * 32 + 2
+                clean_sig = bytearray()
+                for i in range(4):
+                    cw = struct.unpack(">H", p2_clean[clean_addr + i*2 : clean_addr + i*2 + 2])[0]
+                    clean_sig += struct.pack("<H", cw)
+
+                for slot_idx in range(256):
+                    slot_data = pal_ram_bytes[slot_idx * 32 + 2 : slot_idx * 32 + 10]
+                    if slot_data == clean_sig or slot_idx == p1_active_slot:
+                        va = pal_ram_va + slot_idx * 32 + 2
+                        k32.WriteProcessMemory(h_proc, ctypes.c_void_p(va), bytes(lspc_bytes_le), 30, ctypes.byref(written))
 
                 injected_total += 1
 
