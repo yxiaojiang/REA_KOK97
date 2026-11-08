@@ -473,16 +473,17 @@
     height: calc(100vh - 76px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    max-width: 840px;
+    justify-content: flex-start;
+    max-width: 880px;
     margin: 0 auto;
-    padding: 0 40px;
-    gap: 30px;
+    padding: 24px 40px 36px;
+    gap: 20px;
+    overflow-y: auto;
   }
   .combat-cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 16px;
   }
   .combat-card {
     background: var(--panel2);
@@ -904,7 +905,7 @@
 
         <!-- Column 3: Palette Theme Sidebar -->
         <div class="theme-sidebar">
-          <div class="sidebar-header">和谐配色库 (8套精选)</div>
+          <div class="sidebar-header">精选配色库 (10套全新皮肤)</div>
           <div id="themeList" style="display:flex;flex-direction:column;gap:9px;"></div>
           <div class="sidebar-footer">
             <span>同步头像立绘</span>
@@ -938,6 +939,32 @@
             <div>
               <h3>免眩晕</h3>
               <p>Stun 眩晕槽锁死 103 点满值</p>
+            </div>
+          </div>
+
+          <div class="combat-card on" id="cardPower">
+            <div class="combat-card-top">
+              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <div class="switch on" id="swPower"></div>
+            </div>
+            <div>
+              <h3>无限能量</h3>
+              <p>初始3气+满能量槽 · 超必杀/MAX爆气零消耗</p>
+            </div>
+          </div>
+
+          <div class="combat-card" id="cardDizzyTime" style="cursor:default;">
+            <div class="combat-card-top">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="number" id="inputDizzyTime" min="0.5" max="30.0" step="0.5" value="5.0"
+                  style="width:70px;background:#181A22;border:1px solid rgba(255,179,25,0.4);border-radius:10px;color:#FFB319;font-size:16px;font-weight:700;text-align:center;padding:4px 6px;outline:none;" />
+                <span style="font-size:13px;color:var(--mute);font-weight:700;">秒</span>
+              </div>
+            </div>
+            <div>
+              <h3>眩晕持续时间</h3>
+              <p id="dizzyHint">打晕后持续硬直 5.0 秒（原版约4.3秒，免眩晕关闭时生效）</p>
             </div>
           </div>
         </div>
@@ -1076,65 +1103,89 @@ const THEMES = [
     id: "classic",
     name: "原版经典",
     shortName: "原版",
-    sub: "深渊紫黑 + 血月绯红",
+    sub: "SNK 官方默认 · 纯正复古",
     coat: "#3A3A4A", shirt: "#F7F7FF", hair: "#DE3A21", pants: "#AD2910", shoes: "#191929",
     colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F7F7FF","#BDBDC5","#737B84","#DE3A21","#AD2910","#7B1908","#4A0000","#3A3A4A","#29293A","#191929","#000008"]
   },
   {
-    id: "black_gold",
-    name: "奢华黑金",
-    shortName: "黑金",
-    sub: "黑曜纯黑 + 璨金流光",
-    coat: "#212129", shirt: "#3A3A3A", hair: "#FFDE3A", pants: "#DEAD19", shoes: "#101010",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#4A4A4A","#303030","#181818","#FFDE3A","#DEAD19","#A57308","#634200","#292929","#1A1A1A","#101010","#000000"]
+    id: "crimson_shura",
+    name: "血色修罗",
+    shortName: "修罗",
+    sub: "特瑞风极爽 · 鲜红白T曜黑",
+    coat: "#242424", shirt: "#FFFFFF", hair: "#FF2A2A", pants: "#DC2626", shoes: "#141414",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FF2A2A","#DC2626","#991B1B","#450A0A","#383838","#242424","#141414","#000000"]
   },
   {
-    id: "nether_purple",
-    name: "幽冥暗紫",
-    shortName: "幽紫",
-    sub: "虚空幽黑 + 皇家紫罗兰",
-    coat: "#25202E", shirt: "#E6E0F5", hair: "#A855F7", pants: "#7E22CE", shoes: "#100D16",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#E6E0F5","#B8AED4","#7B6E9E","#A855F7","#7E22CE","#581C87","#3B0764","#25202E","#1A1622","#100D16","#000000"]
+    id: "azure_thunder",
+    name: "苍雷疾电",
+    shortName: "苍雷",
+    sub: "牛仔蓝电光 · 纯净白衬深蓝",
+    coat: "#0F172A", shirt: "#FFFFFF", hair: "#38BDF8", pants: "#0284C7", shoes: "#080D1A",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#38BDF8","#0284C7","#0369A1","#082F49","#1E293B","#0F172A","#080D1A","#000000"]
   },
   {
-    id: "glacial_cyan",
-    name: "极地幽蓝",
-    shortName: "极地",
-    sub: "深渊藏青 + 极光钻青",
-    coat: "#1E293B", shirt: "#F0F9FF", hair: "#38BDF8", pants: "#0284C7", shoes: "#080D1A",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F0F9FF","#BAE6FD","#7DD3FC","#38BDF8","#0284C7","#0369A1","#0C4A6E","#1E293B","#0F172A","#080D1A","#000000"]
+    id: "paladin_gold",
+    name: "圣殿骑士",
+    shortName: "圣殿",
+    sub: "纯白圣裁风衣 · 璀璨辉金",
+    coat: "#E2E8F0", shirt: "#FFFFFF", hair: "#FFF066", pants: "#F59E0B", shoes: "#475569",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E2E8F0","#94A3B8","#FFF066","#F59E0B","#B45309","#602800","#FFFFFF","#E2E8F0","#94A3B8","#000000"]
   },
   {
-    id: "silver_knight",
-    name: "白银骑士",
-    shortName: "白银",
-    sub: "高贵白银 + 猩红血月",
-    coat: "#CBD5E1", shirt: "#334155", hair: "#EF4444", pants: "#B91C1C", shoes: "#1E293B",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#334155","#1E293B","#0F172A","#EF4444","#B91C1C","#7F1D1D","#450A0A","#F1F5F9","#CBD5E1","#94A3B8","#475569"]
+    id: "void_shadow",
+    name: "虚空大蛇",
+    shortName: "虚空",
+    sub: "高贵翡翠玉石 · 曜石暗夜黑",
+    coat: "#18181B", shirt: "#FFFFFF", hair: "#34D399", pants: "#10B981", shoes: "#09090B",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#34D399","#10B981","#059669","#064E3B","#27272A","#18181B","#09090B","#000000"]
   },
   {
-    id: "emerald_ghost",
-    name: "翡翠幽灵",
-    shortName: "翡翠",
-    sub: "暗夜森绿 + 碧玉荧光",
-    coat: "#14241B", shirt: "#ECFDF5", hair: "#10B981", pants: "#059669", shoes: "#070E0A",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#ECFDF5","#A7F3D0","#6EE7B7","#10B981","#059669","#047857","#064E3B","#14241B","#0D1913","#070E0A","#000000"]
+    id: "cyber_neon",
+    name: "赛博霓虹",
+    shortName: "霓虹",
+    sub: "荧光粉红发 · 电光青蓝内衬",
+    coat: "#1E1B4B", shirt: "#67E8F9", hair: "#F43F5E", pants: "#E11D48", shoes: "#110E38",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#67E8F9","#06B6D4","#0891B2","#F43F5E","#E11D48","#BE123C","#700824","#2E1065","#1E0842","#0F0324","#000000"]
   },
   {
-    id: "monochrome_ivory",
-    name: "纯白誓约",
-    shortName: "纯白",
-    sub: "极简纯白 + 极夜石墨黑",
-    coat: "#E2E8F0", shirt: "#FFFFFF", hair: "#334155", pants: "#1E293B", shoes: "#020617",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#F8FAFC","#E2E8F0","#CBD5E1","#334155","#1E293B","#0F172A","#020617","#FFFFFF","#E2E8F0","#94A3B8","#475569"]
+    id: "magma_inferno",
+    name: "熔岩地狱",
+    shortName: "熔岩",
+    sub: "活力烈焰赤橙 · 玄岩炭黑",
+    coat: "#27272A", shirt: "#FFFFFF", hair: "#FF7A00", pants: "#EA580C", shoes: "#18181B",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FF7A00","#EA580C","#C2410C","#6B1D03","#333338","#202024","#101014","#000000"]
   },
   {
-    id: "solar_flare",
-    name: "炽炎烈火",
-    shortName: "炽炎",
-    sub: "玄武炭灰 + 烈阳赤金",
-    coat: "#2E2E38", shirt: "#FFEDD5", hair: "#F59E0B", pants: "#D97706", shoes: "#101016",
-    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFEDD5","#FED7AA","#FDBA74","#F59E0B","#D97706","#B45309","#78350F","#2E2E38","#1C1C24","#101016","#000000"]
+    id: "imperial_gold",
+    name: "帝王战尊",
+    shortName: "帝尊",
+    sub: "帝皇纯正亮金 · 霸气玄黑",
+    coat: "#1C1917", shirt: "#FFFFFF", hair: "#FFDE17", pants: "#E5B800", shoes: "#0C0A09",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#FFDE17","#E5B800","#B38600","#594000","#2A2725","#1C1917","#0C0A09","#000000"]
+  },
+  {
+    id: "sakura_frost",
+    name: "樱落吹雪",
+    shortName: "樱雪",
+    sub: "清雅落樱明粉 · 深紫罗兰",
+    coat: "#2E1065", shirt: "#FFFFFF", hair: "#F472B6", pants: "#DB2777", shoes: "#1E0842",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#F472B6","#DB2777","#9D174D","#500724","#3B0764","#24043E","#130122","#000000"]
+  },
+  {
+    id: "aurora_mirage",
+    name: "极光幻影",
+    shortName: "极光",
+    sub: "魔幻尊贵魅紫 · 湖光青绿",
+    coat: "#1E123F", shirt: "#5EEAD4", hair: "#A855F7", pants: "#7E22CE", shoes: "#120929",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#5EEAD4","#0D9488","#075985","#A855F7","#7E22CE","#581C87","#2E0A4E","#1E1B4B","#110E38","#07051A","#000000"]
+  },
+  {
+    id: "toxic_hazard",
+    name: "剧毒酸蚀",
+    shortName: "剧毒",
+    sub: "荧光烈柠亮绿 · 纯黑曜石风衣",
+    coat: "#1A1A1A", shirt: "#FFFFFF", hair: "#A3E635", pants: "#65A30D", shoes: "#0A0A0A",
+    colors: ["#FFF7B5","#F7C584","#EF945A","#B55229","#FFFFFF","#E5E7EB","#9CA3AF","#A3E635","#65A30D","#3F6212","#143503","#262626","#171717","#0A0A0A","#000000"]
   }
 ];
 
@@ -1189,6 +1240,8 @@ const state = {
   scope: "SINGLE",    // "SINGLE" or "ALL"
   guard: true,
   stun: true,
+  infinitePower: true,
+  dizzyDuration: 5.0,
   damageIdx: 3,       // Default: "halved" (50%)
   syncAvatar: true,
   // Per-character skin mapping: charId -> { themeId: string, colors: array }
@@ -1409,6 +1462,35 @@ function bindCombatToggle(cardId, switchId, key, label) {
 bindCombatToggle("#cardGuard", "#swGuard", "guard", "免破防 (Guard 锁死 103 点)");
 bindCombatToggle("#cardStun", "#swStun", "stun", "免眩晕 (Stun 锁死 103 点)");
 
+// Infinite Power Toggle
+const cardPower = $("#cardPower");
+const swPower = $("#swPower");
+cardPower.onclick = () => {
+  state.infinitePower = !state.infinitePower;
+  cardPower.classList.toggle("on", state.infinitePower);
+  swPower.classList.toggle("on", state.infinitePower);
+  callBackend("update_infinite_power", { value: state.infinitePower });
+  toast((state.infinitePower ? "已启用" : "已禁用") + "：无限能量 (初始3气+超杀爆气零消耗)");
+};
+
+// Dizzy Duration Input Box
+const inputDizzy = $("#inputDizzyTime");
+const dizzyHint = $("#dizzyHint");
+function onDizzyChange() {
+  let val = parseFloat(inputDizzy.value);
+  if (isNaN(val) || val < 0.5) val = 0.5;
+  if (val > 30.0) val = 30.0;
+  state.dizzyDuration = val;
+  inputDizzy.value = val.toFixed(1);
+  dizzyHint.textContent = `打晕后持续硬直 ${val.toFixed(1)} 秒（原版约4.3秒，免眩晕关闭时生效）`;
+  callBackend("update_dizzy_duration", { value: val });
+  toast(`眩晕持续时间已设置为: ${val.toFixed(1)} 秒`);
+}
+inputDizzy.addEventListener("change", onDizzyChange);
+inputDizzy.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") onDizzyChange();
+});
+
 // Damage Multiplier Slider
 const nModes = DAMAGE_MODES.length;
 DAMAGE_MODES.forEach((m, i) => {
@@ -1424,7 +1506,7 @@ DAMAGE_MODES.forEach((m, i) => {
   $("#sliderLabels").appendChild(label);
 });
 
-function setDamage(idx) {
+function setDamage(idx, silent = false) {
   state.damageIdx = idx;
   const m = DAMAGE_MODES[idx];
   $("#damageVal").textContent = m.badge;
@@ -1439,7 +1521,9 @@ function setDamage(idx) {
     l.classList.toggle("on", j === idx);
   });
 
-  callBackend("update_damage_mode", { mode_id: m.id });
+  if (!silent) {
+    callBackend("update_damage_mode", { mode_id: m.id });
+  }
 }
 
 // Left Icon Rail Navigation
@@ -1596,9 +1680,19 @@ window.onBackendState = function(s) {
     $("#cardStun").classList.toggle("on", state.stun);
     $("#swStun").classList.toggle("on", state.stun);
   }
+  if (s.infinite_power !== undefined) {
+    state.infinitePower = !!s.infinite_power;
+    $("#cardPower").classList.toggle("on", state.infinitePower);
+    $("#swPower").classList.toggle("on", state.infinitePower);
+  }
+  if (s.dizzy_duration !== undefined) {
+    state.dizzyDuration = parseFloat(s.dizzy_duration) || 5.0;
+    $("#inputDizzyTime").value = state.dizzyDuration.toFixed(1);
+    $("#dizzyHint").textContent = `打晕后持续硬直 ${state.dizzyDuration.toFixed(1)} 秒（原版约4.3秒，免眩晕关闭时生效）`;
+  }
   if (s.damage_mode !== undefined) {
     const idx = DAMAGE_MODES.findIndex(d => d.id === s.damage_mode);
-    if (idx >= 0) setDamage(idx);
+    if (idx >= 0) setDamage(idx, true);
   }
   if (s.sync_avatar !== undefined) {
     state.syncAvatar = !!s.sync_avatar;
@@ -1612,20 +1706,26 @@ window.onBackendState = function(s) {
   // Refresh character list and stage
   renderCharacterList();
   selectCharacter(state.activeCharId, true);
-  log("工作台已与全员 ROM 后端配置同步就绪。", "INFO");
+  log("工作台已与本地保存的配置同步就绪 (已恢复破防/免眩/伤害与皮肤配置)。", "INFO");
 };
 
-// Listen for PyWebView ready event
-window.addEventListener("pywebviewready", () => {
+// Initial state loader
+function initBackendState() {
   callBackend("get_initial_state").then(s => {
     if (s && window.onBackendState) window.onBackendState(s);
   });
-});
+}
+
+// Listen for PyWebView ready event
+window.addEventListener("pywebviewready", initBackendState);
+if (window.pywebview && window.pywebview.api) {
+  initBackendState();
+}
 
 // Initial boot
 renderCharacterList();
 selectCharacter(state.activeCharId, true);
-setDamage(state.damageIdx);
+setDamage(state.damageIdx, true);
 log("拳皇97 逆向魔改工作台 (深色舞台 B 版) 已加载完毕。", "INFO");
 </script>
 </body>
