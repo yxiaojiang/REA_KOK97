@@ -182,3 +182,44 @@
    例如为草薙京添加 `"kyo_jacket"`、`"kyo_hair"`，为特瑞添加 `"terry_vest"`、`"terry_jeans"`、`"terry_hat"`，为不知火舞添加 `"mai_ninja_dress"`；
 3. **在 `generate_harmonious_character_palette` 中增加特化分支**：
    锁定其 `orig_words` 中的肌肉肤色槽位，将其余服装/道具槽位精确挂接至上述主题键名；未单独特化的人物则自动回退至高质量通用启发式合成器。
+
+---
+
+## 10. 全员 15 色部位表与自定义皮肤（2026-11-10）
+
+- `CHARACTER_PALETTE_SCHEMA` 已按官方 A 键 15 色，为全部 36 名角色（ID `0x00`–`0x23`）补全部位并核对：头发走主题辅色，衣服、裤子、鞋子走主色，肤色和真白布锁原色。
+- 八神庵与大蛇庵拆开头发/裤子（辅色）与外套（主色）。大蛇庵仍用普通庵的服装明暗曲线，皮肤和白边保持大蛇庵原色。
+- `'94` 草薙京的 `pal_idx` 保持 `0x00`，不要改。
+- 明暗生成器（`generate_harmonious_character_palette` / `recolor_match_shade`）：亮部锁原明度，新色相够不着时再降低饱和度、往浅色靠；暗部实色不许漂成粉彩。用户已认可这套色阶与明暗感觉，**不要改生成器**。
+- Studio 左侧「自定义皮肤」：可选任意角色、按部位改 15 色槽、中间预览用 ACT 00 站立拼图按 15 色实时上色（原皮走官方 ROM 色），保存后 `pack_rom` / 实时注入原样写入已存自定义色。
+
+## 11. 站立图拼装（ACT 00）与踩过的坑（2026-11-11）
+
+### 正确规则
+
+- 站立帧来自 ACT 00（P2 指针表 `0x200002`），不要用 image-def 下标 0 当站立图。
+- P2 必须先 `bswap16`，再按 68000 大端读。磁盘上的 `00 FF` 在大端里是 `FF 00`。
+- 布局头：byte0 调色板，byte1 绘制函数，byte2 `nx`（列数），byte3 `ny`（行数），随后是该函数的 tile 与遮罩数据。
+- 遮罩按列；byte 遮罩的 bit7、word 遮罩的 bit15 是最顶行。空列仍占 16 像素 X 槽，空位仍占 Y 槽，**不要** `skip_sparse` 抽列或把列挤在一起。
+- 图定义 6 字节：有符号 X、Y，然后 `af`。`af & 0x3FF` 为 C 调用号；`0x4000` 竖翻，`0x8000` 横翻，`0x2000` 表示后面还有一组 6 字节要叠画（如陈国汉）。
+- C-ROM 16×16 的四个 8×8 顺序是 TR、BR、TL、BL（`crom_tool.BLOCK_OFFSETS`）。每一行 8 个像素里，**bit 0（LSB）是最左边，bit 7（MSB）是最右边**。`decode_tile_16x16` 与 `encode_tile_16x16` 必须一致。
+- 列距在 `zoom_x=15` 时是 16 像素。游戏里 sticky 列距等于前一列的 `(zoom_x+1)`，不是“永远 16”；但站立角色默认 `RoleShrinkRate=0xFFFF`、水平系数 `0xFF` 时仍是满尺寸 16 像素。不要靠乱缩列距去补缝。
+- 实现文件：`tools/sprite_compose.py`。Studio 中间预览走 `render_idle_png`。
+
+### 踩过的坑（不要再走）
+
+1. 按磁盘未换字的字节序解析布局，遮罩极性反了，再用 `skip_sparse` 抽掉“稀疏列”，人物会碎成竖条。用户拿到的 6:46 exe 截图就是这个样子。
+2. 布局改对之后如果还碎，通常不是列距问题。官方水平缩放（MAME skip 表 + `(zoom_x+1)` 列距）收不拢碎块；把列重叠绘制会让躯干叠两层，也不要这么做。
+3. 只把左右 8×8 对调（所谓 v6）时，中间会看起来像完整人、两边多出碎块。那是在错误位序（把 MSB 当最左像素）上又等于把整块图左右翻转，不是正确解码。
+4. `crom_tool` 自测里的 “Real MVS C-ROM hardware data bit-exact” 只是 encode↔decode 往返，不能证明屏幕方向对。视觉基准要用 arcade-sprite-viewer 的 `kof97.gfx`：文件头小端 `0x05267234`，从第 16 字节起是 gzip；解压后每块 128 字节，每字节高半像素在左。
+5. 预览背景 `#151720` 太暗，拼对之后的黑道服也会看起来发虚。`hero-stage` 中心已提到 `#2E3140`。不要把对比度问题当成拼装错误。
+6. 根目录 `KOF97ModStudio.exe` 在 Studio 还开着时无法覆盖。新包在 `dist\KOF97ModStudio.exe`。不要把仍被占用的旧 exe 提交上去。
+7. 工程路径 `D:\TEmp\REA\Fighter97` 对文件拷出工具来说可能在允许根目录之外，先拷到 `C:\Users\mimovr\agent-tools\` 再传。PowerShell 不要用 `&&`，用 `;`，带引号的命令写成脚本更稳。
+8. 不要改已经认可的明暗生成器；不要写官方 ROM 目录；特效颜色归 KOF97特效，不要和这套换肤 / Studio 工作混改。
+
+## 12. 交付位置
+
+- 工程：`D:\TEmp\REA\Fighter97`，远程 `https://github.com/yxiaojiang/REA_KOK97`，分支 `main`。
+- 官方 ROM（只读）：`C:\Program Files (x86)\KOF97\roms\kof97.ZIP`。
+- Studio 可执行文件提交为仓库根目录的 `KOF97ModStudio.exe`。`dist\` 被 gitignore；若根目录文件被占用，先用 `KOF97ModStudio_new.exe` 或 `dist\` 里同时打好的那一份。
+

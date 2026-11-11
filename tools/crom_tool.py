@@ -11,6 +11,8 @@ Neo-Geo Sprite Tile Layout (16x16, 4bpp, 128 bytes per tile):
 - Planar bitplane distribution:
   - Odd C-ROMs (C1, C3, C5) store Bitplanes 0 and 1 (64 bytes/tile)
   - Even C-ROMs (C2, C4, C6) store Bitplanes 2 and 3 (64 bytes/tile)
+- In each 8x8 row, bit 0 (LSB) is the leftmost pixel and bit 7 (MSB) is the rightmost.
+  (This matches official hardware / arcade-sprite-viewer packed gfx.)
 """
 
 import argparse
@@ -69,7 +71,8 @@ def decode_tile_16x16(odd_64: bytes, even_64: bytes) -> List[List[int]]:
             bp3 = even_64[b_offset + r * 2 + 1]
 
             for px in range(8):
-                shift = 7 - px
+                # LSB is the leftmost pixel of the 8x8 row.
+                shift = px
                 b0 = (bp0 >> shift) & 1
                 b1 = (bp1 >> shift) & 1
                 b2 = (bp2 >> shift) & 1
@@ -97,7 +100,7 @@ def encode_tile_16x16(pixels: List[List[int]]) -> Tuple[bytes, bytes]:
         for r in range(8):
             bp0 = bp1 = bp2 = bp3 = 0
             for px in range(8):
-                shift = 7 - px
+                shift = px
                 color = pixels[y_ofs + r][x_ofs + px] & 0x0F
                 bp0 |= ((color >> 0) & 1) << shift
                 bp1 |= ((color >> 1) & 1) << shift

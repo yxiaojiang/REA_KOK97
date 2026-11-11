@@ -267,7 +267,7 @@
     overflow: hidden;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at 50% 50%, #151720 0%, var(--bg) 80%);
+    background: radial-gradient(circle at 50% 50%, #2E3140 0%, var(--bg) 80%);
   }
   .watermark {
     position: absolute;
@@ -914,6 +914,118 @@
     opacity: 1;
     transform: translate(-50%, 0);
   }
+
+  .figure-box.has-sprite {
+    aspect-ratio: auto;
+    width: min(340px, 92%);
+  }
+  .figure-box.has-sprite svg { display: none; }
+  .figure-box img.idle-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .custom-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 310px;
+    height: calc(100vh - 76px);
+  }
+  .custom-save-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .custom-save-row input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel2);
+    color: var(--ink);
+    padding: 0 10px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .custom-save-row .btn {
+    height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+    flex: none;
+  }
+  .slot-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+  }
+  .slot-row label {
+    flex: 1;
+    min-width: 0;
+    font-size: 12.5px;
+    color: #D1D4DE;
+  }
+  .slot-row input[type="color"] {
+    width: 32px;
+    height: 24px;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    flex: none;
+  }
+  .slot-row .hex {
+    width: 82px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel2);
+    color: var(--ink);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+  .custom-official-btn {
+    border: 0;
+    background: transparent;
+    color: var(--mute);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    padding: 0 2px 6px;
+  }
+  .custom-official-btn:hover { color: var(--accent); }
+  .saved-skin-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: var(--panel2);
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .saved-skin-row:hover { border-color: rgba(255, 179, 25, 0.35); }
+  .saved-skin-row .name { flex: 1; font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .saved-skin-row .chips { display: flex; gap: 3px; flex: none; }
+  .saved-skin-row .chips i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+  .saved-skin-row .del {
+    border: 0;
+    background: transparent;
+    color: var(--mute);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 2px;
+  }
+  .saved-skin-row .del:hover { color: #FF6B6B; }
+  .custom-empty { font-size: 12px; color: var(--mute); padding: 6px 2px; }
 </style>
 </head>
 <body>
@@ -923,6 +1035,7 @@
   <nav class="rail">
     <div class="logo">97</div>
     <button class="nav on" data-p="skin" title="角色外观与皮肤定制"><svg viewBox="0 0 24 24"><path d="M12 3c-4 5-6 8-6 11a6 6 0 0 0 12 0c0-3-2-6-6-11z"/></svg></button>
+    <button class="nav" data-p="custom" title="自定义皮肤"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
     <button class="nav" data-p="combat" title="战斗与防御属性强化"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></button>
     <button class="nav" data-p="tools" title="一键工程维护与工具"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg></button>
     <div class="rail-spacer"></div>
@@ -995,6 +1108,44 @@
     </section>
 
     <!-- PAGE 2: COMBAT -->
+
+    <!-- PAGE: CUSTOM SKIN -->
+    <section class="page" id="pg-custom">
+      <div class="custom-layout">
+        <div class="char-list-col">
+          <div class="char-list-header">
+            <span>选择角色</span>
+            <span class="badge">36 位</span>
+          </div>
+          <div class="char-scroll-box" id="customCharBox"></div>
+        </div>
+        <div class="hero-stage">
+          <div class="watermark" id="customWatermark">八神庵</div>
+          <div class="halo-glow"></div>
+          <div class="figure-box has-sprite" id="customFigureBox">
+            <img class="idle-preview" id="customIdleImg" alt="站立预览">
+          </div>
+          <div class="active-char-banner">
+            <span class="cname" id="customBannerName">八神庵</span>
+            <span style="color:var(--line);">|</span>
+            <span class="tname" id="customBannerHint">编辑 15 色槽</span>
+          </div>
+        </div>
+        <div class="theme-sidebar">
+          <div class="sidebar-header">15 色配色</div>
+          <button class="custom-official-btn" id="btnOfficialColors" type="button">还原为该角色官方色</button>
+          <div id="customSlotList" style="display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;"></div>
+          <div class="custom-save-row">
+            <input type="text" id="customSkinName" placeholder="皮肤名称" maxlength="24">
+            <button class="btn outline" id="btnSaveCustom" type="button">保存</button>
+            <button class="btn primary" id="btnApplyCustom" type="button">应用</button>
+          </div>
+          <div class="sidebar-header" style="margin-top:10px;">已保存</div>
+          <div id="customSavedList"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="page" id="pg-combat">
       <div class="combat-layout">
         <div class="combat-cards">
@@ -1425,15 +1576,43 @@ CHARACTERS.forEach(c => {
 });
 
 const $ = s => document.querySelector(s);
+
+state.customSkins = [];
+state.slotLabels = [];
+state.officialColors = [];
+state.customEdit = { charId: 0x1B, colors: [], skinId: null };
 const $$ = s => document.querySelectorAll(s);
 const rootStyle = document.documentElement.style;
 
 // Mount SVG Figure
-$("#figureBox").innerHTML = SVG_FIGURE;
+$("#figureBox").innerHTML = SVG_FIGURE + '<img class="idle-preview" id="figureIdleImg" alt="" hidden>';
 
 /* Helper to get theme by ID */
 function getThemeById(themeId) {
   return THEMES.find(t => t.id === themeId) || THEMES[0];
+}
+
+function isCustomTheme(themeId) {
+  return typeof themeId === "string" && themeId.indexOf("custom") === 0;
+}
+
+function customSkinById(themeId) {
+  if (!isCustomTheme(themeId)) return null;
+  const sid = themeId.indexOf(":") >= 0 ? themeId.slice(themeId.indexOf(":") + 1) : "";
+  return (state.customSkins || []).find(s => s.id === sid) || null;
+}
+
+function themeDisplayName(skinInfo) {
+  const id = skinInfo && skinInfo.themeId;
+  const saved = customSkinById(id);
+  if (saved) return saved.name;
+  if (isCustomTheme(id)) return "自定义皮肤";
+  return getThemeById(id).name;
+}
+
+function themeShortName(skinInfo) {
+  if (isCustomTheme(skinInfo && skinInfo.themeId)) return "自定义";
+  return getThemeById(skinInfo && skinInfo.themeId).shortName;
 }
 
 function skinPreviewColors(skinInfo) {
@@ -1441,6 +1620,63 @@ function skinPreviewColors(skinInfo) {
     return skinInfo.preview;
   }
   return getThemeById(skinInfo && skinInfo.themeId ? skinInfo.themeId : "classic");
+}
+
+function normalizeHex(value) {
+  const raw = String(value || "").trim();
+  const h = raw.charAt(0) === "#" ? raw.slice(1) : raw;
+  if (/^[0-9a-fA-F]{6}$/.test(h)) return "#" + h.toUpperCase();
+  return null;
+}
+
+let previewTimer = null;
+let previewSeq = 0;
+
+function showIdleImage(img, box, pngBase64) {
+  if (!img || !pngBase64) return false;
+  img.src = "data:image/png;base64," + pngBase64;
+  img.hidden = false;
+  if (box) box.classList.add("has-sprite");
+  return true;
+}
+
+function hideIdleImage(img, box) {
+  if (img) {
+    img.removeAttribute("src");
+    img.hidden = true;
+  }
+  if (box) box.classList.remove("has-sprite");
+}
+
+function refreshIdlePreview(charId, colors, targets) {
+  const list = targets || [
+    { img: $("#figureIdleImg"), box: $("#figureBox") },
+    { img: $("#customIdleImg"), box: $("#customFigureBox") }
+  ];
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(() => {
+    const seq = ++previewSeq;
+    const skin = state.characterSkins[charId] || { themeId: "classic" };
+    const payload = { char_id: charId };
+    if (colors && colors.length === 15) {
+      payload.colors = colors;
+    } else if (skin.themeId !== "classic" && skin.colors && skin.colors.length === 15) {
+      payload.colors = skin.colors;
+    }
+    callBackend("get_idle_preview", payload).then(res => {
+      if (seq !== previewSeq) return;
+      if (res && res.labels) state.slotLabels = res.labels;
+      if (res && res.official_colors) state.officialColors = res.official_colors;
+      if (res && res.success && res.png_base64) {
+        list.forEach(t => showIdleImage(t.img, t.box, res.png_base64));
+      } else {
+        list.forEach(t => hideIdleImage(t.img, t.box));
+      }
+    }).catch(() => {
+      if (seq !== previewSeq) return;
+      list.forEach(t => hideIdleImage(t.img, t.box));
+    });
+  }, 70);
 }
 
 
@@ -1456,7 +1692,7 @@ function renderCharacterList() {
   CHARACTERS.forEach((c, idx) => {
     const skinInfo = state.characterSkins[c.id] || { themeId: "classic" };
     const theme = getThemeById(skinInfo.themeId);
-    const isModded = theme.id !== "classic";
+    const isModded = skinInfo.themeId !== "classic";
     const isActive = c.id === state.activeCharId;
 
     const row = document.createElement("div");
@@ -1470,7 +1706,7 @@ function renderCharacterList() {
       </div>
       <div class="char-skin-tag ${isModded ? 'modded' : ''}" id="skin-tag-${c.id}">
         <span class="char-skin-dot" style="background:${skinPreviewColors(skinInfo).hair};"></span>
-        <span>${theme.shortName}</span>
+        <span>${themeShortName(skinInfo)}</span>
       </div>
     `;
 
@@ -1498,10 +1734,11 @@ function selectCharacter(charId, silent = false) {
   // Update Center Stage
   $("#watermark").textContent = char.name;
   $("#bannerCharName").textContent = char.name;
-  $("#bannerThemeName").textContent = theme.name;
+  $("#bannerThemeName").textContent = themeDisplayName(skinInfo);
 
-  // Paint the dummy from this character's generated palette
+  // Paint the dummy as fallback, then swap in the real standing sprite
   updateFigureColors(skinPreviewColors(skinInfo));
+  refreshIdlePreview(charId);
 
   // Update Right Theme Cards selection
   $$(".theme-card").forEach(c => {
@@ -1734,6 +1971,8 @@ $$(".nav").forEach(b => {
   b.onclick = () => {
     $$(".nav").forEach(x => x.classList.toggle("on", x === b));
     $$(".page").forEach(p => p.classList.toggle("on", p.id === "pg-" + b.dataset.p));
+    if (b.dataset.p === "custom") openCustomEditor(state.activeCharId);
+    if (b.dataset.p === "skin") refreshIdlePreview(state.activeCharId);
   };
 });
 
@@ -1944,6 +2183,9 @@ window.onBackendState = function(s) {
       state.characterSkins[cid] = s.character_skins[cidStr];
     });
   }
+  if (s.custom_skins) {
+    state.customSkins = s.custom_skins;
+  }
   if (s.char_id !== undefined) {
     state.activeCharId = s.char_id;
   }
@@ -2027,6 +2269,267 @@ if (window.pywebview && window.pywebview.api) {
 
 // Initial boot
 renderCharacterList();
+function defaultSlotLabels() {
+  return ["皮肤 1","皮肤 2","皮肤 3","皮肤 4","白边 1","白边 2","白边 3","头发 1","头发 2","头发 3","头发 4","衣服 1","衣服 2","衣服 3","勾边"];
+}
+
+function currentEditorColors() {
+  return (state.customEdit.colors || []).slice();
+}
+
+function renderCustomCharacterList() {
+  const container = $("#customCharBox");
+  if (!container) return;
+  container.innerHTML = "";
+  CHARACTERS.forEach((c, idx) => {
+    const skinInfo = state.characterSkins[c.id] || { themeId: "classic" };
+    const isActive = c.id === state.customEdit.charId;
+    const row = document.createElement("div");
+    row.className = "char-row" + (isActive ? " on" : "");
+    row.innerHTML = `
+      <div class="char-row-left">
+        <span class="idx">${String(idx + 1).padStart(2, "0")}</span>
+        <span class="name">${c.name}</span>
+      </div>
+      <div class="char-skin-tag ${skinInfo.themeId !== "classic" ? "modded" : ""}">
+        <span class="char-skin-dot" style="background:${skinPreviewColors(skinInfo).hair};"></span>
+        <span>${themeShortName(skinInfo)}</span>
+      </div>
+    `;
+    row.onclick = () => openCustomEditor(c.id);
+    container.appendChild(row);
+  });
+}
+
+function renderCustomSlots() {
+  const box = $("#customSlotList");
+  if (!box) return;
+  const labels = (state.slotLabels && state.slotLabels.length === 15) ? state.slotLabels : defaultSlotLabels();
+  const colors = currentEditorColors();
+  box.innerHTML = "";
+  for (let i = 0; i < 15; i++) {
+    const hex = normalizeHex(colors[i]) || "#808080";
+    const row = document.createElement("div");
+    row.className = "slot-row";
+    row.innerHTML = `
+      <label>${labels[i]}</label>
+      <input type="color" data-slot="${i}" value="${hex}">
+      <input class="hex" data-slot="${i}" value="${hex}" maxlength="7">
+    `;
+    box.appendChild(row);
+  }
+  box.querySelectorAll("input[type=color]").forEach(inp => {
+    inp.addEventListener("input", ev => {
+      const idx = parseInt(ev.target.dataset.slot, 10);
+      const hex = normalizeHex(ev.target.value);
+      if (!hex) return;
+      state.customEdit.colors[idx] = hex;
+      const text = box.querySelector(`input.hex[data-slot="${idx}"]`);
+      if (text) text.value = hex;
+      refreshIdlePreview(state.customEdit.charId, state.customEdit.colors, [
+        { img: $("#customIdleImg"), box: $("#customFigureBox") }
+      ]);
+    });
+  });
+  box.querySelectorAll("input.hex").forEach(inp => {
+    inp.addEventListener("change", ev => {
+      const idx = parseInt(ev.target.dataset.slot, 10);
+      const hex = normalizeHex(ev.target.value);
+      if (!hex) {
+        ev.target.value = state.customEdit.colors[idx] || "";
+        return;
+      }
+      ev.target.value = hex;
+      state.customEdit.colors[idx] = hex;
+      const colorInp = box.querySelector(`input[type=color][data-slot="${idx}"]`);
+      if (colorInp) colorInp.value = hex;
+      refreshIdlePreview(state.customEdit.charId, state.customEdit.colors, [
+        { img: $("#customIdleImg"), box: $("#customFigureBox") }
+      ]);
+    });
+  });
+}
+
+function renderSavedCustomSkins() {
+  const box = $("#customSavedList");
+  if (!box) return;
+  const cid = state.customEdit.charId;
+  const items = (state.customSkins || []).filter(s => s.cid === cid);
+  if (!items.length) {
+    box.innerHTML = '<div class="custom-empty">还没有保存过这个角色的自定义皮肤</div>';
+    return;
+  }
+  box.innerHTML = "";
+  items.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "saved-skin-row";
+    const chips = (item.colors || []).slice(7, 12).map(c => `<i style="background:${c}"></i>`).join("");
+    row.innerHTML = `
+      <div class="chips">${chips}</div>
+      <div class="name">${item.name}</div>
+      <button class="del" type="button" title="删除">×</button>
+    `;
+    row.onclick = ev => {
+      if (ev.target.closest(".del")) return;
+      state.customEdit.skinId = item.id;
+      state.customEdit.colors = item.colors.slice();
+      const nameInp = $("#customSkinName");
+      if (nameInp) nameInp.value = item.name;
+      renderCustomSlots();
+      refreshIdlePreview(cid, state.customEdit.colors, [
+        { img: $("#customIdleImg"), box: $("#customFigureBox") }
+      ]);
+    };
+    row.querySelector(".del").onclick = ev => {
+      ev.stopPropagation();
+      callBackend("delete_custom_skin", { id: item.id }).then(res => {
+        if (res && res.success) {
+          state.customSkins = res.custom_skins || [];
+          if (state.customEdit.skinId === item.id) state.customEdit.skinId = null;
+          renderSavedCustomSkins();
+          toast("已删除该自定义皮肤");
+        }
+      });
+    };
+    box.appendChild(row);
+  });
+}
+
+function openCustomEditor(charId) {
+  const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[27];
+  const skinInfo = state.characterSkins[charId] || { themeId: "classic" };
+  state.customEdit.charId = charId;
+  state.customEdit.skinId = isCustomTheme(skinInfo.themeId) && customSkinById(skinInfo.themeId)
+    ? customSkinById(skinInfo.themeId).id
+    : null;
+  const fallback = (skinInfo.colors && skinInfo.colors.length === 15) ? skinInfo.colors.slice() : [];
+  state.customEdit.colors = fallback.length === 15 ? fallback : (state.officialColors || []).slice();
+  const nameInp = $("#customSkinName");
+  if (nameInp) {
+    const saved = customSkinById(skinInfo.themeId);
+    nameInp.value = saved ? saved.name : (char.name + "自定义");
+  }
+  $("#customWatermark").textContent = char.name;
+  $("#customBannerName").textContent = char.name;
+  renderCustomCharacterList();
+  renderCustomSlots();
+  renderSavedCustomSkins();
+  const payload = { char_id: charId };
+  if (state.customEdit.colors.length === 15 && skinInfo.themeId !== "classic") {
+    payload.colors = state.customEdit.colors;
+  }
+  callBackend("get_idle_preview", payload).then(res => {
+    if (res && res.labels) state.slotLabels = res.labels;
+    if (res && res.official_colors) state.officialColors = res.official_colors;
+    if (state.customEdit.colors.length !== 15 && state.officialColors.length === 15) {
+      state.customEdit.colors = state.officialColors.slice();
+    }
+    renderCustomSlots();
+    if (res && res.success && res.png_base64) {
+      showIdleImage($("#customIdleImg"), $("#customFigureBox"), res.png_base64);
+    } else {
+      hideIdleImage($("#customIdleImg"), $("#customFigureBox"));
+    }
+  });
+}
+
+function syncCustomSkinsFrom(res) {
+  if (res && res.custom_skins) state.customSkins = res.custom_skins;
+  if (res && res.character_skins) {
+    Object.keys(res.character_skins).forEach(cidStr => {
+      state.characterSkins[parseInt(cidStr, 10)] = res.character_skins[cidStr];
+    });
+    renderCharacterList();
+    renderCustomCharacterList();
+  }
+}
+
+$("#btnOfficialColors").onclick = () => {
+  const cid = state.customEdit.charId;
+  callBackend("get_idle_preview", { char_id: cid }).then(res => {
+    if (res && res.official_colors && res.official_colors.length === 15) {
+      state.officialColors = res.official_colors;
+      state.customEdit.colors = res.official_colors.slice();
+      renderCustomSlots();
+      if (res.success && res.png_base64) {
+        showIdleImage($("#customIdleImg"), $("#customFigureBox"), res.png_base64);
+      }
+    }
+  });
+};
+
+$("#btnSaveCustom").onclick = () => {
+  const colors = currentEditorColors();
+  if (colors.length !== 15) {
+    toast("请先凑齐 15 个颜色");
+    return;
+  }
+  callBackend("save_custom_skin", {
+    char_id: state.customEdit.charId,
+    name: ($("#customSkinName").value || "").trim(),
+    colors,
+    id: state.customEdit.skinId || ""
+  }).then(res => {
+    if (!res || !res.success) {
+      toast((res && res.error) ? res.error : "保存失败");
+      return;
+    }
+    state.customEdit.skinId = res.id;
+    syncCustomSkinsFrom(res);
+    renderSavedCustomSkins();
+    toast("自定义皮肤已保存");
+  });
+};
+
+$("#btnApplyCustom").onclick = () => {
+  const colors = currentEditorColors();
+  if (colors.length !== 15) {
+    toast("请先凑齐 15 个颜色");
+    return;
+  }
+  const name = ($("#customSkinName").value || "").trim() || "自定义皮肤";
+  const applyNow = (skinId) => {
+    const themeId = "custom:" + skinId;
+    callBackend("set_character_skin", {
+      char_id: state.customEdit.charId,
+      theme_id: themeId,
+      scope: "SINGLE",
+      colors,
+      use_stored_colors: true
+    }).then(res => {
+      syncCustomSkinsFrom(res);
+      state.activeCharId = state.customEdit.charId;
+      selectCharacter(state.activeCharId, true);
+      const char = CHARACTERS.find(c => c.id === state.customEdit.charId);
+      toast(`已为【${char ? char.name : ""}】应用：${name}`);
+    });
+    if (state.autoLive && state.isEmulatorRunning) {
+      callBackend("apply_skin_live", {
+        char_id: state.customEdit.charId,
+        theme_id: themeId,
+        scope: "SINGLE",
+        colors,
+        use_stored_colors: true
+      });
+    }
+  };
+  callBackend("save_custom_skin", {
+    char_id: state.customEdit.charId,
+    name,
+    colors,
+    id: state.customEdit.skinId || ""
+  }).then(res => {
+    if (!res || !res.success) {
+      toast((res && res.error) ? res.error : "保存失败");
+      return;
+    }
+    state.customEdit.skinId = res.id;
+    syncCustomSkinsFrom(res);
+    renderSavedCustomSkins();
+    applyNow(res.id);
+  });
+};
+
 selectCharacter(state.activeCharId, true);
 setDamage(state.damageIdx, true);
 log("拳皇97 逆向魔改工作台 (深色舞台 B 版) 已加载完毕。", "INFO");

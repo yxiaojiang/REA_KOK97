@@ -16,6 +16,8 @@ import subprocess
 import sys
 import threading
 import time
+import uuid
+import base64
 import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -78,6 +80,20 @@ from tools.rom_tool import (
     start_sandbox_kawaks,
     unpack_rom_set,
 )
+
+from tools.sprite_compose import (
+    SpriteRom,
+    official_colors,
+    official_header_word,
+    render_idle_png,
+    slot_labels as compose_slot_labels,
+)
+
+
+def is_custom_theme_id(theme_id: str) -> bool:
+    """Return True when the theme id belongs to a user-saved custom palette."""
+    return bool(theme_id) and str(theme_id).startswith("custom")
+
 
 
 # ============================================================================
@@ -863,43 +879,46 @@ THEME_RAMPS: Dict[str, Dict[str, Any]] = {
 
 
 # Disjoint-union semantic slot schema for all 36 characters in KOF97 (0x00..0x23).
-# Ensures clean color blocking, strict luminance ranking, deep dark anchor, and sharp outlines.
+# Audited against official A-button palettes. Hair takes the accent hue;
+# clothes, pants and shoes take the primary hue. Skin, true white cloth
+# and outlines stay official. Cream or midtone cloth is not parked in
+# white_trim, so a theme can cover the visible costume.
 CHARACTER_PALETTE_SCHEMA: Dict[int, Dict[str, List[int]]] = {
     0x00: {"skin": [1, 2, 3, 4], "white_trim": [0], "hair": [5, 6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x01: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "dark_anchor": [6, 7, 8, 9], "contour": [10], "accent": [11, 12, 13, 14]},
+    0x01: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "dark_anchor": [6, 7, 8, 9], "contour": [10], "hair": [11, 12, 13, 14]},
     0x02: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9, 10], "accent": [11], "white_trim": [12, 13], "contour": [14]},
-    0x03: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8], "primary": [9, 10], "accent": [11, 12], "white_trim": [13], "contour": [14]},
-    0x04: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9, 11], "accent": [10, 12, 13], "contour": [14]},
-    0x05: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "accent": [8, 9], "white_trim": [10, 11, 12, 13], "contour": [14]},
-    0x06: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9, 10], "contour": [11], "accent": [12, 13, 14]},
-    0x07: {"skin": [0, 1, 2, 3, 4], "accent": [5], "primary": [6, 7, 8, 9], "white_trim": [10], "dark_anchor": [11, 12, 13], "contour": [14]},
-    0x08: {"accent": [0], "skin": [1, 2, 3, 4, 5], "white_trim": [6, 7, 8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
-    0x09: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "accent": [12, 13, 14]},
-    0x0A: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x0B: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x0C: {"skin": [0, 1, 2, 3, 4], "accent": [5, 6, 7, 8], "white_trim": [9, 10, 11], "primary": [12, 13, 14]},
+    0x03: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8], "primary": [9, 10], "accent": [11], "hair": [12], "white_trim": [13], "contour": [14]},
+    0x04: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 11], "primary": [6, 7, 8, 9], "accent": [10], "hair": [12, 13], "contour": [14]},
+    0x05: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "hair": [8, 9], "dark_anchor": [10, 11, 12], "white_trim": [13], "contour": [14]},
+    0x06: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9, 10], "contour": [11], "hair": [12, 13, 14]},
+    0x07: {"skin": [0, 1, 2, 3, 4], "accent": [5], "primary": [6, 7, 8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x08: {"accent": [0], "skin": [1, 2, 3, 4, 5], "white_trim": [6, 7], "primary": [8, 9, 10], "hair": [11, 12, 13], "contour": [14]},
+    0x09: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "hair": [12, 13, 14]},
+    0x0A: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10], "hair": [11, 12, 13], "contour": [14]},
+    0x0B: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10], "hair": [11, 12, 13], "contour": [14]},
+    0x0C: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8], "white_trim": [9], "hair": [10, 11, 12, 13, 14]},
     0x0D: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x0E: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x0F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
-    0x10: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "white_trim": [8, 9, 10], "dark_anchor": [11, 12], "accent": [13], "contour": [14]},
-    0x11: {"primary": [0, 1, 2, 3], "accent": [4, 5], "white_trim": [6, 7, 8, 9], "skin": [10, 11, 12, 13, 14]},
-    0x12: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "contour": [13], "dark_anchor": [14]},
-    0x13: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11]},
-    0x14: {"skin": [0, 1, 2, 3], "primary": [4, 5, 6, 7, 8], "accent": [9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
-    0x15: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
+    0x0E: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x0F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6], "primary": [7, 8, 9], "hair": [10, 11, 12], "accent": [13, 14]},
+    0x10: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "white_trim": [8], "dark_anchor": [9, 10, 11, 12], "accent": [13], "contour": [14]},
+    0x11: {"hair": [0, 1, 2, 3], "accent": [4, 5], "primary": [6, 7, 8], "white_trim": [9], "skin": [10, 11, 12, 13, 14]},
+    0x12: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 14], "primary": [7, 8, 9], "hair": [10, 11, 12], "contour": [13]},
+    0x13: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "hair": [12, 13, 14]},
+    0x14: {"skin": [0, 1, 2, 3], "primary": [4, 5, 6, 7, 8], "accent": [9, 10], "hair": [11, 12, 13], "contour": [14]},
+    0x15: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
     0x16: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "dark_anchor": [13, 14]},
-    0x17: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
-    0x18: {"skin": [0, 1, 2, 3, 4], "accent": [5, 6, 7], "dark_anchor": [8, 9, 10, 11, 12], "contour": [13], "white_trim": [14]},
-    0x19: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "accent": [8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
+    0x17: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6], "hair": [7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
+    0x18: {"skin": [0, 1, 2, 3, 4], "hair": [5, 6, 7], "dark_anchor": [8, 9, 10, 11, 12, 14], "contour": [13]},
+    0x19: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "hair": [8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
     0x1A: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "white_trim": [14]},
-    0x1B: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "accent": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
+    0x1B: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "hair": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
     0x1C: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "hair": [6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x1D: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "accent": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
-    0x1E: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "accent": [12, 13, 14]},
-    0x1F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "contour": [14]},
-    0x20: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "dark_anchor": [13, 14]},
-    0x21: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
-    0x22: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 7, 8, 9, 10, 11], "accent": [12, 13, 14]},
+    0x1D: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "hair": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
+    0x1E: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "dark_anchor": [10], "contour": [11], "hair": [12, 13, 14]},
+    0x1F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x20: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "hair": [13, 14]},
+    0x21: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
+    0x22: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9, 10], "contour": [11], "accent": [12, 13, 14]},
     0x23: {"skin": [1, 2, 3, 4], "white_trim": [0], "hair": [5, 6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
 }
 
@@ -1154,9 +1173,11 @@ def generate_harmonious_character_palette(
     Each costume slot keeps the luma the sprite was drawn with. Highlights
     preserve that luma and ease saturation when the new hue is darker.
     Dark pigment keeps its saturation and must not get brighter. Skin,
-    white cloth, natural hair and outlines stay official. Orochi Iori
-    uses normal Iori's shade curve, because the official Orochi ramp is
-    a pastel highlight over a crushed shadow.
+    true white cloth and outlines stay official. Hair takes the accent
+    hue, and clothes, pants and shoes take the primary hue, so a theme
+    covers the visible costume. Orochi Iori uses normal Iori's shade
+    curve, because the official Orochi ramp is a pastel highlight over
+    a crushed shadow.
     """
     _, _, pal_idx = get_char_engine_info(cid)
     base_off = 0x483E + pal_idx * 8
@@ -1178,31 +1199,29 @@ def generate_harmonious_character_palette(
         iori_addr = 0x2CFFF0 + iori_pid * 32
         source = list(struct.unpack(">16H", p2_clean[iori_addr:iori_addr + 32])[1:])
 
-    if cid in (0x1B, 0x1D) or pal_idx in (0x1B, 0x1C):
-        res = list(source)
-        for idx in (7, 8, 9, 10, 11, 12, 13):
-            _paint_slot(res, source, idx, primary_h, primary_s)
-        res[14] = 0x0000
-        return res
-
     schema = CHARACTER_PALETTE_SCHEMA.get(cid)
     if not schema:
         return orig_words
 
     res = list(orig_words)
-    # Skin, white cloth and natural hair stay on the official words.
-    # Costume groups take the theme hue. Highlights keep luma (saturation
-    # eases when the hue is darker). Dark pigment keeps saturation and
-    # does not get brighter.
+    # Skin, true white cloth and outlines stay official. Clothes, pants
+    # and shoes take the primary hue. Hair takes the accent hue.
+    # Painted slots still take their shade from source, so Orochi Iori
+    # keeps official skin while using normal Iori's costume curve.
+    # Highlights keep luma (saturation eases when the hue is darker).
+    # Dark pigment keeps saturation and does not get brighter.
     if "primary" in schema:
         for idx in schema["primary"]:
-            _paint_slot(res, orig_words, idx, primary_h, primary_s)
+            _paint_slot(res, source, idx, primary_h, primary_s)
     if "dark_anchor" in schema:
         for idx in schema["dark_anchor"]:
-            _paint_slot(res, orig_words, idx, primary_h, primary_s)
+            _paint_slot(res, source, idx, primary_h, primary_s)
     if "accent" in schema:
         for idx in schema["accent"]:
-            _paint_slot(res, orig_words, idx, accent_h, accent_s, keep_value=True)
+            _paint_slot(res, source, idx, accent_h, accent_s, keep_value=True)
+    if "hair" in schema:
+        for idx in schema["hair"]:
+            _paint_slot(res, source, idx, accent_h, accent_s)
     if "contour" in schema:
         for idx in schema["contour"]:
             res[idx] = 0x0000
@@ -1531,6 +1550,9 @@ class KOF97BridgeApi:
         self._cached_p2_pid: Optional[int] = None
 
         # Per-character skin store: char_id -> {themeId, colors, preview}
+        self._sprite_rom = None
+        self._custom_skins = []
+
         self._character_skins: Dict[int, Dict[str, Any]] = {}
         classic_colors = list(PRESET_THEMES[0]["colors"])
         for char in CHARACTER_ROSTER:
@@ -1587,7 +1609,7 @@ class KOF97BridgeApi:
                     t_id = entry.get("themeId", "classic")
                     if t_id in OBSOLETE_THEME_MAP:
                         t_id = OBSOLETE_THEME_MAP[t_id]
-                    if t_id not in valid_theme_ids:
+                    if t_id not in valid_theme_ids and not is_custom_theme_id(t_id):
                         t_id = "classic"
 
                     colors = entry.get("colors")
@@ -1597,6 +1619,31 @@ class KOF97BridgeApi:
                     self._character_skins[cid] = make_skin_entry(cid, t_id, colors)
 
             print(f"[INFO] Successfully loaded configuration from {cfg_path}")
+
+            raw_customs = data.get("custom_skins", [])
+            customs = []
+            if isinstance(raw_customs, list):
+                for item in raw_customs:
+                    if not isinstance(item, dict):
+                        continue
+                    colors = item.get("colors")
+                    if not isinstance(colors, list) or len(colors) != 15:
+                        continue
+                    try:
+                        cid = int(item.get("cid"))
+                    except (TypeError, ValueError):
+                        continue
+                    sid = str(item.get("id") or "").strip()
+                    name = str(item.get("name") or "自定义皮肤").strip() or "自定义皮肤"
+                    if not sid:
+                        continue
+                    customs.append({
+                        "id": sid,
+                        "name": name,
+                        "cid": cid,
+                        "colors": [str(c) for c in colors],
+                    })
+            self._custom_skins = customs
             return True
         except Exception as exc:
             print(f"[WARN] Failed to read configuration from {cfg_path}: {exc}")
@@ -1618,6 +1665,7 @@ class KOF97BridgeApi:
                 str(cid): skin
                 for cid, skin in self._character_skins.items()
             },
+            "custom_skins": list(self._custom_skins),
             "last_saved": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
         cfg_path = get_config_path()
@@ -1663,7 +1711,119 @@ class KOF97BridgeApi:
             "has_unpacked": has_unpacked,
             "has_zip": has_zip,
             "zip_crc32": zip_crc,
+            "custom_skins": list(self._custom_skins),
         }
+
+
+    def _lspc_words_for_skin(self, cid: int, skin_entry: Dict[str, Any], p1_data: bytes, p2_clean: bytes) -> tuple:
+        """Return (theme_id, 15 LSPC2 words) for packing or live injection."""
+        theme_id = skin_entry.get("themeId", "classic") if skin_entry else "classic"
+        if is_custom_theme_id(theme_id):
+            colors = (skin_entry or {}).get("colors") or []
+            if isinstance(colors, list) and len(colors) == 15:
+                return theme_id, [hex_to_lspc2(c) for c in colors]
+            theme_id = "classic"
+        if theme_id == "classic":
+            _, _, pal_idx = get_char_engine_info(cid)
+            base_off = 0x483E + pal_idx * 8
+            base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+            orig_p2_addr = 0x2CFFF0 + base_pid * 32
+            lspc_words = [
+                struct.unpack(">H", p2_clean[orig_p2_addr + i * 2: orig_p2_addr + i * 2 + 2])[0]
+                for i in range(1, 16)
+            ]
+            return theme_id, lspc_words
+        lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
+        return theme_id, lspc_words
+
+    def _get_sprite_rom(self) -> SpriteRom:
+        """Load and cache official P/C ROM data for idle previews."""
+        if self._sprite_rom is None:
+            rom = SpriteRom(Path(self._source_zip))
+            rom.load()
+            self._sprite_rom = rom
+        return self._sprite_rom
+
+    def get_idle_preview(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Render an ACT 00 standing sprite recolored with 15 gameplay colors."""
+        params = params or {}
+        cid = int(params.get("char_id", self._char_id))
+        engine_cid, _alt, pal_idx = get_char_engine_info(cid)
+        schema = CHARACTER_PALETTE_SCHEMA.get(cid, {})
+        labels = compose_slot_labels(schema)
+        official = []
+        try:
+            rom = self._get_sprite_rom()
+            official = official_colors(rom.p1, rom.p2, pal_idx)
+            header = official_header_word(rom.p1, rom.p2, pal_idx)
+            raw = params.get("colors")
+            if isinstance(raw, list) and len(raw) == 15:
+                colors15 = [str(c) for c in raw]
+            else:
+                colors15 = official
+            png = render_idle_png(rom, engine_cid, colors15, frame_i=0, scale=4, header_word=header)
+            if not png:
+                return {
+                    "success": False,
+                    "error": "idle frame not available",
+                    "labels": labels,
+                    "official_colors": official,
+                    "png_base64": "",
+                }
+            return {
+                "success": True,
+                "png_base64": base64.b64encode(png).decode("ascii"),
+                "labels": labels,
+                "official_colors": official,
+            }
+        except Exception as exc:
+            return {
+                "success": False,
+                "error": str(exc),
+                "labels": labels,
+                "official_colors": official,
+                "png_base64": "",
+            }
+
+    def save_custom_skin(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Save or update a named 15-color custom skin for one character."""
+        params = params or {}
+        try:
+            cid = int(params.get("char_id", self._char_id))
+        except (TypeError, ValueError):
+            return {"success": False, "error": "invalid character"}
+        colors = params.get("colors")
+        if not isinstance(colors, list) or len(colors) != 15:
+            return {"success": False, "error": "need 15 colors"}
+        name = str(params.get("name") or "\u81ea\u5b9a\u4e49\u76ae\u80a4").strip() or "\u81ea\u5b9a\u4e49\u76ae\u80a4"
+        sid = str(params.get("id") or "").strip()
+        entry = {"id": sid, "name": name, "cid": cid, "colors": [str(c) for c in colors]}
+        if sid:
+            found = False
+            for i, item in enumerate(self._custom_skins):
+                if item.get("id") == sid:
+                    self._custom_skins[i] = entry
+                    found = True
+                    break
+            if not found:
+                self._custom_skins.append(entry)
+        else:
+            sid = "cs_%02x_%s" % (cid, uuid.uuid4().hex[:8])
+            entry["id"] = sid
+            self._custom_skins.append(entry)
+        self._save_config_to_disk()
+        async_log(f"\u5df2\u4fdd\u5b58\u81ea\u5b9a\u4e49\u76ae\u80a4\u3010{name}\u3011", "SUCCESS")
+        return {"success": True, "id": sid, "custom_skins": list(self._custom_skins)}
+
+    def delete_custom_skin(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Remove one saved custom skin by id."""
+        params = params or {}
+        sid = str(params.get("id") or "").strip()
+        if not sid:
+            return {"success": False, "error": "missing id"}
+        self._custom_skins = [s for s in self._custom_skins if s.get("id") != sid]
+        self._save_config_to_disk()
+        return {"success": True, "custom_skins": list(self._custom_skins)}
 
     def update_active_character(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Update active character selection."""
@@ -1679,10 +1839,14 @@ class KOF97BridgeApi:
         """
         Set skin for a single character or bulk set for all characters.
         Maintains independent per-character entries with computed hex colors!
+        Custom palettes keep the 15 colors the user stored and skip the theme generator.
         """
         char_id = params.get("char_id", self._char_id)
         theme_id = params.get("theme_id", "classic")
         scope = params.get("scope", self._scope)
+        raw_colors = params.get("colors")
+        stored_colors = list(raw_colors) if isinstance(raw_colors, list) and len(raw_colors) == 15 else None
+        use_stored = bool(params.get("use_stored_colors")) or is_custom_theme_id(theme_id)
 
         p1_path = self._workdir / "p1_be.bin"
         p2_path = self._workdir / "p2_be.bin"
@@ -1692,7 +1856,12 @@ class KOF97BridgeApi:
             if p1_data is None:
                 p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
 
-        if scope == "ALL":
+        if use_stored and stored_colors:
+            self._character_skins[char_id] = make_skin_entry(char_id, theme_id, stored_colors)
+            char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
+            cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
+            async_log(f"\u5df2\u4fdd\u5b58\u89d2\u8272\u3010{cname}\u3011\u7684\u81ea\u5b9a\u4e49\u76ae\u80a4: \u3010{theme_id}\u3011", "INFO")
+        elif scope == "ALL":
             for char_info in CHARACTER_ROSTER:
                 cid = char_info["id"]
                 lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
@@ -1714,6 +1883,7 @@ class KOF97BridgeApi:
         return {
             "success": True,
             "character_skins": {str(k): v for k, v in self._character_skins.items()},
+            "custom_skins": list(self._custom_skins),
         }
 
 
@@ -1992,8 +2162,8 @@ class KOF97BridgeApi:
                 customized_count += 1
                 cname = char_info["name_cn"]
 
-                # Generate tailored, luminance-preserving harmonious palette
-                lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
+                # Custom skins keep stored colors; presets still go through the generator.
+                _tid, lspc_words = self._lspc_words_for_skin(cid, skin_entry, p1_data, p2_clean)
                 lspc_bytes = struct.pack(">15H", *lspc_words)
 
                 # Generate luminous harmonic burst flash palette for MAX Mode (sub-palette +3)
@@ -2207,13 +2377,11 @@ class KOF97BridgeApi:
                 base_off = 0x483E + pal_idx * 8
                 base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
 
-                if t_id == "classic":
-                    orig_p2_addr = 0x2CFFF0 + base_pid * 32
-                    lspc_words = [struct.unpack(">H", p2_clean[orig_p2_addr + i * 2 : orig_p2_addr + i * 2 + 2])[0] for i in range(1, 16)]
+                _tid, lspc_words = self._lspc_words_for_skin(target_cid, skin_entry, p1_data, p2_clean)
+                if _tid == "classic":
                     burst_words = lspc_words
                 else:
-                    lspc_words = generate_harmonious_character_palette(target_cid, t_id, p1_data, p2_clean)
-                    burst_words = generate_burst_character_palette(target_cid, t_id, lspc_words)
+                    burst_words = generate_burst_character_palette(target_cid, _tid, lspc_words)
 
                 # Prepare Little-Endian packed words for WinKawaks RAM
                 lspc_bytes_le = bytearray()
