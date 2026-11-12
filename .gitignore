@@ -23,6 +23,7 @@ sandbox/*.exe
 sandbox/*.dll
 sandbox/*.rom
 sandbox/*.png
+sandbox/*.wav
 sandbox/blend/
 sandbox/cheats/
 sandbox/eeprom/
@@ -35,9 +36,12 @@ sandbox/capture/deleteme.txt
 sandbox/ini/deleteme.txt
 
 # OS & Editor temporary files
+Temps/
 .DS_Store
 Thumbs.db
 *.tmp
 *.bak
+*.bak*
+*.bak_*
 *.swp
 *~

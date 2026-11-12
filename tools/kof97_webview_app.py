@@ -10,10 +10,12 @@ All comments, identifiers, and variables strictly follow 100% English specificat
 
 import ctypes
 import json
+import math
 import os
 import struct
 import subprocess
 import sys
+import random
 import threading
 import time
 import uuid
@@ -899,18 +901,18 @@ CHARACTER_PALETTE_SCHEMA: Dict[int, Dict[str, List[int]]] = {
     0x0C: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8], "white_trim": [9], "hair": [10, 11, 12, 13, 14]},
     0x0D: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
     0x0E: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
-    0x0F: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6], "primary": [7, 8, 9], "hair": [10, 11, 12], "accent": [13, 14]},
-    0x10: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "white_trim": [8], "dark_anchor": [9, 10, 11, 12], "accent": [13], "contour": [14]},
+    0x0F: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9, 10, 11, 12], "accent": [13, 14]},
+    0x10: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8], "dark_anchor": [9, 10, 11, 12], "accent": [13], "contour": [14]},
     0x11: {"hair": [0, 1, 2, 3], "accent": [4, 5], "primary": [6, 7, 8], "white_trim": [9], "skin": [10, 11, 12, 13, 14]},
-    0x12: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6, 14], "primary": [7, 8, 9], "hair": [10, 11, 12], "contour": [13]},
+    0x12: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9, 14], "hair": [10, 11, 12], "contour": [13]},
     0x13: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "hair": [12, 13, 14]},
     0x14: {"skin": [0, 1, 2, 3], "primary": [4, 5, 6, 7, 8], "accent": [9, 10], "hair": [11, 12, 13], "contour": [14]},
     0x15: {"skin": [0, 1, 2, 3, 4], "white_trim": [5], "primary": [6, 7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
     0x16: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7, 8, 9], "accent": [10, 11], "contour": [12], "dark_anchor": [13, 14]},
     0x17: {"skin": [0, 1, 2, 3, 4], "white_trim": [5, 6], "hair": [7, 8, 9], "primary": [10, 11, 12], "dark_anchor": [13], "contour": [14]},
-    0x18: {"skin": [0, 1, 2, 3, 4], "hair": [5, 6, 7], "dark_anchor": [8, 9, 10, 11, 12, 14], "contour": [13]},
+    0x18: {"skin": [0, 1, 2, 3, 4], "hair": [5, 6, 7], "primary": [8, 9, 10, 11, 12, 14], "contour": [13]},
     0x19: {"skin": [0, 1, 2, 3, 4], "primary": [5, 6, 7], "hair": [8, 9, 10], "dark_anchor": [11, 12, 13], "contour": [14]},
-    0x1A: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13], "white_trim": [14]},
+    0x1A: {"skin": [0, 1, 2, 3, 4], "dark_anchor": [5, 6, 7, 8, 9], "primary": [10, 11, 12, 13, 14]},
     0x1B: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "hair": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
     0x1C: {"white_trim": [0], "skin": [1, 2, 3, 4, 5], "hair": [6], "primary": [7, 8, 9], "dark_anchor": [10, 11, 12, 13], "contour": [14]},
     0x1D: {"skin": [0, 1, 2, 3], "white_trim": [4, 5, 6], "hair": [7, 8, 9, 10], "primary": [11, 12, 13], "contour": [14]},
@@ -1144,6 +1146,296 @@ def recolor_match_shade(
     )
 
 
+
+def _slot_hsv(word: int) -> Tuple[float, float, float, float]:
+    """Return hue, saturation, value, and luma for one LSPC2 word."""
+    r5, g5, b5, _ = decode_lspc2(word)
+    hue, sat, val = _rgb5_to_hsv(r5, g5, b5)
+    luma = _unit_luma(r5 / 31.0, g5 / 31.0, b5 / 31.0)
+    return hue, sat, val, luma
+
+
+def _slot_is_inert(word: int) -> bool:
+    """True when a painted slot still reads as gray, white, or near-black."""
+    _hue, sat, val, _luma = _slot_hsv(word)
+    if val <= 0.07:
+        return True
+    if sat < 0.18:
+        return True
+    if val < 0.40 and sat < 0.35:
+        return True
+    # Muddy midtones (a dark blue kimono shifted toward red) still look gray.
+    if sat < 0.45 and val < 0.72:
+        return True
+    return False
+
+
+def _cluster_slots(source: List[int], indices: List[int]) -> List[List[int]]:
+    """Split a costume group where a large luma gap separates two garments."""
+    ranked = sorted(indices, key=lambda i: _slot_hsv(source[i])[3])
+    clusters: List[List[int]] = [[ranked[0]]]
+    for prev, cur in zip(ranked, ranked[1:]):
+        if _slot_hsv(source[cur])[3] - _slot_hsv(source[prev])[3] > 0.24:
+            clusters.append([cur])
+        else:
+            clusters[-1].append(cur)
+    return clusters
+
+
+def _cluster_bias(source: List[int], cluster: List[int]) -> str:
+    """Choose light, dark, or full theme-ramp coverage for one luma cluster."""
+    lumas = [_slot_hsv(source[i])[3] for i in cluster]
+    if max(lumas) <= 0.50:
+        return "dark"
+    if max(lumas) >= 0.80 and (sum(lumas) / float(len(lumas))) >= 0.45:
+        return "light"
+    return "full"
+
+
+def _bias_t(unit: float, bias: str) -> float:
+    """Map a 0..1 shade rank onto the part of the theme ramp this garment uses."""
+    if bias == "light":
+        return 0.46 + unit * 0.54
+    if bias == "dark":
+        return 0.05 + unit * 0.48
+    return 0.06 + unit * 0.88
+
+
+def _ramp_word(theme_id: str, ramp_key: str, unit: float) -> Optional[int]:
+    """Sample one theme ramp. 0 is the darkest step, 1 is the lightest."""
+    ramp = THEME_RAMPS.get(theme_id, {}).get(ramp_key) or []
+    cols = []
+    for hx in ramp:
+        r5, g5, b5 = hex_to_rgb5(hx)
+        luma = _unit_luma(r5 / 31.0, g5 / 31.0, b5 / 31.0)
+        cols.append((luma, r5, g5, b5))
+    if not cols:
+        return None
+    cols.sort(key=lambda item: item[0])
+    unit = min(1.0, max(0.0, unit))
+    if len(cols) == 1:
+        _luma, r5, g5, b5 = cols[0]
+        return encode_lspc2(r5, g5, b5, dark=0)
+    pos = unit * (len(cols) - 1)
+    i = int(pos)
+    frac = pos - i
+    if i >= len(cols) - 1:
+        _luma, r5, g5, b5 = cols[-1]
+    else:
+        _l0, r0, g0, b0 = cols[i]
+        _l1, r1, g1, b1 = cols[i + 1]
+        r5 = int(round(r0 + (r1 - r0) * frac))
+        g5 = int(round(g0 + (g1 - g0) * frac))
+        b5 = int(round(b0 + (b1 - b0) * frac))
+    return encode_lspc2(
+        min(31, max(0, r5)),
+        min(31, max(0, g5)),
+        min(31, max(0, b5)),
+        dark=0,
+    )
+
+
+def _srgb_to_linear(c: float) -> float:
+    """sRGB transfer to linear light, 0..1."""
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def _linear_to_srgb(c: float) -> float:
+    """Linear light to sRGB transfer, 0..1 (input may be out of range)."""
+    if c <= 0.0031308:
+        return 12.92 * c
+    return 1.055 * (c ** (1.0 / 2.4)) - 0.055
+
+
+def _rgb_unit_to_oklch(rf: float, gf: float, bf: float) -> Tuple[float, float, float]:
+    """sRGB 0..1 to OKLCH (L 0..1, chroma, hue degrees)."""
+    r, g, b = _srgb_to_linear(rf), _srgb_to_linear(gf), _srgb_to_linear(bf)
+    l_ = (0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b) ** (1.0 / 3.0)
+    m_ = (0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b) ** (1.0 / 3.0)
+    s_ = (0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b) ** (1.0 / 3.0)
+    lum = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_
+    a_ax = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+    b_ax = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+    chroma = (a_ax * a_ax + b_ax * b_ax) ** 0.5
+    hue = math.degrees(math.atan2(b_ax, a_ax)) % 360.0
+    return lum, chroma, hue
+
+
+def _oklch_to_linear(lum: float, chroma: float, hue: float) -> Tuple[float, float, float]:
+    """OKLCH to linear sRGB (may fall outside 0..1)."""
+    a_ax = chroma * math.cos(math.radians(hue))
+    b_ax = chroma * math.sin(math.radians(hue))
+    l_ = (lum + 0.3963377774 * a_ax + 0.2158037573 * b_ax) ** 3
+    m_ = (lum - 0.1055613458 * a_ax - 0.0638541728 * b_ax) ** 3
+    s_ = (lum - 0.0894841775 * a_ax - 1.2914855480 * b_ax) ** 3
+    r = 4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_
+    g = -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_
+    b = -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_
+    return r, g, b
+
+
+def _oklch_word(lum: float, chroma: float, hue: float) -> int:
+    """Encode an OKLCH color as LSPC2, lowering chroma until it fits sRGB."""
+    lum = min(1.0, max(0.0, lum))
+    lo, hi = 0.0, max(0.0, chroma)
+    rgb = _oklch_to_linear(lum, hi, hue)
+    if min(rgb) < 0.0 or max(rgb) > 1.0:
+        for _ in range(18):
+            mid = (lo + hi) * 0.5
+            test = _oklch_to_linear(lum, mid, hue)
+            if min(test) < 0.0 or max(test) > 1.0:
+                hi = mid
+            else:
+                lo = mid
+        rgb = _oklch_to_linear(lum, lo, hue)
+    out = []
+    for comp in rgb:
+        unit = _linear_to_srgb(min(1.0, max(0.0, comp)))
+        out.append(min(31, max(0, int(round(unit * 31.0)))))
+    return encode_lspc2(out[0], out[1], out[2], dark=0)
+
+
+# Peak OKLCH chroma of official SNK alternate costumes. Measured on the
+# Chizuru and Yamazaki B/C/D palettes: pale garments sit near 0.04-0.07,
+# dark suits near 0.07-0.13. Tailwind ramps run up to 0.20, which reads as
+# neon on 15-color pixel art, so the cover painter caps chroma here.
+_CLOTH_CHROMA_PEAK = {"light": 0.105, "full": 0.11, "dark": 0.13}
+
+
+def _cloth_chroma_cap(lum: float, bias: str) -> float:
+    """Chroma ceiling for one cloth shade: highest at mid L, low at the ends."""
+    bell = 1.0 - ((lum - 0.5) / 0.55) ** 2
+    bell = min(1.0, max(0.15, bell))
+    return _CLOTH_CHROMA_PEAK.get(bias, 0.10) * bell
+
+
+def _natural_cloth_word(
+    theme_id: str,
+    ramp_key: str,
+    ramp_t: float,
+    src_word: int,
+    bias: str,
+    key_hex: Optional[str] = None,
+    lift_neutral: bool = False,
+) -> Optional[int]:
+    """
+    Dye one cloth or hair shade the way SNK built alternate costumes.
+
+    The sprite's own OKLCH lightness is kept, so a white top stays a pale
+    tint, a black suit stays a deep tone, and the contrast between garments
+    survives. Hue comes from the theme ramp at that rank, so each skin keeps
+    its identity. Chroma is the ramp's chroma, capped to the official
+    alt-costume range. A slot the artist drew vivid (Iori's red hair, Mai's
+    red dress) may keep up to its own chroma. When a vivid slot is turned
+    near-neutral (a red headband on a white theme), lightness is lifted
+    toward a gray of the same HSV value, so it reads as white, not dull gray.
+    key_hex, when given, replaces the ramp sample as hue and chroma source
+    (the theme's identity color from THEME_KEYS, used for vivid garments).
+    """
+    if key_hex is not None:
+        kr, kg, kb = hex_to_rgb5(key_hex)
+        _kl, ramp_c, ramp_h = _rgb_unit_to_oklch(kr / 31.0, kg / 31.0, kb / 31.0)
+    else:
+        ramp_word = _ramp_word(theme_id, ramp_key, ramp_t)
+        if ramp_word is None:
+            return None
+        rr, rg, rb, _ = decode_lspc2(ramp_word)
+        _rl, ramp_c, ramp_h = _rgb_unit_to_oklch(rr / 31.0, rg / 31.0, rb / 31.0)
+    sr, sg, sb, _ = decode_lspc2(src_word)
+    src_l, src_c, _sh = _rgb_unit_to_oklch(sr / 31.0, sg / 31.0, sb / 31.0)
+    # Keep the drawn lightness. Very dark shades get a small lift so the
+    # dye can still be seen against the black outline.
+    lum = src_l if src_l >= 0.16 else 0.16 + (src_l - 0.16) * 0.5
+    if bias == "light":
+        # Pure white cannot carry any hue. Settle pale cloth a touch lower
+        # so the top step still shows the dye, like SNK's cream Chizuru.
+        lum = min(lum, 0.97) - 0.02 * lum
+    ceiling = max(_cloth_chroma_cap(lum, bias), min(src_c, 0.20))
+    chroma = min(ramp_c, ceiling)
+    if lift_neutral and src_c > 0.08 and chroma < src_c:
+        loss = (src_c - chroma) / src_c
+        src_val = max(sr, sg, sb) / 31.0
+        gray_l, _gc, _gh = _rgb_unit_to_oklch(src_val, src_val, src_val)
+        if gray_l > lum:
+            lum += (gray_l - lum) * loss * 0.6
+    return _oklch_word(lum, chroma, ramp_h)
+
+
+def _paint_ramp_cluster(
+    res: List[int],
+    source: List[int],
+    cluster: List[int],
+    theme_id: str,
+    ramp_key: str,
+    keep_shine: bool,
+    lift_neutral: bool = False,
+) -> None:
+    """
+    Dye one garment cluster with the theme hue, keeping its own shading.
+
+    keep_shine marks a garment the artist drew in color. Its pure white
+    slots are specular shine and stay, and its hue comes from the theme's
+    identity color (THEME_KEYS). A gray, white, or black garment
+    (keep_shine False) tints every slot and takes hue from the theme ramp.
+    """
+    bias = _cluster_bias(source, cluster)
+    key_hex: Optional[str] = None
+    if keep_shine and theme_id in THEME_KEYS:
+        key_hex = THEME_KEYS[theme_id][0 if ramp_key == "primary" else 1]
+    ordered = sorted(cluster, key=lambda i: _slot_hsv(source[i])[3])
+    count = len(ordered)
+    for rank, idx in enumerate(ordered):
+        _hue, sat, val, _luma = _slot_hsv(source[idx])
+        if val <= 0.06:
+            continue
+        if keep_shine and sat <= 0.12 and val >= 0.90:
+            res[idx] = source[idx]
+            continue
+        unit = 0.5 if count == 1 else rank / float(count - 1)
+        word = _natural_cloth_word(
+            theme_id, ramp_key, _bias_t(unit, bias), source[idx], bias, key_hex, lift_neutral
+        )
+        if word is not None:
+            res[idx] = word
+
+
+# Schema group -> theme ramp. Clothes, pants and shoes take the primary
+# ramp; hair, headbands and belts take the accent ramp.
+_NATURAL_GROUPS = (
+    ("primary", "primary"),
+    ("dark_anchor", "primary"),
+    ("hair", "accent"),
+    ("accent", "accent"),
+)
+
+
+def _paint_costume_natural(
+    res: List[int],
+    source: List[int],
+    schema: Dict[str, List[int]],
+    theme_id: str,
+) -> None:
+    """
+    Dye every costume group of one fighter with the natural cloth painter.
+
+    Each group is split into garments by luma gaps, then each garment keeps
+    its own lightness ladder. Skin, white trim and contour are not touched.
+    """
+    for group, ramp_key in _NATURAL_GROUPS:
+        indices = [i for i in schema.get(group, []) if 0 <= i < len(res)]
+        if not indices:
+            continue
+        for cluster in _cluster_slots(source, indices):
+            inert = [i for i in cluster if _slot_is_inert(source[i])]
+            keep_shine = len(inert) / float(len(cluster)) < 0.55
+            # Only headbands, belts and ribbons get the white lift. Hair and
+            # cloth never grow brighter than the drawn shade.
+            _paint_ramp_cluster(
+                res, source, cluster, theme_id, ramp_key, keep_shine,
+                lift_neutral=(group == "accent"),
+            )
+
+
 def _paint_slot(
     res: List[int],
     source: List[int],
@@ -1166,36 +1458,39 @@ def generate_harmonious_character_palette(
     theme_id: str,
     p1_data: bytes,
     p2_clean: bytes,
+    btn_idx: int = 0,
 ) -> List[int]:
     """
-    Recolor a character with a theme hue while keeping SNK's original shade.
+    Recolor one button palette with a theme hue while keeping SNK's shade.
 
     Each costume slot keeps the luma the sprite was drawn with. Highlights
     preserve that luma and ease saturation when the new hue is darker.
     Dark pigment keeps its saturation and must not get brighter. Skin,
-    true white cloth and outlines stay official. Hair takes the accent
-    hue, and clothes, pants and shoes take the primary hue, so a theme
-    covers the visible costume. Orochi Iori uses normal Iori's shade
-    curve, because the official Orochi ramp is a pastel highlight over
-    a crushed shadow.
+    true white trim and outlines stay official. Hair takes the accent
+    hue, and clothes, pants and shoes take the primary hue. A costume
+    that stays gray, white, or black is then laid across that theme's
+    existing light-to-dark ramp, in the original shade order. btn_idx
+    0..3 reads that button's own 15 colors, so a second costume is not
+    replaced by the A-button result. Orochi Iori uses normal Iori's
+    shade curve for the same button.
     """
     _, _, pal_idx = get_char_engine_info(cid)
     base_off = 0x483E + pal_idx * 8
-    pal_id = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+    if btn_idx < 0 or btn_idx > 3:
+        btn_idx = 0
+    pal_id = struct.unpack(">H", p1_data[base_off + btn_idx * 2:base_off + btn_idx * 2 + 2])[0]
     p2_addr = 0x2CFFF0 + pal_id * 32
     orig_words = list(struct.unpack(">16H", p2_clean[p2_addr : p2_addr + 32])[1:])
 
     if theme_id == "classic" or theme_id not in THEME_KEYS:
         return orig_words
 
-    primary_h, primary_s, accent_h, accent_s = theme_hsv(theme_id)
-
     # Orochi Iori's official ramp is the glossy one. Both Iori forms take
     # their shade from normal Iori, then the theme hue is applied.
     source = orig_words
     if cid == 0x1D or pal_idx == 0x1C:
         iori_off = 0x483E + 0x1B * 8
-        iori_pid = struct.unpack(">H", p1_data[iori_off:iori_off + 2])[0]
+        iori_pid = struct.unpack(">H", p1_data[iori_off + btn_idx * 2:iori_off + btn_idx * 2 + 2])[0]
         iori_addr = 0x2CFFF0 + iori_pid * 32
         source = list(struct.unpack(">16H", p2_clean[iori_addr:iori_addr + 32])[1:])
 
@@ -1204,27 +1499,24 @@ def generate_harmonious_character_palette(
         return orig_words
 
     res = list(orig_words)
-    # Skin, true white cloth and outlines stay official. Clothes, pants
-    # and shoes take the primary hue. Hair takes the accent hue.
-    # Painted slots still take their shade from source, so Orochi Iori
-    # keeps official skin while using normal Iori's costume curve.
-    # Highlights keep luma (saturation eases when the hue is darker).
-    # Dark pigment keeps saturation and does not get brighter.
-    if "primary" in schema:
-        for idx in schema["primary"]:
+    # Skin, true white cloth and outlines stay official. Every costume
+    # group goes through the natural cloth painter (see ProjectMemory
+    # section 13): keep each slot's OKLCH lightness, take the hue from the
+    # theme ramp, cap chroma to SNK's alt-costume range. Painted slots read
+    # their shade from source, so Orochi Iori keeps official skin while
+    # using normal Iori's costume curve.
+    if theme_id in THEME_RAMPS:
+        _paint_costume_natural(res, source, schema, theme_id)
+    else:
+        primary_h, primary_s, accent_h, accent_s = theme_hsv(theme_id)
+        for idx in schema.get("primary", []) + schema.get("dark_anchor", []):
             _paint_slot(res, source, idx, primary_h, primary_s)
-    if "dark_anchor" in schema:
-        for idx in schema["dark_anchor"]:
-            _paint_slot(res, source, idx, primary_h, primary_s)
-    if "accent" in schema:
-        for idx in schema["accent"]:
+        for idx in schema.get("accent", []):
             _paint_slot(res, source, idx, accent_h, accent_s, keep_value=True)
-    if "hair" in schema:
-        for idx in schema["hair"]:
+        for idx in schema.get("hair", []):
             _paint_slot(res, source, idx, accent_h, accent_s)
-    if "contour" in schema:
-        for idx in schema["contour"]:
-            res[idx] = 0x0000
+    for idx in schema.get("contour", []):
+        res[idx] = 0x0000
     return res
 
 
@@ -1942,8 +2234,7 @@ class KOF97BridgeApi:
 
     def randomize_other_skins(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Randomize skins for all characters EXCLUDING Iori (0x1B) and Orochi Iori (0x1D).
-        Maintains user-defined skin for Iori while giving every other fighter a distinct theme.
+        Assign a preset skin to every roster character, including Iori.
         """
         import random
         available_themes = [t for t in PRESET_THEMES if t["id"] != "classic"]
@@ -1966,10 +2257,6 @@ class KOF97BridgeApi:
 
         for char_info in CHARACTER_ROSTER:
             cid = char_info["id"]
-            # Exclude Iori (0x1B) and Orochi Iori (0x1D) - user defined!
-            if cid in (0x1B, 0x1D):
-                continue
-
             chosen_theme = theme_pool[pool_idx % len(theme_pool)]
             pool_idx += 1
             theme_id = chosen_theme["id"]
@@ -1980,7 +2267,7 @@ class KOF97BridgeApi:
             randomized_count += 1
 
         self._save_config_to_disk()
-        async_log(f"\u5df2\u4e00\u952e\u968f\u673a\u5176\u4f59 {randomized_count} \u4f4d\u89d2\u8272\u76ae\u80a4\uff01\u516b\u795e(\u66b4\u8d70\u516b\u795e)\u4fdd\u6301\u81ea\u5b9a\u4e49\u3002", "SUCCESS")
+        async_log(f"\u5df2\u4e3a\u5168\u90e8 {randomized_count} \u4f4d\u89d2\u8272\u968f\u673a\u5206\u914d\u76ae\u80a4\u3002", "SUCCESS")
         return {
             "success": True,
             "count": randomized_count,
@@ -2162,13 +2449,9 @@ class KOF97BridgeApi:
                 customized_count += 1
                 cname = char_info["name_cn"]
 
-                # Custom skins keep stored colors; presets still go through the generator.
+                # Button A feeds portraits. Preset themes rebuild each button
+                # from that button's own official colors.
                 _tid, lspc_words = self._lspc_words_for_skin(cid, skin_entry, p1_data, p2_clean)
-                lspc_bytes = struct.pack(">15H", *lspc_words)
-
-                # Generate luminous harmonic burst flash palette for MAX Mode (sub-palette +3)
-                burst_words = generate_burst_character_palette(cid, theme_id, lspc_words)
-                burst_bytes = struct.pack(">15H", *burst_words)
 
                 _, _, pal_idx = get_char_engine_info(cid)
                 base_off = 0x483E + pal_idx * 8
@@ -2181,8 +2464,17 @@ class KOF97BridgeApi:
                 for btn_idx in range(4):
                     btn_off = base_off + btn_idx * 2
                     pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
+                    if is_custom_theme_id(theme_id):
+                        btn_words = lspc_words
+                    else:
+                        btn_words = generate_harmonious_character_palette(
+                            cid, theme_id, p1_data, p2_clean, btn_idx
+                        )
+                    btn_bytes = struct.pack(">15H", *btn_words)
+                    burst_words = generate_burst_character_palette(cid, theme_id, btn_words)
+                    burst_bytes = struct.pack(">15H", *burst_words)
                     p2_addr_base = 0x2CFFF0 + pal_id * 32
-                    p2_data[p2_addr_base + 2 : p2_addr_base + 32] = lspc_bytes
+                    p2_data[p2_addr_base + 2 : p2_addr_base + 32] = btn_bytes
                     p2_addr_burst = 0x2CFFF0 + (pal_id + 3) * 32
                     p2_data[p2_addr_burst + 2 : p2_addr_burst + 32] = burst_bytes
 
@@ -2392,16 +2684,29 @@ class KOF97BridgeApi:
                 for w in burst_words:
                     burst_bytes_le += struct.pack("<H", w)
 
-                # A. Overwrite all 4 button slots (A, B, C, D) in loaded P2 ROM memory
+                # A. Overwrite all 4 button slots (A, B, C, D) in loaded P2 ROM memory.
+                # Each button is recolored from its own official palette.
                 for btn_idx in range(4):
                     btn_off = base_off + btn_idx * 2
                     pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
-                    # Normal skin (pal_id + 0)
+                    if is_custom_theme_id(t_id) or t_id == "classic":
+                        btn_words = lspc_words
+                        btn_burst = burst_words
+                    else:
+                        btn_words = generate_harmonious_character_palette(
+                            target_cid, t_id, p1_data, p2_clean, btn_idx
+                        )
+                        btn_burst = generate_burst_character_palette(target_cid, t_id, btn_words)
+                    btn_le = bytearray()
+                    for w in btn_words:
+                        btn_le += struct.pack("<H", w)
+                    burst_le = bytearray()
+                    for w in btn_burst:
+                        burst_le += struct.pack("<H", w)
                     btn_addr = p2_base + 0x2CFFF0 + pal_id * 32 + 2
-                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_addr), bytes(lspc_bytes_le), 30, ctypes.byref(written))
-                    # MAX Mode Burst skin (pal_id + 3)
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(btn_addr), bytes(btn_le), 30, ctypes.byref(written))
                     burst_addr = p2_base + 0x2CFFF0 + (pal_id + 3) * 32 + 2
-                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(burst_addr), bytes(burst_bytes_le), 30, ctypes.byref(written))
+                    k32.WriteProcessMemory(h_proc, ctypes.c_void_p(burst_addr), bytes(burst_le), 30, ctypes.byref(written))
 
                 # B. Synchronize all portrait and avatar palettes in P2 ROM
                 if self._sync_avatar:

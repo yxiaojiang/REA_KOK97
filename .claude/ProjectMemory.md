@@ -223,3 +223,34 @@
 - 官方 ROM（只读）：`C:\Program Files (x86)\KOF97\roms\kof97.ZIP`。
 - Studio 可执行文件提交为仓库根目录的 `KOF97ModStudio.exe`。`dist\` 被 gitignore；若根目录文件被占用，先用 `KOF97ModStudio_new.exe` 或 `dist\` 里同时打好的那一份。
 
+## 13. 全员自然染色算法（OKLCH Natural Cloth Painter，2026-11-11 用户实机确认为最终标准）
+
+### 13.1 为什么直接套 Tailwind 色阶或纯 HSV 转色相不够自然
+1. **荧光色问题**：网页 Tailwind 色板在 OKLCH 空间里的彩度（Chroma, `C`）高达 `0.18~0.21`，直接套在 15 色像素立绘上会变成刺眼的荧光色（如神乐变成荧光绿）。实测 SNK 官方 B/C/D 换色（如神乐、山崎龙二的 B/C/D 键）：
+   - 浅色衣物（白衣换色）的 OKLCH 峰值彩度仅 `0.04~0.105`；
+   - 中间调衣物约 `0.07~0.11`；
+   - 深色西装/长裤约 `0.07~0.13`。
+2. **明暗与上下装对比丢失**：若用固定色阶区间直接覆盖原槽位明度，会把白上衣压暗、黑裤子提亮，导致整个人物上下装融成同一块颜色，丧失原画的布料立体感与深浅层次。
+3. **无彩色衣物无法靠纯色相旋转上色**：纯白（神乐上衣、金家藩道服）、纯黑/深灰（龙二西装、八神外套）原槽位饱和度接近 0，仅旋转色相不会变色。
+
+### 13.2 核心算法（`tools/kof97_webview_app.py` 中的 `_paint_costume_natural` 与 `_natural_cloth_word`）
+全员 36 名角色（`0x00..0x23`，含八神庵、暴走八神、大门五郎、陈国汉、神乐千鹤、山崎龙二等）统一走 `_paint_costume_natural`：
+
+1. **部位分组与色源映射（`_NATURAL_GROUPS`）**：
+   - `skin`（皮肤）、`white_trim`（锁定的纯白内衬/绑带）、`contour`（纯黑勾边 `0x0000`）保持官方原色不动。
+   - `primary`、`dark_anchor`（衣服、裤子、外套、鞋靴）走主题 `primary` 色阶。
+   - `hair`、`accent`（头发、头带、腰带、饰品）走主题 `accent` 色阶。
+2. **按明度断层自动拆分上下装（`_cluster_slots`）**：
+   - 同一部位组内按原槽位明度排序；相邻槽位明度差 `> 0.24` 时自动拆成独立衣物簇（例如神乐 `primary` 自动拆成白上衣簇与黑裤子簇），每件衣物各自计算明暗偏置（`light` / `full` / `dark`）。
+3. **区分原画有色部位与无彩色部位（`keep_shine`）**：
+   - 若簇内超过 45% 的槽位原本就有颜色（`keep_shine = True`，如八神红发、不知火舞红衣）：簇内纯白高光点（`sat <= 0.12 and val >= 0.90`）视为镜面反光保留原白；色相与基准彩度直接取 `THEME_KEYS[theme_id]` 的主/辅标志色。
+   - 若簇内原本是白/灰/黑无彩色布料（`keep_shine = False`，如神乐白衣、龙二黑衣、大门/大猪道服、八神黑外套）：所有槽位均参与染色，色相与基准彩度按槽位在簇内的明暗次序从 `THEME_RAMPS[theme_id]` 采样。
+4. **锁死原画 OKLCH 明度 `L` + 钟形彩度封顶（`_natural_cloth_word`）**：
+   - 将原槽位 RGB5 转到线性光再转 `OKLCH(src_l, src_c, src_h)`。
+   - **明度 `lum`**：严格保留原槽位 `src_l`（极暗槽位 `src_l < 0.16` 轻微缓和为 `0.16 + (src_l - 0.16) * 0.5` 以免死黑吞没染色；`light` 浅色簇顶格压到 `min(lum, 0.97) - 0.02 * lum`，让纯白顶格也能挂上淡淡的米色/薄荷色，与 SNK 官方神乐 D 键一致）。
+   - **彩度封顶 `chroma`**：按明度钟形曲线 `_cloth_chroma_cap(lum, bias)` 计算官方布料彩度上限（峰值 `_CLOTH_CHROMA_PEAK = {"light": 0.105, "full": 0.11, "dark": 0.13}`，乘以 `1.0 - ((lum - 0.5) / 0.55) ** 2` 让高光和深影自动收敛彩度）。若原槽位本身就是高饱和色（如八神红发 `src_c` 较高），允许上限放宽至 `min(src_c, 0.20)`；最终取 `min(ramp_c, ceiling)`，保证银色/暗忍等低饱和主题依然是银灰色。
+   - **头带/腰带转浅色主题时的明度补偿（`lift_neutral`）**：仅对 `accent` 组启用；当原本鲜艳的头带/腰带遇到白色/银色辅色主题导致彩度大幅下降时，按彩度损失比例向同 HSV 明度的中性灰 `gray_l` 抬升 `lum`，使红头带在白色主题下变成干净的白色而非暗灰。
+   - **sRGB 色域二分回退（`_oklch_word`）**：合成 `OKLCH(lum, chroma, ramp_h)` 后转回线性 sRGB，若超出 `[0, 1]` 色域则保持 `lum` 和 `ramp_h` 不变，二分降低 `chroma` 直至落入色域，再量化为 LSPC2 16 位调色板字。
+5. **四键独立生成**：`generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean, btn_idx)` 对 `btn_idx = 0..3`（A/B/C/D 四键）各自读取该键自己的官方 15 色作为 `orig_words`（暴走八神借用普通八神同键的服装明暗曲线）。
+
+

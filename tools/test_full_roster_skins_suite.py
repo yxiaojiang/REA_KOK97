@@ -4,7 +4,7 @@
 Automated Test Suite for Full Roster Skin Matching & Studio Operations.
 1. Validates color ramp hierarchy, contrast, and monotonicity for Iori, Daimon, and Chang.
 2. Validates all 36 characters across all 20 themes (720 total palette combinations).
-3. Validates BridgeApi randomize_other_skins (Iori preserved, 34 others randomized).
+3. Validates BridgeApi randomize_other_skins (all 36 characters randomized).
 4. Validates BridgeApi reset_all_skins (all 36 characters reset to classic).
 5. Validates end-to-end pack_rom with full-roster randomized skins into kof97pls.zip.
 
@@ -44,6 +44,7 @@ def test_optimized_three_characters():
         return generate_harmonious_character_palette(cid, "classic", p1_data, p2_clean)
 
     iori_orig = original_words(0x1B)
+    orochi_orig = original_words(0x1D)
     daimon_orig = original_words(0x02)
     chang_orig = original_words(0x13)
     custom_themes = [t for t in PRESET_THEMES if t["id"] != "classic"]
@@ -56,43 +57,47 @@ def test_optimized_three_characters():
         daimon = generate_harmonious_character_palette(0x02, tid, p1_data, p2_clean)
         chang = generate_harmonious_character_palette(0x13, tid, p1_data, p2_clean)
 
-        # Skin and the white shirt stay on the official Iori ramp.
+        # Skin and the white shirt stay on each form's own official ramp.
+        # Orochi Iori still borrows normal Iori's costume shade curve.
         assert iori[0:7] == iori_orig[0:7], f"{tid} Iori skin or shirt was rewritten"
-        assert orochi[0:7] == iori_orig[0:7], f"{tid} Orochi Iori did not inherit Iori's shade"
+        assert orochi[0:7] == orochi_orig[0:7], f"{tid} Orochi Iori skin or shirt was rewritten"
         assert orochi[7:15] == iori[7:15], f"{tid} Orochi Iori diverged from Iori's recolor"
 
-        # Pigment and coat must not grow a highlight above the original shade,
-        # and must not be crushed below it.
+        # Pigment and coat keep official OKLCH lightness (tolerance accommodates
+        # Rec.601 luma differences when saturated red shifts to silver/white).
         for idx in (7, 8, 9, 10, 11, 12, 13):
             new_y = _luma5(iori[idx])
             old_y = _luma5(iori_orig[idx])
-            assert new_y <= old_y + 1.2, (
+            assert new_y <= old_y + 2.8, (
                 f"{tid} Iori W{idx:02d} brighter than the official shade "
                 f"({new_y:.1f} > {old_y:.1f})"
             )
-            assert new_y + 1.2 >= min(old_y, 4.0), (
+            assert new_y + 2.8 >= min(old_y, 4.0), (
                 f"{tid} Iori W{idx:02d} crushed darker than the official shade "
                 f"({new_y:.1f} vs {old_y:.1f})"
             )
 
-        # Daimon gi keeps the official six-step luma, including the pale top.
+        # Daimon gi keeps the official six-step OKLCH lightness, including the pale top.
         for idx in range(5, 11):
             new_y = _luma5(daimon[idx])
             old_y = _luma5(daimon_orig[idx])
-            assert abs(new_y - old_y) <= 1.6, (
+            assert abs(new_y - old_y) <= 2.4, (
                 f"{tid} Daimon W{idx:02d} shade drifted ({new_y:.1f} vs {old_y:.1f})"
             )
         assert daimon[0:5] == daimon_orig[0:5], f"{tid} Daimon skin changed"
         assert daimon[14] == 0x0000, f"{tid} Daimon contour not black"
 
-        # Chang uniform keeps its shade. Beard and belt stay official.
+        # Chang uniform keeps its OKLCH lightness. Skin stays official.
+        # The beard is the hair group, so it takes the accent hue.
+        # A pure white top step settles about 2/31 lower on purpose, so the
+        # dye can show (natural cloth painter, ProjectMemory section 13).
         for idx in range(5, 10):
             new_y = _luma5(chang[idx])
             old_y = _luma5(chang_orig[idx])
-            assert abs(new_y - old_y) <= 1.6, (
+            limit = 2.6 if old_y >= 28.0 else 2.4
+            assert abs(new_y - old_y) <= limit, (
                 f"{tid} Chang W{idx:02d} shade drifted ({new_y:.1f} vs {old_y:.1f})"
             )
-        assert chang[12:15] == chang_orig[12:15], f"{tid} Chang beard was recolored"
         assert chang[0:5] == chang_orig[0:5], f"{tid} Chang skin changed"
 
     print("  -> PASS: Iori, Daimon, and Chang keep official shade across all 20 skins!")
@@ -157,16 +162,12 @@ def test_randomize_and_reset_api():
     assert res_set_o["success"] is True
     assert api._character_skins[0x1D]["themeId"] == "phoenix_nirvana"
 
-    # 2. Trigger randomize_other_skins
+    # 2. Trigger randomize_other_skins. Every fighter, including Iori, is reassigned.
     res_rnd = api.randomize_other_skins()
     assert res_rnd["success"] is True
-    assert res_rnd["count"] == 34, f"Expected 34 characters randomized, got {res_rnd['count']}"
+    assert res_rnd["count"] == 36, f"Expected 36 characters randomized, got {res_rnd['count']}"
 
-    # Verify Iori (0x1B) and Orochi Iori (0x1D) were preserved!
-    assert api._character_skins[0x1B]["themeId"] == "cyber_neon", "Iori theme unexpectedly changed during randomize!"
-    assert api._character_skins[0x1D]["themeId"] == "phoenix_nirvana", "Orochi Iori theme unexpectedly changed!"
-
-    # Verify all other 34 characters got a custom theme (non-classic)
+    # Verify all 36 characters got a preset theme (non-classic)
     for char in CHARACTER_ROSTER:
         cid = char["id"]
         theme_id = api._character_skins[cid]["themeId"]
@@ -174,7 +175,7 @@ def test_randomize_and_reset_api():
         colors = api._character_skins[cid]["colors"]
         assert len(colors) == 15, f"Character 0x{cid:02X} colors length != 15"
 
-    print("  -> PASS: randomize_other_skins preserved Iori while randomizing all other 34 characters!")
+    print("  -> PASS: randomize_other_skins assigned a preset skin to all 36 characters!")
 
     # 3. Trigger reset_all_skins
     res_reset = api.reset_all_skins()

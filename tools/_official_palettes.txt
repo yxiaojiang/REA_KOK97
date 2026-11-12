@@ -1,0 +1,725 @@
+P1 pal_id table diffs in 0x00..0x23: 0
+
+=== pal_id table (4 buttons) ===
+  pal_idx=0x00: 0100 0110 0120 0130
+  pal_idx=0x01: 0140 0150 0160 0170
+  pal_idx=0x02: 0180 0190 01A0 01B0
+  pal_idx=0x03: 01C0 01D0 01E0 01F0
+  pal_idx=0x04: 0200 0210 0220 0230
+  pal_idx=0x05: 0240 0250 0260 0270
+  pal_idx=0x06: 0280 0290 02A0 02B0
+  pal_idx=0x07: 02C0 02D0 02E0 02F0
+  pal_idx=0x08: 0300 0310 0320 0330
+  pal_idx=0x09: 0340 0350 0360 0370
+  pal_idx=0x0A: 0380 0390 03A0 03B0
+  pal_idx=0x0B: 03C0 03D0 03E0 03F0
+  pal_idx=0x0C: 0400 0410 0420 0430
+  pal_idx=0x0D: 0440 0450 0460 0470
+  pal_idx=0x0E: 0480 0490 04A0 04B0
+  pal_idx=0x0F: 04C0 04D0 04E0 04F0
+  pal_idx=0x10: 0500 0510 0520 0530
+  pal_idx=0x11: 0540 0550 0560 0570
+  pal_idx=0x12: 0580 0590 05A0 05B0
+  pal_idx=0x13: 05C0 05D0 05E0 05F0
+  pal_idx=0x14: 0600 0610 0620 0630
+  pal_idx=0x15: 0700 0710 0720 0730
+  pal_idx=0x16: 0740 0750 0760 0770
+  pal_idx=0x17: 0780 0790 07A0 07B0
+  pal_idx=0x18: 0640 0650 0660 0670
+  pal_idx=0x19: 0680 0690 06A0 06B0
+  pal_idx=0x1A: 06C0 06D0 06E0 06F0
+  pal_idx=0x1B: 07C0 07D0 07E0 07F0
+  pal_idx=0x1C: 0800 0810 0820 0830
+  pal_idx=0x1D: 0840 0850 0860 0870
+  pal_idx=0x1E: 0880 0890 08A0 08B0
+  pal_idx=0x1F: 08C0 08D0 08E0 08F0
+  pal_idx=0x20: 0900 0910 0920 0930
+  pal_idx=0x21: 0940 0950 0960 0970
+  pal_idx=0x22: 0980 0990 09A0 09B0
+  pal_idx=0x23: 09C0 09D0 09E0 09F0
+
+========================================================================================
+草薙京 / Kyo Kusanagi  UI=0x00  eng=0x00  alt=0  pal_idx=0x00  pal_id=0x0100
+  schema={'skin': [1, 2, 3, 4], 'white_trim': [0], 'hair': [5, 6], 'primary': [7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFD6A5  skin          H=  32.7 S= 0.35 V= 1.00 Y=0.865  RGB5=(31,26,20) 
+  W03 idx= 2 #F7AD6B  skin          H=  28.2 S= 0.57 V= 0.97 Y=0.735  RGB5=(30,21,13) SKINLIKE
+  W04 idx= 3 #D67B42  skin          H=  23.3 S= 0.69 V= 0.84 Y=0.564  RGB5=(26,15, 8) SKINLIKE
+  W05 idx= 4 #843A08  skin          H=  24.0 S= 0.94 V= 0.52 Y=0.291  RGB5=(16, 7, 1) SKINLIKE
+  W06 idx= 5 #4A1900  hair          H=  20.0 S= 1.00 V= 0.29 Y=0.144  RGB5=( 9, 3, 0) 
+  W07 idx= 6 #000000  hair          H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+  W08 idx= 7 #BDC59C  primary       H=  72.0 S= 0.21 V= 0.77 Y=0.746  RGB5=(23,24,19) 
+  W09 idx= 8 #6B734A  primary       H=  72.0 S= 0.36 V= 0.45 Y=0.424  RGB5=(13,14, 9) 
+  W10 idx= 9 #3A4219  primary       H=  72.0 S= 0.62 V= 0.26 Y=0.230  RGB5=( 7, 8, 3) 
+  W11 idx=10 #424A31  dark_anchor   H=  80.0 S= 0.33 V= 0.29 Y=0.270  RGB5=( 8, 9, 6) 
+  W12 idx=11 #313A21  dark_anchor   H=  80.0 S= 0.43 V= 0.23 Y=0.205  RGB5=( 6, 7, 4) 
+  W13 idx=12 #212910  dark_anchor   H=  80.0 S= 0.60 V= 0.16 Y=0.141  RGB5=( 4, 5, 2) 
+  W14 idx=13 #001000  dark_anchor   H= 120.0 S= 1.00 V= 0.06 Y=0.038  RGB5=( 0, 2, 0) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+二阶堂红丸 / Benimaru Nikaido  UI=0x01  eng=0x01  alt=0  pal_idx=0x01  pal_id=0x0140
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5], 'dark_anchor': [6, 7, 8, 9], 'contour': [10], 'hair': [11, 12, 13, 14]}
+  W01 idx= 0 #FFEFBD  skin          H=  45.0 S= 0.26 V= 1.00 Y=0.933  RGB5=(31,29,23) 
+  W02 idx= 1 #FFBD84  skin          H=  28.0 S= 0.48 V= 1.00 Y=0.793  RGB5=(31,23,16) SKINLIKE
+  W03 idx= 2 #E6945A  skin          H=  24.7 S= 0.61 V= 0.90 Y=0.651  RGB5=(28,18,11) SKINLIKE
+  W04 idx= 3 #9C5229  skin          H=  21.4 S= 0.74 V= 0.61 Y=0.391  RGB5=(19,10, 5) SKINLIKE
+  W05 idx= 4 #632910  skin          H=  18.0 S= 0.83 V= 0.39 Y=0.218  RGB5=(12, 5, 2) SKINLIKE
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #DED6C5  dark_anchor   H=  40.0 S= 0.11 V= 0.87 Y=0.841  RGB5=(27,26,24) PALE
+  W08 idx= 7 #A59C8C  dark_anchor   H=  40.0 S= 0.15 V= 0.65 Y=0.615  RGB5=(20,19,17) 
+  W09 idx= 8 #6B635A  dark_anchor   H=  30.0 S= 0.15 V= 0.42 Y=0.393  RGB5=(13,12,11) 
+  W10 idx= 9 #3A3A31  dark_anchor   H=  60.0 S= 0.14 V= 0.23 Y=0.222  RGB5=( 7, 7, 6) 
+  W11 idx=10 #080808  contour       H=   0.0 S= 0.00 V= 0.03 Y=0.032  RGB5=( 1, 1, 1) NEAR_BLACK
+  W12 idx=11 #FFFFBD  hair          H=  60.0 S= 0.26 V= 1.00 Y=0.971  RGB5=(31,31,23) 
+  W13 idx=12 #E6CE6B  hair          H=  48.0 S= 0.54 V= 0.90 Y=0.791  RGB5=(28,25,13) SKINLIKE
+  W14 idx=13 #B59431  hair          H=  45.0 S= 0.73 V= 0.71 Y=0.575  RGB5=(22,18, 6) SKINLIKE
+  W15 idx=14 #8C6308  hair          H=  41.2 S= 0.94 V= 0.55 Y=0.395  RGB5=(17,12, 1) SKINLIKE
+
+========================================================================================
+大门五郎 / Goro Daimon  UI=0x02  eng=0x02  alt=0  pal_idx=0x02  pal_id=0x0180
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9, 10], 'accent': [11], 'white_trim': [12, 13], 'contour': [14]}
+  W01 idx= 0 #FFCE94  skin          H=  32.3 S= 0.42 V= 1.00 Y=0.839  RGB5=(31,25,18) SKINLIKE
+  W02 idx= 1 #F7A563  skin          H=  26.7 S= 0.60 V= 0.97 Y=0.712  RGB5=(30,20,12) SKINLIKE
+  W03 idx= 2 #D67B3A  skin          H=  25.3 S= 0.73 V= 0.84 Y=0.561  RGB5=(26,15, 7) SKINLIKE
+  W04 idx= 3 #A55221  skin          H=  22.5 S= 0.80 V= 0.65 Y=0.397  RGB5=(20,10, 4) SKINLIKE
+  W05 idx= 4 #6B3110  skin          H=  21.8 S= 0.85 V= 0.42 Y=0.246  RGB5=(13, 6, 2) SKINLIKE
+  W06 idx= 5 #FFFFEF  primary       H=  60.0 S= 0.06 V= 1.00 Y=0.993  RGB5=(31,31,29) TRUE_WHITE
+  W07 idx= 6 #EFE6BD  primary       H=  50.0 S= 0.21 V= 0.94 Y=0.894  RGB5=(29,28,23) 
+  W08 idx= 7 #CEC59C  primary       H=  50.0 S= 0.24 V= 0.81 Y=0.765  RGB5=(25,24,19) 
+  W09 idx= 8 #A59C7B  primary       H=  48.0 S= 0.25 V= 0.65 Y=0.608  RGB5=(20,19,15) SKINLIKE
+  W10 idx= 9 #736B4A  primary       H=  48.0 S= 0.36 V= 0.45 Y=0.414  RGB5=(14,13, 9) SKINLIKE
+  W11 idx=10 #4A4221  primary       H=  48.0 S= 0.56 V= 0.29 Y=0.253  RGB5=( 9, 8, 4) SKINLIKE
+  W12 idx=11 #EF4A21  accent        H=  12.0 S= 0.86 V= 0.94 Y=0.465  RGB5=(29, 9, 4) SKINLIKE
+  W13 idx=12 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W14 idx=13 #EFEFEF  white_trim    H=   0.0 S= 0.00 V= 0.94 Y=0.935  RGB5=(29,29,29) TRUE_WHITE
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+特瑞·伯加德 / Terry Bogard  UI=0x03  eng=0x03  alt=0  pal_idx=0x03  pal_id=0x01C0
+  schema={'skin': [0, 1, 2, 3, 4], 'dark_anchor': [5, 6, 7, 8], 'primary': [9, 10], 'accent': [11, 12], 'white_trim': [13], 'contour': [14]}
+  W01 idx= 0 #FFDEA5  skin          H=  38.2 S= 0.35 V= 1.00 Y=0.884  RGB5=(31,27,20) 
+  W02 idx= 1 #F7A563  skin          H=  26.7 S= 0.60 V= 0.97 Y=0.712  RGB5=(30,20,12) SKINLIKE
+  W03 idx= 2 #D67331  skin          H=  24.0 S= 0.77 V= 0.84 Y=0.538  RGB5=(26,14, 6) SKINLIKE
+  W04 idx= 3 #9C3A19  skin          H=  15.0 S= 0.84 V= 0.61 Y=0.327  RGB5=(19, 7, 3) SKINLIKE
+  W05 idx= 4 #631019  skin          H= 354.0 S= 0.83 V= 0.39 Y=0.165  RGB5=(12, 2, 3) 
+  W06 idx= 5 #7384AD  dark_anchor   H= 222.9 S= 0.33 V= 0.68 Y=0.515  RGB5=(14,16,21) 
+  W07 idx= 6 #4A638C  dark_anchor   H= 217.5 S= 0.47 V= 0.55 Y=0.377  RGB5=( 9,12,17) 
+  W08 idx= 7 #21426B  dark_anchor   H= 213.3 S= 0.69 V= 0.42 Y=0.238  RGB5=( 4, 8,13) 
+  W09 idx= 8 #08214A  dark_anchor   H= 217.5 S= 0.89 V= 0.29 Y=0.118  RGB5=( 1, 4, 9) 
+  W10 idx= 9 #CE3100  primary       H=  14.4 S= 1.00 V= 0.81 Y=0.355  RGB5=(25, 6, 0) SKINLIKE
+  W11 idx=10 #8C0000  primary       H=   0.0 S= 1.00 V= 0.55 Y=0.164  RGB5=(17, 0, 0) 
+  W12 idx=11 #A5BDD6  accent        H= 210.0 S= 0.23 V= 0.84 Y=0.724  RGB5=(20,23,26) 
+  W13 idx=12 #FFAD3A  accent        H=  35.0 S= 0.77 V= 1.00 Y=0.722  RGB5=(31,21, 7) SKINLIKE
+  W14 idx=13 #EFF7FF  white_trim    H= 210.0 S= 0.06 V= 1.00 Y=0.962  RGB5=(29,30,31) TRUE_WHITE
+  W15 idx=14 #100010  contour       H= 300.0 S= 1.00 V= 0.06 Y=0.027  RGB5=( 2, 0, 2) 
+
+========================================================================================
+安迪·伯加德 / Andy Bogard  UI=0x04  eng=0x04  alt=0  pal_idx=0x04  pal_id=0x0200
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 11], 'primary': [6, 7, 8, 9], 'accent': [10], 'hair': [12, 13], 'contour': [14]}
+  W01 idx= 0 #FFE69C  skin          H=  45.0 S= 0.39 V= 1.00 Y=0.899  RGB5=(31,28,19) 
+  W02 idx= 1 #FFAD63  skin          H=  28.4 S= 0.61 V= 1.00 Y=0.741  RGB5=(31,21,12) SKINLIKE
+  W03 idx= 2 #DE733A  skin          H=  21.0 S= 0.74 V= 0.87 Y=0.551  RGB5=(27,14, 7) SKINLIKE
+  W04 idx= 3 #9C3108  skin          H=  16.7 S= 0.95 V= 0.61 Y=0.301  RGB5=(19, 6, 1) SKINLIKE
+  W05 idx= 4 #630019  skin          H= 345.0 S= 1.00 V= 0.39 Y=0.127  RGB5=(12, 0, 3) 
+  W06 idx= 5 #FFFFEF  white_trim    H=  60.0 S= 0.06 V= 1.00 Y=0.993  RGB5=(31,31,29) TRUE_WHITE
+  W07 idx= 6 #F7E6B5  primary       H=  45.0 S= 0.27 V= 0.97 Y=0.900  RGB5=(30,28,22) 
+  W08 idx= 7 #C5B57B  primary       H=  46.7 S= 0.37 V= 0.77 Y=0.703  RGB5=(24,22,15) SKINLIKE
+  W09 idx= 8 #848C63  primary       H=  72.0 S= 0.29 V= 0.55 Y=0.520  RGB5=(16,17,12) 
+  W10 idx= 9 #3A4A3A  primary       H= 120.0 S= 0.22 V= 0.29 Y=0.264  RGB5=( 7, 9, 7) 
+  W11 idx=10 #A50000  accent        H=   0.0 S= 1.00 V= 0.65 Y=0.193  RGB5=(20, 0, 0) 
+  W12 idx=11 #FFFFEF  white_trim    H=  60.0 S= 0.06 V= 1.00 Y=0.993  RGB5=(31,31,29) TRUE_WHITE
+  W13 idx=12 #DEB552  hair          H=  42.4 S= 0.63 V= 0.87 Y=0.714  RGB5=(27,22,10) SKINLIKE
+  W14 idx=13 #9C7B10  hair          H=  45.9 S= 0.89 V= 0.61 Y=0.475  RGB5=(19,15, 2) SKINLIKE
+  W15 idx=14 #210000  contour       H=   0.0 S= 1.00 V= 0.13 Y=0.039  RGB5=( 4, 0, 0) 
+
+========================================================================================
+东丈 / Joe Higashi  UI=0x05  eng=0x05  alt=0  pal_idx=0x05  pal_id=0x0240
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7], 'accent': [8, 9], 'white_trim': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFDEA5  skin          H=  38.2 S= 0.35 V= 1.00 Y=0.884  RGB5=(31,27,20) 
+  W02 idx= 1 #F7AD6B  skin          H=  28.2 S= 0.57 V= 0.97 Y=0.735  RGB5=(30,21,13) SKINLIKE
+  W03 idx= 2 #DE7B42  skin          H=  22.1 S= 0.70 V= 0.87 Y=0.574  RGB5=(27,15, 8) SKINLIKE
+  W04 idx= 3 #9C4210  skin          H=  21.2 S= 0.89 V= 0.61 Y=0.342  RGB5=(19, 8, 2) SKINLIKE
+  W05 idx= 4 #632100  skin          H=  20.0 S= 1.00 V= 0.39 Y=0.191  RGB5=(12, 4, 0) SKINLIKE
+  W06 idx= 5 #FF6B29  primary       H=  18.5 S= 0.84 V= 1.00 Y=0.564  RGB5=(31,13, 5) SKINLIKE
+  W07 idx= 6 #CE3A08  primary       H=  15.0 S= 0.96 V= 0.81 Y=0.377  RGB5=(25, 7, 1) SKINLIKE
+  W08 idx= 7 #941908  primary       H=   7.1 S= 0.94 V= 0.58 Y=0.234  RGB5=(18, 3, 1) 
+  W09 idx= 8 #FFAD29  accent        H=  36.9 S= 0.84 V= 1.00 Y=0.715  RGB5=(31,21, 5) SKINLIKE
+  W10 idx= 9 #DE7B00  accent        H=  33.3 S= 1.00 V= 0.87 Y=0.544  RGB5=(27,15, 0) SKINLIKE
+  W11 idx=10 #4A6B3A  white_trim    H= 100.0 S= 0.46 V= 0.42 Y=0.359  RGB5=( 9,13, 7) 
+  W12 idx=11 #849C7B  white_trim    H= 105.0 S= 0.21 V= 0.61 Y=0.569  RGB5=(16,19,15) 
+  W13 idx=12 #C5D6C5  white_trim    H= 120.0 S= 0.08 V= 0.84 Y=0.812  RGB5=(24,26,24) PALE
+  W14 idx=13 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W15 idx=14 #190800  contour       H=  20.0 S= 1.00 V= 0.10 Y=0.048  RGB5=( 3, 1, 0) 
+
+========================================================================================
+坂崎良 / Ryo Sakazaki  UI=0x06  eng=0x06  alt=0  pal_idx=0x06  pal_id=0x0280
+  schema={'white_trim': [0], 'skin': [1, 2, 3, 4, 5], 'primary': [6, 7, 8, 9, 10], 'contour': [11], 'accent': [12, 13, 14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFD69C  skin          H=  35.0 S= 0.39 V= 1.00 Y=0.861  RGB5=(31,26,19) 
+  W03 idx= 2 #EFAD6B  skin          H=  30.0 S= 0.55 V= 0.94 Y=0.725  RGB5=(29,21,13) SKINLIKE
+  W04 idx= 3 #DE7B3A  skin          H=  24.0 S= 0.74 V= 0.87 Y=0.570  RGB5=(27,15, 7) SKINLIKE
+  W05 idx= 4 #9C4A21  skin          H=  20.0 S= 0.79 V= 0.61 Y=0.368  RGB5=(19, 9, 4) SKINLIKE
+  W06 idx= 5 #5A2100  skin          H=  21.8 S= 1.00 V= 0.35 Y=0.182  RGB5=(11, 4, 0) SKINLIKE
+  W07 idx= 6 #FF7321  primary       H=  22.2 S= 0.87 V= 1.00 Y=0.579  RGB5=(31,14, 4) SKINLIKE
+  W08 idx= 7 #E65208  primary       H=  20.0 S= 0.96 V= 0.90 Y=0.463  RGB5=(28,10, 1) SKINLIKE
+  W09 idx= 8 #C53A08  primary       H=  15.7 S= 0.96 V= 0.77 Y=0.368  RGB5=(24, 7, 1) SKINLIKE
+  W10 idx= 9 #941900  primary       H=  10.0 S= 1.00 V= 0.58 Y=0.230  RGB5=(18, 3, 0) SKINLIKE
+  W11 idx=10 #520000  primary       H=   0.0 S= 1.00 V= 0.32 Y=0.096  RGB5=(10, 0, 0) 
+  W12 idx=11 #080000  contour       H=   0.0 S= 1.00 V= 0.03 Y=0.010  RGB5=( 1, 0, 0) NEAR_BLACK
+  W13 idx=12 #CE9C4A  accent        H=  37.5 S= 0.64 V= 0.81 Y=0.634  RGB5=(25,19, 9) SKINLIKE
+  W14 idx=13 #9C6B19  accent        H=  37.5 S= 0.84 V= 0.61 Y=0.440  RGB5=(19,13, 3) SKINLIKE
+  W15 idx=14 #6B3A00  accent        H=  32.3 S= 1.00 V= 0.42 Y=0.258  RGB5=(13, 7, 0) SKINLIKE
+
+========================================================================================
+罗伯特·加西亚 / Robert Garcia  UI=0x07  eng=0x07  alt=0  pal_idx=0x07  pal_id=0x02C0
+  schema={'skin': [0, 1, 2, 3, 4], 'accent': [5], 'primary': [6, 7, 8, 9], 'white_trim': [10], 'dark_anchor': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFDEA5  skin          H=  38.2 S= 0.35 V= 1.00 Y=0.884  RGB5=(31,27,20) 
+  W02 idx= 1 #FFAD6B  skin          H=  26.7 S= 0.58 V= 1.00 Y=0.744  RGB5=(31,21,13) SKINLIKE
+  W03 idx= 2 #E67B42  skin          H=  21.0 S= 0.71 V= 0.90 Y=0.584  RGB5=(28,15, 8) SKINLIKE
+  W04 idx= 3 #A54208  skin          H=  22.1 S= 0.95 V= 0.65 Y=0.348  RGB5=(20, 8, 1) SKINLIKE
+  W05 idx= 4 #5A0800  skin          H=   5.5 S= 1.00 V= 0.35 Y=0.125  RGB5=(11, 1, 0) 
+  W06 idx= 5 #FFC54A  accent        H=  40.9 S= 0.71 V= 1.00 Y=0.787  RGB5=(31,24, 9) SKINLIKE
+  W07 idx= 6 #FFFFFF  primary       H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W08 idx= 7 #E6E6C5  primary       H=  60.0 S= 0.14 V= 0.90 Y=0.889  RGB5=(28,28,24) PALE
+  W09 idx= 8 #ADAD8C  primary       H=  60.0 S= 0.19 V= 0.68 Y=0.663  RGB5=(21,21,17) 
+  W10 idx= 9 #73735A  primary       H=  60.0 S= 0.21 V= 0.45 Y=0.441  RGB5=(14,14,11) 
+  W11 idx=10 #424231  white_trim    H=  60.0 S= 0.25 V= 0.26 Y=0.251  RGB5=( 8, 8, 6) 
+  W12 idx=11 #195AB5  dark_anchor   H= 214.7 S= 0.86 V= 0.71 Y=0.318  RGB5=( 3,11,22) 
+  W13 idx=12 #003A8C  dark_anchor   H= 215.3 S= 1.00 V= 0.55 Y=0.195  RGB5=( 0, 7,17) 
+  W14 idx=13 #00195A  dark_anchor   H= 223.6 S= 1.00 V= 0.35 Y=0.097  RGB5=( 0, 3,11) 
+  W15 idx=14 #000019  contour       H= 240.0 S= 1.00 V= 0.10 Y=0.011  RGB5=( 0, 0, 3) 
+
+========================================================================================
+坂崎百合 / Yuri Sakazaki  UI=0x08  eng=0x08  alt=0  pal_idx=0x08  pal_id=0x0300
+  schema={'accent': [0], 'skin': [1, 2, 3, 4, 5], 'white_trim': [6, 7, 8, 9, 10], 'dark_anchor': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #CE3A21  accent        H=   8.6 S= 0.84 V= 0.81 Y=0.388  RGB5=(25, 7, 4) SKINLIKE
+  W02 idx= 1 #FFDEA5  skin          H=  38.2 S= 0.35 V= 1.00 Y=0.884  RGB5=(31,27,20) 
+  W03 idx= 2 #FFBD7B  skin          H=  30.0 S= 0.52 V= 1.00 Y=0.790  RGB5=(31,23,15) SKINLIKE
+  W04 idx= 3 #EF8452  skin          H=  18.9 S= 0.66 V= 0.94 Y=0.619  RGB5=(29,16,10) SKINLIKE
+  W05 idx= 4 #BD4A31  skin          H=  10.6 S= 0.74 V= 0.74 Y=0.414  RGB5=(23, 9, 6) SKINLIKE
+  W06 idx= 5 #841910  skin          H=   4.3 S= 0.88 V= 0.52 Y=0.218  RGB5=(16, 3, 2) 
+  W07 idx= 6 #F7FFF7  white_trim    H= 120.0 S= 0.03 V= 1.00 Y=0.987  RGB5=(30,31,30) TRUE_WHITE
+  W08 idx= 7 #DEE6CE  white_trim    H=  80.0 S= 0.11 V= 0.90 Y=0.883  RGB5=(27,28,25) TRUE_WHITE
+  W09 idx= 8 #BDCEA5  white_trim    H=  84.0 S= 0.20 V= 0.81 Y=0.769  RGB5=(23,25,20) 
+  W10 idx= 9 #849C7B  white_trim    H= 105.0 S= 0.21 V= 0.61 Y=0.569  RGB5=(16,19,15) 
+  W11 idx=10 #4A634A  white_trim    H= 120.0 S= 0.25 V= 0.39 Y=0.347  RGB5=( 9,12, 9) 
+  W12 idx=11 #4A3A73  dark_anchor   H= 257.1 S= 0.50 V= 0.45 Y=0.271  RGB5=( 9, 7,14) 
+  W13 idx=12 #3A215A  dark_anchor   H= 265.7 S= 0.64 V= 0.35 Y=0.184  RGB5=( 7, 4,11) 
+  W14 idx=13 #29083A  dark_anchor   H= 280.0 S= 0.86 V= 0.23 Y=0.093  RGB5=( 5, 1, 7) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+莉安娜·哈迪兰 / Leona Heidern  UI=0x09  eng=0x09  alt=0  pal_idx=0x09  pal_id=0x0340
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9], 'dark_anchor': [10], 'contour': [11], 'accent': [12, 13, 14]}
+  W01 idx= 0 #FFE6B5  skin          H=  40.0 S= 0.29 V= 1.00 Y=0.910  RGB5=(31,28,22) 
+  W02 idx= 1 #FFC57B  skin          H=  33.8 S= 0.52 V= 1.00 Y=0.809  RGB5=(31,24,15) SKINLIKE
+  W03 idx= 2 #E69442  skin          H=  30.0 S= 0.71 V= 0.90 Y=0.640  RGB5=(28,18, 8) SKINLIKE
+  W04 idx= 3 #B55A21  skin          H=  23.3 S= 0.82 V= 0.71 Y=0.435  RGB5=(22,11, 4) SKINLIKE
+  W05 idx= 4 #7B3100  skin          H=  24.0 S= 1.00 V= 0.48 Y=0.258  RGB5=(15, 6, 0) SKINLIKE
+  W06 idx= 5 #EFF7DE  primary       H=  80.0 S= 0.10 V= 0.97 Y=0.947  RGB5=(29,30,27) TRUE_WHITE
+  W07 idx= 6 #ADBD84  primary       H=  77.1 S= 0.30 V= 0.74 Y=0.697  RGB5=(21,23,16) 
+  W08 idx= 7 #7B8C3A  primary       H=  72.0 S= 0.59 V= 0.55 Y=0.492  RGB5=(15,17, 7) 
+  W09 idx= 8 #525A10  primary       H=  66.7 S= 0.82 V= 0.35 Y=0.312  RGB5=(10,11, 2) 
+  W10 idx= 9 #3A3A08  primary       H=  60.0 S= 0.86 V= 0.23 Y=0.204  RGB5=( 7, 7, 1) 
+  W11 idx=10 #212108  dark_anchor   H=  60.0 S= 0.75 V= 0.13 Y=0.118  RGB5=( 4, 4, 1) 
+  W12 idx=11 #000010  contour       H= 240.0 S= 1.00 V= 0.06 Y=0.007  RGB5=( 0, 0, 2) 
+  W13 idx=12 #4A84B5  accent        H= 207.7 S= 0.59 V= 0.71 Y=0.471  RGB5=( 9,16,22) 
+  W14 idx=13 #105A8C  accent        H= 204.0 S= 0.88 V= 0.55 Y=0.290  RGB5=( 2,11,17) 
+  W15 idx=14 #103163  accent        H= 216.0 S= 0.83 V= 0.39 Y=0.177  RGB5=( 2, 6,12) 
+
+========================================================================================
+拉尔夫·琼斯 / Ralf Jones  UI=0x0A  eng=0x0A  alt=0  pal_idx=0x0A  pal_id=0x0380
+  schema={'white_trim': [0], 'skin': [1, 2, 3, 4, 5], 'primary': [6, 7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFE6AD  skin          H=  42.0 S= 0.32 V= 1.00 Y=0.906  RGB5=(31,28,21) 
+  W03 idx= 2 #F7B573  skin          H=  30.0 S= 0.53 V= 0.97 Y=0.757  RGB5=(30,22,14) SKINLIKE
+  W04 idx= 3 #CE733A  skin          H=  23.3 S= 0.72 V= 0.81 Y=0.532  RGB5=(25,14, 7) SKINLIKE
+  W05 idx= 4 #943A10  skin          H=  18.8 S= 0.89 V= 0.58 Y=0.314  RGB5=(18, 7, 2) SKINLIKE
+  W06 idx= 5 #5A1900  skin          H=  16.4 S= 1.00 V= 0.35 Y=0.163  RGB5=(11, 3, 0) 
+  W07 idx= 6 #CEDEDE  primary       H= 180.0 S= 0.07 V= 0.87 Y=0.852  RGB5=(25,27,27) PALE
+  W08 idx= 7 #94ADB5  primary       H= 195.0 S= 0.18 V= 0.71 Y=0.652  RGB5=(18,21,22) 
+  W09 idx= 8 #638494  primary       H= 200.0 S= 0.33 V= 0.58 Y=0.485  RGB5=(12,16,18) 
+  W10 idx= 9 #314A5A  primary       H= 204.0 S= 0.45 V= 0.35 Y=0.269  RGB5=( 6, 9,11) 
+  W11 idx=10 #082931  dark_anchor   H= 192.0 S= 0.83 V= 0.19 Y=0.126  RGB5=( 1, 5, 6) 
+  W12 idx=11 #4A4219  dark_anchor   H=  50.0 S= 0.67 V= 0.29 Y=0.249  RGB5=( 9, 8, 3) 
+  W13 idx=12 #313108  dark_anchor   H=  60.0 S= 0.83 V= 0.19 Y=0.175  RGB5=( 6, 6, 1) 
+  W14 idx=13 #191900  dark_anchor   H=  60.0 S= 1.00 V= 0.10 Y=0.086  RGB5=( 3, 3, 0) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+克拉克·斯提尔 / Clark Still  UI=0x0B  eng=0x0B  alt=0  pal_idx=0x0B  pal_id=0x03C0
+  schema={'white_trim': [0], 'skin': [1, 2, 3, 4, 5], 'primary': [6, 7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFEFAD  skin          H=  48.0 S= 0.32 V= 1.00 Y=0.925  RGB5=(31,29,21) 
+  W03 idx= 2 #F7BD73  skin          H=  33.8 S= 0.53 V= 0.97 Y=0.776  RGB5=(30,23,14) SKINLIKE
+  W04 idx= 3 #CE843A  skin          H=  30.0 S= 0.72 V= 0.81 Y=0.570  RGB5=(25,16, 7) SKINLIKE
+  W05 idx= 4 #944A10  skin          H=  26.2 S= 0.89 V= 0.58 Y=0.351  RGB5=(18, 9, 2) SKINLIKE
+  W06 idx= 5 #632908  skin          H=  21.8 S= 0.92 V= 0.39 Y=0.214  RGB5=(12, 5, 1) SKINLIKE
+  W07 idx= 6 #CEDEDE  primary       H= 180.0 S= 0.07 V= 0.87 Y=0.852  RGB5=(25,27,27) PALE
+  W08 idx= 7 #94ADB5  primary       H= 195.0 S= 0.18 V= 0.71 Y=0.652  RGB5=(18,21,22) 
+  W09 idx= 8 #638494  primary       H= 200.0 S= 0.33 V= 0.58 Y=0.485  RGB5=(12,16,18) 
+  W10 idx= 9 #314A5A  primary       H= 204.0 S= 0.45 V= 0.35 Y=0.269  RGB5=( 6, 9,11) 
+  W11 idx=10 #082931  dark_anchor   H= 192.0 S= 0.83 V= 0.19 Y=0.126  RGB5=( 1, 5, 6) 
+  W12 idx=11 #4A4219  dark_anchor   H=  50.0 S= 0.67 V= 0.29 Y=0.249  RGB5=( 9, 8, 3) 
+  W13 idx=12 #313108  dark_anchor   H=  60.0 S= 0.83 V= 0.19 Y=0.175  RGB5=( 6, 6, 1) 
+  W14 idx=13 #191900  dark_anchor   H=  60.0 S= 1.00 V= 0.10 Y=0.086  RGB5=( 3, 3, 0) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+麻宫雅典娜 / Athena Asamiya  UI=0x0C  eng=0x0C  alt=0  pal_idx=0x0C  pal_id=0x0400
+  schema={'skin': [0, 1, 2, 3, 4], 'accent': [5, 6, 7, 8], 'white_trim': [9, 10, 11], 'primary': [12, 13, 14]}
+  W01 idx= 0 #FFEFB5  skin          H=  46.7 S= 0.29 V= 1.00 Y=0.929  RGB5=(31,29,22) 
+  W02 idx= 1 #FFBD73  skin          H=  31.8 S= 0.55 V= 1.00 Y=0.786  RGB5=(31,23,14) SKINLIKE
+  W03 idx= 2 #F7944A  skin          H=  25.7 S= 0.70 V= 0.97 Y=0.663  RGB5=(30,18, 9) SKINLIKE
+  W04 idx= 3 #C55221  skin          H=  18.0 S= 0.83 V= 0.77 Y=0.436  RGB5=(24,10, 4) SKINLIKE
+  W05 idx= 4 #8C2110  skin          H=   8.0 S= 0.88 V= 0.55 Y=0.247  RGB5=(17, 4, 2) SKINLIKE
+  W06 idx= 5 #B52900  accent        H=  13.6 S= 1.00 V= 0.71 Y=0.307  RGB5=(22, 5, 0) SKINLIKE
+  W07 idx= 6 #8C0000  accent        H=   0.0 S= 1.00 V= 0.55 Y=0.164  RGB5=(17, 0, 0) 
+  W08 idx= 7 #6B0000  accent        H=   0.0 S= 1.00 V= 0.42 Y=0.125  RGB5=(13, 0, 0) 
+  W09 idx= 8 #4A0000  accent        H=   0.0 S= 1.00 V= 0.29 Y=0.087  RGB5=( 9, 0, 0) 
+  W10 idx= 9 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W11 idx=10 #FFDEC5  white_trim    H=  25.7 S= 0.23 V= 1.00 Y=0.899  RGB5=(31,27,24) 
+  W12 idx=11 #E6AD9C  white_trim    H=  13.3 S= 0.32 V= 0.90 Y=0.738  RGB5=(28,21,19) SKINLIKE
+  W13 idx=12 #B57384  primary       H= 345.0 S= 0.36 V= 0.71 Y=0.536  RGB5=(22,14,16) 
+  W14 idx=13 #732942  primary       H= 340.0 S= 0.64 V= 0.45 Y=0.259  RGB5=(14, 5, 8) 
+  W15 idx=14 #190000  primary       H=   0.0 S= 1.00 V= 0.10 Y=0.029  RGB5=( 3, 0, 0) 
+
+========================================================================================
+椎拳崇 / Sie Kensou  UI=0x0D  eng=0x0D  alt=0  pal_idx=0x0D  pal_id=0x0440
+  schema={'white_trim': [0], 'skin': [1, 2, 3, 4, 5], 'primary': [6, 7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFD69C  skin          H=  35.0 S= 0.39 V= 1.00 Y=0.861  RGB5=(31,26,19) 
+  W03 idx= 2 #FFAD5A  skin          H=  30.0 S= 0.65 V= 1.00 Y=0.737  RGB5=(31,21,11) SKINLIKE
+  W04 idx= 3 #DE7329  skin          H=  24.5 S= 0.81 V= 0.87 Y=0.544  RGB5=(27,14, 5) SKINLIKE
+  W05 idx= 4 #9C3A08  skin          H=  20.0 S= 0.95 V= 0.61 Y=0.319  RGB5=(19, 7, 1) SKINLIKE
+  W06 idx= 5 #521000  skin          H=  12.0 S= 1.00 V= 0.32 Y=0.134  RGB5=(10, 2, 0) 
+  W07 idx= 6 #EFF7C5  primary       H=  70.0 S= 0.20 V= 0.97 Y=0.936  RGB5=(29,30,24) 
+  W08 idx= 7 #BDC59C  primary       H=  72.0 S= 0.21 V= 0.77 Y=0.746  RGB5=(23,24,19) 
+  W09 idx= 8 #7B845A  primary       H=  72.0 S= 0.31 V= 0.52 Y=0.488  RGB5=(15,16,11) 
+  W10 idx= 9 #424A21  primary       H=  72.0 S= 0.56 V= 0.29 Y=0.262  RGB5=( 8, 9, 4) 
+  W11 idx=10 #5A6B94  dark_anchor   H= 222.9 S= 0.39 V= 0.58 Y=0.418  RGB5=(11,13,18) 
+  W12 idx=11 #3A527B  dark_anchor   H= 217.5 S= 0.53 V= 0.48 Y=0.312  RGB5=( 7,10,15) 
+  W13 idx=12 #193152  dark_anchor   H= 214.3 S= 0.70 V= 0.32 Y=0.179  RGB5=( 3, 6,10) 
+  W14 idx=13 #08193A  dark_anchor   H= 220.0 S= 0.86 V= 0.23 Y=0.092  RGB5=( 1, 3, 7) 
+  W15 idx=14 #000008  contour       H= 240.0 S= 1.00 V= 0.03 Y=0.004  RGB5=( 0, 0, 1) NEAR_BLACK
+
+========================================================================================
+镇元斋 / Chin Gentsai  UI=0x0E  eng=0x0E  alt=0  pal_idx=0x0E  pal_id=0x0480
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFE69C  skin          H=  45.0 S= 0.39 V= 1.00 Y=0.899  RGB5=(31,28,19) 
+  W02 idx= 1 #FFB56B  skin          H=  30.0 S= 0.58 V= 1.00 Y=0.763  RGB5=(31,22,13) SKINLIKE
+  W03 idx= 2 #DE8442  skin          H=  25.3 S= 0.70 V= 0.87 Y=0.593  RGB5=(27,16, 8) SKINLIKE
+  W04 idx= 3 #9C4A08  skin          H=  26.7 S= 0.95 V= 0.61 Y=0.357  RGB5=(19, 9, 1) SKINLIKE
+  W05 idx= 4 #522100  skin          H=  24.0 S= 1.00 V= 0.32 Y=0.172  RGB5=(10, 4, 0) 
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #FFEFCE  white_trim    H=  40.0 S= 0.19 V= 1.00 Y=0.940  RGB5=(31,29,25) 
+  W08 idx= 7 #E6C59C  white_trim    H=  33.3 S= 0.32 V= 0.90 Y=0.794  RGB5=(28,24,19) SKINLIKE
+  W09 idx= 8 #947B5A  white_trim    H=  34.3 S= 0.39 V= 0.58 Y=0.498  RGB5=(18,15,11) SKINLIKE
+  W10 idx= 9 #524229  white_trim    H=  36.0 S= 0.50 V= 0.32 Y=0.266  RGB5=(10, 8, 5) SKINLIKE
+  W11 idx=10 #7B6321  dark_anchor   H=  43.6 S= 0.73 V= 0.48 Y=0.387  RGB5=(15,12, 4) SKINLIKE
+  W12 idx=11 #5A4A10  dark_anchor   H=  46.7 S= 0.82 V= 0.35 Y=0.284  RGB5=(11, 9, 2) SKINLIKE
+  W13 idx=12 #423108  dark_anchor   H=  42.9 S= 0.88 V= 0.26 Y=0.194  RGB5=( 8, 6, 1) SKINLIKE
+  W14 idx=13 #292108  dark_anchor   H=  45.0 S= 0.80 V= 0.16 Y=0.128  RGB5=( 5, 4, 1) 
+  W15 idx=14 #190808  contour       H=   0.0 S= 0.67 V= 0.10 Y=0.052  RGB5=( 3, 1, 1) 
+
+========================================================================================
+神乐千鹤 / Chizuru Kagura  UI=0x0F  eng=0x0F  alt=0  pal_idx=0x0F  pal_id=0x04C0
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFEFC5  skin          H=  42.9 S= 0.23 V= 1.00 Y=0.936  RGB5=(31,29,24) 
+  W02 idx= 1 #F7BD84  skin          H=  30.0 S= 0.47 V= 0.97 Y=0.784  RGB5=(30,23,16) SKINLIKE
+  W03 idx= 2 #E67B4A  skin          H=  18.9 S= 0.68 V= 0.90 Y=0.587  RGB5=(28,15, 9) SKINLIKE
+  W04 idx= 3 #A53A08  skin          H=  18.9 S= 0.95 V= 0.65 Y=0.329  RGB5=(20, 7, 1) SKINLIKE
+  W05 idx= 4 #631008  skin          H=   5.5 S= 0.92 V= 0.39 Y=0.157  RGB5=(12, 2, 1) 
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #E6DEDE  white_trim    H=   0.0 S= 0.04 V= 0.90 Y=0.881  RGB5=(28,27,27) TRUE_WHITE
+  W08 idx= 7 #BDADB5  white_trim    H= 330.0 S= 0.09 V= 0.74 Y=0.700  RGB5=(23,21,22) 
+  W09 idx= 8 #947B84  white_trim    H= 340.0 S= 0.17 V= 0.58 Y=0.516  RGB5=(18,15,16) 
+  W10 idx= 9 #523A42  white_trim    H= 340.0 S= 0.30 V= 0.32 Y=0.258  RGB5=(10, 7, 8) 
+  W11 idx=10 #3A2931  primary       H= 330.0 S= 0.29 V= 0.23 Y=0.184  RGB5=( 7, 5, 6) 
+  W12 idx=11 #291921  primary       H= 330.0 S= 0.40 V= 0.16 Y=0.120  RGB5=( 5, 3, 4) 
+  W13 idx=12 #080000  primary       H=   0.0 S= 1.00 V= 0.03 Y=0.010  RGB5=( 1, 0, 0) NEAR_BLACK
+  W14 idx=13 #CE3110  primary       H=  10.4 S= 0.92 V= 0.81 Y=0.362  RGB5=(25, 6, 2) SKINLIKE
+  W15 idx=14 #9C1910  contour       H=   3.5 S= 0.89 V= 0.61 Y=0.247  RGB5=(19, 3, 2) 
+
+========================================================================================
+不知火舞 / Mai Shiranui  UI=0x10  eng=0x10  alt=0  pal_idx=0x10  pal_id=0x0500
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7], 'white_trim': [8, 9, 10], 'dark_anchor': [11, 12], 'accent': [13], 'contour': [14]}
+  W01 idx= 0 #FFEFB5  skin          H=  46.7 S= 0.29 V= 1.00 Y=0.929  RGB5=(31,29,22) 
+  W02 idx= 1 #FFC584  skin          H=  32.0 S= 0.48 V= 1.00 Y=0.812  RGB5=(31,24,16) SKINLIKE
+  W03 idx= 2 #E68C52  skin          H=  23.3 S= 0.64 V= 0.90 Y=0.629  RGB5=(28,17,10) SKINLIKE
+  W04 idx= 3 #B54A29  skin          H=  14.1 S= 0.77 V= 0.71 Y=0.401  RGB5=(22, 9, 5) SKINLIKE
+  W05 idx= 4 #841908  skin          H=   8.0 S= 0.94 V= 0.52 Y=0.215  RGB5=(16, 3, 1) SKINLIKE
+  W06 idx= 5 #FF3A29  primary       H=   4.6 S= 0.84 V= 1.00 Y=0.450  RGB5=(31, 7, 5) 
+  W07 idx= 6 #C52110  primary       H=   5.5 S= 0.92 V= 0.77 Y=0.315  RGB5=(24, 4, 2) 
+  W08 idx= 7 #9C0808  primary       H=   0.0 S= 0.95 V= 0.61 Y=0.206  RGB5=(19, 1, 1) 
+  W09 idx= 8 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W10 idx= 9 #D6CEB5  white_trim    H=  45.0 S= 0.15 V= 0.84 Y=0.805  RGB5=(26,25,22) PALE
+  W11 idx=10 #8C946B  white_trim    H=  72.0 S= 0.28 V= 0.58 Y=0.553  RGB5=(17,18,13) 
+  W12 idx=11 #630808  dark_anchor   H=   0.0 S= 0.92 V= 0.39 Y=0.138  RGB5=(12, 1, 1) 
+  W13 idx=12 #310000  dark_anchor   H=   0.0 S= 1.00 V= 0.19 Y=0.058  RGB5=( 6, 0, 0) 
+  W14 idx=13 #B51910  accent        H=   3.0 S= 0.91 V= 0.71 Y=0.276  RGB5=(22, 3, 2) 
+  W15 idx=14 #080000  contour       H=   0.0 S= 1.00 V= 0.03 Y=0.010  RGB5=( 1, 0, 0) NEAR_BLACK
+
+========================================================================================
+琼 / King  UI=0x11  eng=0x11  alt=0  pal_idx=0x11  pal_id=0x0540
+  schema={'primary': [0, 1, 2, 3], 'accent': [4, 5], 'white_trim': [6, 7, 8, 9], 'skin': [10, 11, 12, 13, 14]}
+  W01 idx= 0 #190008  primary       H= 340.0 S= 1.00 V= 0.10 Y=0.033  RGB5=( 3, 0, 1) 
+  W02 idx= 1 #4A0821  primary       H= 337.5 S= 0.89 V= 0.29 Y=0.120  RGB5=( 9, 1, 4) 
+  W03 idx= 2 #731942  primary       H= 332.7 S= 0.79 V= 0.45 Y=0.221  RGB5=(14, 3, 8) 
+  W04 idx= 3 #94315A  primary       H= 335.0 S= 0.67 V= 0.58 Y=0.328  RGB5=(18, 6,11) 
+  W05 idx= 4 #9C6B19  accent        H=  37.5 S= 0.84 V= 0.61 Y=0.440  RGB5=(19,13, 3) SKINLIKE
+  W06 idx= 5 #CE9C4A  accent        H=  37.5 S= 0.64 V= 0.81 Y=0.634  RGB5=(25,19, 9) SKINLIKE
+  W07 idx= 6 #5A5A6B  white_trim    H= 240.0 S= 0.15 V= 0.42 Y=0.362  RGB5=(11,11,13) 
+  W08 idx= 7 #9494A5  white_trim    H= 240.0 S= 0.10 V= 0.65 Y=0.588  RGB5=(18,18,20) 
+  W09 idx= 8 #CECEDE  white_trim    H= 240.0 S= 0.07 V= 0.87 Y=0.814  RGB5=(25,25,27) PALE
+  W10 idx= 9 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W11 idx=10 #6B3119  skin          H=  18.0 S= 0.77 V= 0.42 Y=0.250  RGB5=(13, 6, 3) SKINLIKE
+  W12 idx=11 #A54A21  skin          H=  18.8 S= 0.80 V= 0.65 Y=0.378  RGB5=(20, 9, 4) SKINLIKE
+  W13 idx=12 #D67B4A  skin          H=  21.2 S= 0.65 V= 0.84 Y=0.568  RGB5=(26,15, 9) SKINLIKE
+  W14 idx=13 #EFA563  skin          H=  28.2 S= 0.59 V= 0.94 Y=0.703  RGB5=(29,20,12) SKINLIKE
+  W15 idx=14 #FFDE9C  skin          H=  40.0 S= 0.39 V= 1.00 Y=0.880  RGB5=(31,27,19) 
+
+========================================================================================
+金家藩 / Kim Kaphwan  UI=0x12  eng=0x12  alt=0  pal_idx=0x12  pal_id=0x0580
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12], 'contour': [13], 'dark_anchor': [14]}
+  W01 idx= 0 #FFCE8C  skin          H=  34.3 S= 0.45 V= 1.00 Y=0.835  RGB5=(31,25,17) SKINLIKE
+  W02 idx= 1 #EF9C5A  skin          H=  26.7 S= 0.62 V= 0.94 Y=0.680  RGB5=(29,19,11) SKINLIKE
+  W03 idx= 2 #CE7342  skin          H=  21.2 S= 0.68 V= 0.81 Y=0.536  RGB5=(25,14, 8) SKINLIKE
+  W04 idx= 3 #944229  skin          H=  13.8 S= 0.72 V= 0.58 Y=0.343  RGB5=(18, 8, 5) SKINLIKE
+  W05 idx= 4 #5A1910  skin          H=   6.7 S= 0.82 V= 0.35 Y=0.170  RGB5=(11, 3, 2) 
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #EFE6D6  white_trim    H=  40.0 S= 0.10 V= 0.94 Y=0.906  RGB5=(29,28,26) TRUE_WHITE
+  W08 idx= 7 #BDB5A5  white_trim    H=  40.0 S= 0.13 V= 0.74 Y=0.712  RGB5=(23,22,20) 
+  W09 idx= 8 #847B6B  white_trim    H=  40.0 S= 0.19 V= 0.52 Y=0.486  RGB5=(16,15,13) 
+  W10 idx= 9 #524A3A  white_trim    H=  40.0 S= 0.30 V= 0.32 Y=0.293  RGB5=(10, 9, 7) SKINLIKE
+  W11 idx=10 #4A5AA5  primary       H= 229.1 S= 0.55 V= 0.65 Y=0.369  RGB5=( 9,11,20) 
+  W12 idx=11 #213173  primary       H= 228.0 S= 0.71 V= 0.45 Y=0.204  RGB5=( 4, 6,14) 
+  W13 idx=12 #101942  primary       H= 230.0 S= 0.75 V= 0.26 Y=0.106  RGB5=( 2, 3, 8) 
+  W14 idx=13 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+  W15 idx=14 #FFFFFF  dark_anchor   H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+
+========================================================================================
+陈国汉 / Chang Koehan  UI=0x13  eng=0x13  alt=0  pal_idx=0x13  pal_id=0x05C0
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9], 'accent': [10, 11]}
+  MISSING SLOTS: [12, 13, 14]
+  W01 idx= 0 #EFB58C  skin          H=  25.0 S= 0.41 V= 0.94 Y=0.759  RGB5=(29,22,17) SKINLIKE
+  W02 idx= 1 #E69463  skin          H=  22.5 S= 0.57 V= 0.90 Y=0.655  RGB5=(28,18,12) SKINLIKE
+  W03 idx= 2 #AD633A  skin          H=  21.4 S= 0.67 V= 0.68 Y=0.456  RGB5=(21,12, 7) SKINLIKE
+  W04 idx= 3 #7B3A21  skin          H=  16.4 S= 0.73 V= 0.48 Y=0.292  RGB5=(15, 7, 4) SKINLIKE
+  W05 idx= 4 #521010  skin          H=   0.0 S= 0.80 V= 0.32 Y=0.142  RGB5=(10, 2, 2) 
+  W06 idx= 5 #FFFFF7  primary       H=  60.0 S= 0.03 V= 1.00 Y=0.996  RGB5=(31,31,30) TRUE_WHITE
+  W07 idx= 6 #EFE6D6  primary       H=  40.0 S= 0.10 V= 0.94 Y=0.906  RGB5=(29,28,26) TRUE_WHITE
+  W08 idx= 7 #BDB5A5  primary       H=  40.0 S= 0.13 V= 0.74 Y=0.712  RGB5=(23,22,20) 
+  W09 idx= 8 #847B6B  primary       H=  40.0 S= 0.19 V= 0.52 Y=0.486  RGB5=(16,15,13) 
+  W10 idx= 9 #524A3A  primary       H=  40.0 S= 0.30 V= 0.32 Y=0.293  RGB5=(10, 9, 7) SKINLIKE
+  W11 idx=10 #293A7B  accent        H= 228.0 S= 0.67 V= 0.48 Y=0.236  RGB5=( 5, 7,15) 
+  W12 idx=11 #101942  accent        H= 230.0 S= 0.75 V= 0.26 Y=0.106  RGB5=( 2, 3, 8) 
+  W13 idx=12 #847B63  UNGROUPED     H=  45.0 S= 0.25 V= 0.52 Y=0.482  RGB5=(16,15,12) SKINLIKE
+  W14 idx=13 #4A4231  UNGROUPED     H=  40.0 S= 0.33 V= 0.29 Y=0.260  RGB5=( 9, 8, 6) SKINLIKE
+  W15 idx=14 #100800  UNGROUPED     H=  30.0 S= 1.00 V= 0.06 Y=0.038  RGB5=( 2, 1, 0) 
+
+========================================================================================
+蔡宝奇 / Choi Bounge  UI=0x14  eng=0x14  alt=0  pal_idx=0x14  pal_id=0x0600
+  schema={'skin': [0, 1, 2, 3], 'primary': [4, 5, 6, 7, 8], 'accent': [9, 10], 'dark_anchor': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #EFBD7B  skin          H=  34.3 S= 0.48 V= 0.94 Y=0.770  RGB5=(29,23,15) SKINLIKE
+  W02 idx= 1 #BD844A  skin          H=  30.0 S= 0.61 V= 0.74 Y=0.558  RGB5=(23,16, 9) SKINLIKE
+  W03 idx= 2 #8C4A10  skin          H=  28.0 S= 0.88 V= 0.55 Y=0.342  RGB5=(17, 9, 2) SKINLIKE
+  W04 idx= 3 #632100  skin          H=  20.0 S= 1.00 V= 0.39 Y=0.191  RGB5=(12, 4, 0) SKINLIKE
+  W05 idx= 4 #FFFFFF  primary       H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W06 idx= 5 #EFE6D6  primary       H=  40.0 S= 0.10 V= 0.94 Y=0.906  RGB5=(29,28,26) TRUE_WHITE
+  W07 idx= 6 #BDB5A5  primary       H=  40.0 S= 0.13 V= 0.74 Y=0.712  RGB5=(23,22,20) 
+  W08 idx= 7 #847B6B  primary       H=  40.0 S= 0.19 V= 0.52 Y=0.486  RGB5=(16,15,13) 
+  W09 idx= 8 #524A3A  primary       H=  40.0 S= 0.30 V= 0.32 Y=0.293  RGB5=(10, 9, 7) SKINLIKE
+  W10 idx= 9 #293A7B  accent        H= 228.0 S= 0.67 V= 0.48 Y=0.236  RGB5=( 5, 7,15) 
+  W11 idx=10 #101942  accent        H= 230.0 S= 0.75 V= 0.26 Y=0.106  RGB5=( 2, 3, 8) 
+  W12 idx=11 #734A42  dark_anchor   H=  10.0 S= 0.43 V= 0.45 Y=0.335  RGB5=(14, 9, 8) SKINLIKE
+  W13 idx=12 #5A3A31  dark_anchor   H=  12.0 S= 0.45 V= 0.35 Y=0.261  RGB5=(11, 7, 6) SKINLIKE
+  W14 idx=13 #3A2119  dark_anchor   H=  15.0 S= 0.57 V= 0.23 Y=0.154  RGB5=( 7, 4, 3) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
+========================================================================================
+七枷社 / Yashiro Nanakase  UI=0x15  eng=0x15  alt=0  pal_idx=0x15  pal_id=0x0700
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFDE9C  skin          H=  40.0 S= 0.39 V= 1.00 Y=0.880  RGB5=(31,27,19) 
+  W02 idx= 1 #F7A55A  skin          H=  28.4 S= 0.63 V= 0.97 Y=0.709  RGB5=(30,20,11) SKINLIKE
+  W03 idx= 2 #C56B31  skin          H=  23.3 S= 0.75 V= 0.77 Y=0.500  RGB5=(24,13, 6) SKINLIKE
+  W04 idx= 3 #843110  skin          H=  17.1 S= 0.88 V= 0.52 Y=0.275  RGB5=(16, 6, 2) SKINLIKE
+  W05 idx= 4 #4A1008  skin          H=   7.5 S= 0.89 V= 0.29 Y=0.128  RGB5=( 9, 2, 1) 
+  W06 idx= 5 #FFF7E6  white_trim    H=  40.0 S= 0.10 V= 1.00 Y=0.970  RGB5=(31,30,28) TRUE_WHITE
+  W07 idx= 6 #EFE6BD  white_trim    H=  50.0 S= 0.21 V= 0.94 Y=0.894  RGB5=(29,28,23) 
+  W08 idx= 7 #C5BD94  white_trim    H=  50.0 S= 0.25 V= 0.77 Y=0.733  RGB5=(24,23,18) 
+  W09 idx= 8 #8C8452  white_trim    H=  51.4 S= 0.41 V= 0.55 Y=0.504  RGB5=(17,16,10) 
+  W10 idx= 9 #5A5229  white_trim    H=  50.0 S= 0.55 V= 0.35 Y=0.314  RGB5=(11,10, 5) 
+  W11 idx=10 #DE4231  primary       H=   5.7 S= 0.78 V= 0.87 Y=0.434  RGB5=(27, 8, 6) 
+  W12 idx=11 #C51908  primary       H=   5.2 S= 0.96 V= 0.77 Y=0.292  RGB5=(24, 3, 1) 
+  W13 idx=12 #8C0000  primary       H=   0.0 S= 1.00 V= 0.55 Y=0.164  RGB5=(17, 0, 0) 
+  W14 idx=13 #4A0000  primary       H=   0.0 S= 1.00 V= 0.29 Y=0.087  RGB5=( 9, 0, 0) 
+  W15 idx=14 #100000  contour       H=   0.0 S= 1.00 V= 0.06 Y=0.019  RGB5=( 2, 0, 0) 
+
+========================================================================================
+谢尔美 / Shermie  UI=0x16  eng=0x16  alt=0  pal_idx=0x16  pal_id=0x0740
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9], 'accent': [10, 11], 'contour': [12], 'dark_anchor': [13, 14]}
+  W01 idx= 0 #FFD6AD  skin          H=  30.0 S= 0.32 V= 1.00 Y=0.869  RGB5=(31,26,21) 
+  W02 idx= 1 #FFAD7B  skin          H=  22.5 S= 0.52 V= 1.00 Y=0.752  RGB5=(31,21,15) SKINLIKE
+  W03 idx= 2 #E68452  skin          H=  20.0 S= 0.64 V= 0.90 Y=0.610  RGB5=(28,16,10) SKINLIKE
+  W04 idx= 3 #B55229  skin          H=  17.6 S= 0.77 V= 0.71 Y=0.420  RGB5=(22,10, 5) SKINLIKE
+  W05 idx= 4 #732100  skin          H=  17.1 S= 1.00 V= 0.45 Y=0.211  RGB5=(14, 4, 0) SKINLIKE
+  W06 idx= 5 #FFF7FF  primary       H= 300.0 S= 0.03 V= 1.00 Y=0.981  RGB5=(31,30,31) TRUE_WHITE
+  W07 idx= 6 #FFDED6  primary       H=  12.0 S= 0.16 V= 1.00 Y=0.906  RGB5=(31,27,26) PALE
+  W08 idx= 7 #F7B5A5  primary       H=  12.0 S= 0.33 V= 0.97 Y=0.779  RGB5=(30,22,20) SKINLIKE
+  W09 idx= 8 #C57363  primary       H=  10.0 S= 0.50 V= 0.77 Y=0.541  RGB5=(24,14,12) SKINLIKE
+  W10 idx= 9 #8C4231  primary       H=  10.9 S= 0.65 V= 0.55 Y=0.338  RGB5=(17, 8, 6) SKINLIKE
+  W11 idx=10 #73529C  accent        H= 266.7 S= 0.47 V= 0.61 Y=0.394  RGB5=(14,10,19) 
+  W12 idx=11 #4A296B  accent        H= 270.0 S= 0.62 V= 0.42 Y=0.229  RGB5=( 9, 5,13) 
+  W13 idx=12 #080000  contour       H=   0.0 S= 1.00 V= 0.03 Y=0.010  RGB5=( 1, 0, 0) NEAR_BLACK
+  W14 idx=13 #B51000  dark_anchor   H=   5.5 S= 1.00 V= 0.71 Y=0.250  RGB5=(22, 2, 0) 
+  W15 idx=14 #6B0000  dark_anchor   H=   0.0 S= 1.00 V= 0.42 Y=0.125  RGB5=(13, 0, 0) 
+
+========================================================================================
+克里斯 / Chris  UI=0x17  eng=0x17  alt=0  pal_idx=0x17  pal_id=0x0780
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12], 'dark_anchor': [13], 'contour': [14]}
+  W01 idx= 0 #FFE6AD  skin          H=  42.0 S= 0.32 V= 1.00 Y=0.906  RGB5=(31,28,21) 
+  W02 idx= 1 #FFB573  skin          H=  28.2 S= 0.55 V= 1.00 Y=0.767  RGB5=(31,22,14) SKINLIKE
+  W03 idx= 2 #E68452  skin          H=  20.0 S= 0.64 V= 0.90 Y=0.610  RGB5=(28,16,10) SKINLIKE
+  W04 idx= 3 #A54219  skin          H=  17.6 S= 0.85 V= 0.65 Y=0.355  RGB5=(20, 8, 3) SKINLIKE
+  W05 idx= 4 #731900  skin          H=  12.9 S= 1.00 V= 0.45 Y=0.192  RGB5=(14, 3, 0) SKINLIKE
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #EFE6D6  white_trim    H=  40.0 S= 0.10 V= 0.94 Y=0.906  RGB5=(29,28,26) TRUE_WHITE
+  W08 idx= 7 #C5BDA5  white_trim    H=  45.0 S= 0.17 V= 0.77 Y=0.741  RGB5=(24,23,20) PALE
+  W09 idx= 8 #948C73  white_trim    H=  45.0 S= 0.22 V= 0.58 Y=0.547  RGB5=(18,17,14) SKINLIKE
+  W10 idx= 9 #5A5242  white_trim    H=  40.0 S= 0.27 V= 0.35 Y=0.325  RGB5=(11,10, 8) SKINLIKE
+  W11 idx=10 #2152B5  primary       H= 220.0 S= 0.82 V= 0.71 Y=0.309  RGB5=( 4,10,22) 
+  W12 idx=11 #083A94  primary       H= 218.8 S= 0.94 V= 0.58 Y=0.208  RGB5=( 1, 7,18) 
+  W13 idx=12 #001963  primary       H= 225.0 S= 1.00 V= 0.39 Y=0.101  RGB5=( 0, 3,12) 
+  W14 idx=13 #3A3A29  dark_anchor   H=  60.0 S= 0.29 V= 0.23 Y=0.218  RGB5=( 7, 7, 5) 
+  W15 idx=14 #000008  contour       H= 240.0 S= 1.00 V= 0.03 Y=0.004  RGB5=( 0, 0, 1) NEAR_BLACK
+
+========================================================================================
+山崎龙二 / Ryuji Yamazaki  UI=0x18  eng=0x18  alt=0  pal_idx=0x18  pal_id=0x0640
+  schema={'skin': [0, 1, 2, 3, 4], 'accent': [5, 6, 7], 'dark_anchor': [8, 9, 10, 11, 12], 'contour': [13], 'white_trim': [14]}
+  W01 idx= 0 #FFD694  skin          H=  36.9 S= 0.42 V= 1.00 Y=0.858  RGB5=(31,26,18) 
+  W02 idx= 1 #FFAD63  skin          H=  28.4 S= 0.61 V= 1.00 Y=0.741  RGB5=(31,21,12) SKINLIKE
+  W03 idx= 2 #CE733A  skin          H=  23.3 S= 0.72 V= 0.81 Y=0.532  RGB5=(25,14, 7) SKINLIKE
+  W04 idx= 3 #8C3A19  skin          H=  17.1 S= 0.82 V= 0.55 Y=0.308  RGB5=(17, 7, 3) SKINLIKE
+  W05 idx= 4 #521910  skin          H=   7.5 S= 0.80 V= 0.32 Y=0.161  RGB5=(10, 3, 2) 
+  W06 idx= 5 #FFEF73  accent        H=  52.9 S= 0.55 V= 1.00 Y=0.900  RGB5=(31,29,14) 
+  W07 idx= 6 #C5A531  accent        H=  46.7 S= 0.75 V= 0.77 Y=0.632  RGB5=(24,20, 6) SKINLIKE
+  W08 idx= 7 #7B5A00  accent        H=  44.0 S= 1.00 V= 0.48 Y=0.353  RGB5=(15,11, 0) SKINLIKE
+  W09 idx= 8 #635A52  dark_anchor   H=  30.0 S= 0.17 V= 0.39 Y=0.361  RGB5=(12,11,10) 
+  W10 idx= 9 #524A42  dark_anchor   H=  30.0 S= 0.20 V= 0.32 Y=0.296  RGB5=(10, 9, 8) SKINLIKE
+  W11 idx=10 #423A31  dark_anchor   H=  30.0 S= 0.25 V= 0.26 Y=0.232  RGB5=( 8, 7, 6) SKINLIKE
+  W12 idx=11 #312921  dark_anchor   H=  30.0 S= 0.33 V= 0.19 Y=0.167  RGB5=( 6, 5, 4) 
+  W13 idx=12 #211910  dark_anchor   H=  30.0 S= 0.50 V= 0.13 Y=0.103  RGB5=( 4, 3, 2) 
+  W14 idx=13 #080000  contour       H=   0.0 S= 1.00 V= 0.03 Y=0.010  RGB5=( 1, 0, 0) NEAR_BLACK
+  W15 idx=14 #D6CECE  white_trim    H=   0.0 S= 0.04 V= 0.84 Y=0.816  RGB5=(26,25,25) PALE
+
+========================================================================================
+布鲁·玛丽 / Blue Mary  UI=0x19  eng=0x19  alt=0  pal_idx=0x19  pal_id=0x0680
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7], 'accent': [8, 9, 10], 'dark_anchor': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFE6B5  skin          H=  40.0 S= 0.29 V= 1.00 Y=0.910  RGB5=(31,28,22) 
+  W02 idx= 1 #FFC584  skin          H=  32.0 S= 0.48 V= 1.00 Y=0.812  RGB5=(31,24,16) SKINLIKE
+  W03 idx= 2 #F79C52  skin          H=  27.0 S= 0.67 V= 0.97 Y=0.686  RGB5=(30,19,10) SKINLIKE
+  W04 idx= 3 #AD5A19  skin          H=  26.7 S= 0.86 V= 0.68 Y=0.422  RGB5=(21,11, 3) SKINLIKE
+  W05 idx= 4 #733100  skin          H=  25.7 S= 1.00 V= 0.45 Y=0.249  RGB5=(14, 6, 0) SKINLIKE
+  W06 idx= 5 #CE2900  primary       H=  12.0 S= 1.00 V= 0.81 Y=0.336  RGB5=(25, 5, 0) SKINLIKE
+  W07 idx= 6 #A50800  primary       H=   3.0 S= 1.00 V= 0.65 Y=0.212  RGB5=(20, 1, 0) 
+  W08 idx= 7 #5A0000  primary       H=   0.0 S= 1.00 V= 0.35 Y=0.106  RGB5=(11, 0, 0) 
+  W09 idx= 8 #FFF7AD  accent        H=  54.0 S= 0.32 V= 1.00 Y=0.944  RGB5=(31,30,21) 
+  W10 idx= 9 #F7CE5A  accent        H=  44.2 S= 0.63 V= 0.97 Y=0.803  RGB5=(30,25,11) SKINLIKE
+  W11 idx=10 #C58C21  accent        H=  39.0 S= 0.83 V= 0.77 Y=0.568  RGB5=(24,17, 4) SKINLIKE
+  W12 idx=11 #6B5A9C  dark_anchor   H= 255.0 S= 0.42 V= 0.61 Y=0.404  RGB5=(13,11,19) 
+  W13 idx=12 #4A3A7B  dark_anchor   H= 255.0 S= 0.53 V= 0.48 Y=0.275  RGB5=( 9, 7,15) 
+  W14 idx=13 #291952  dark_anchor   H= 257.1 S= 0.70 V= 0.32 Y=0.142  RGB5=( 5, 3,10) 
+  W15 idx=14 #080010  contour       H= 270.0 S= 1.00 V= 0.06 Y=0.017  RGB5=( 1, 0, 2) 
+
+========================================================================================
+比利·凯恩 / Billy Kane  UI=0x1A  eng=0x1A  alt=0  pal_idx=0x1A  pal_id=0x06C0
+  schema={'skin': [0, 1, 2, 3, 4], 'dark_anchor': [5, 6, 7, 8, 9], 'primary': [10, 11, 12, 13], 'white_trim': [14]}
+  W01 idx= 0 #FFDEA5  skin          H=  38.2 S= 0.35 V= 1.00 Y=0.884  RGB5=(31,27,20) 
+  W02 idx= 1 #FFB56B  skin          H=  30.0 S= 0.58 V= 1.00 Y=0.763  RGB5=(31,22,13) SKINLIKE
+  W03 idx= 2 #E6843A  skin          H=  25.7 S= 0.75 V= 0.90 Y=0.599  RGB5=(28,16, 7) SKINLIKE
+  W04 idx= 3 #A54208  skin          H=  22.1 S= 0.95 V= 0.65 Y=0.348  RGB5=(20, 8, 1) SKINLIKE
+  W05 idx= 4 #6B1900  skin          H=  13.8 S= 1.00 V= 0.42 Y=0.182  RGB5=(13, 3, 0) SKINLIKE
+  W06 idx= 5 #215A94  dark_anchor   H= 210.0 S= 0.78 V= 0.58 Y=0.313  RGB5=( 4,11,18) 
+  W07 idx= 6 #083A6B  dark_anchor   H= 210.0 S= 0.92 V= 0.42 Y=0.190  RGB5=( 1, 7,13) 
+  W08 idx= 7 #00214A  dark_anchor   H= 213.3 S= 1.00 V= 0.29 Y=0.109  RGB5=( 0, 4, 9) 
+  W09 idx= 8 #000831  dark_anchor   H= 230.0 S= 1.00 V= 0.19 Y=0.041  RGB5=( 0, 1, 6) 
+  W10 idx= 9 #080008  dark_anchor   H= 300.0 S= 1.00 V= 0.03 Y=0.013  RGB5=( 1, 0, 1) NEAR_BLACK
+  W11 idx=10 #E63A21  primary       H=   7.5 S= 0.86 V= 0.90 Y=0.417  RGB5=(28, 7, 4) 
+  W12 idx=11 #B50808  primary       H=   0.0 S= 0.95 V= 0.71 Y=0.235  RGB5=(22, 1, 1) 
+  W13 idx=12 #6B0000  primary       H=   0.0 S= 1.00 V= 0.42 Y=0.125  RGB5=(13, 0, 0) 
+  W14 idx=13 #3A0000  primary       H=   0.0 S= 1.00 V= 0.23 Y=0.068  RGB5=( 7, 0, 0) 
+  W15 idx=14 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+
+========================================================================================
+八神庵 / Iori Yagami  UI=0x1B  eng=0x1B  alt=0  pal_idx=0x1B  pal_id=0x07C0
+  schema={'skin': [0, 1, 2, 3], 'white_trim': [4, 5, 6], 'accent': [7, 8, 9, 10], 'primary': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFF7B5  skin          H=  53.3 S= 0.29 V= 1.00 Y=0.948  RGB5=(31,30,22) 
+  W02 idx= 1 #F7C584  skin          H=  34.3 S= 0.47 V= 0.97 Y=0.803  RGB5=(30,24,16) SKINLIKE
+  W03 idx= 2 #EF945A  skin          H=  23.3 S= 0.62 V= 0.94 Y=0.661  RGB5=(29,18,11) SKINLIKE
+  W04 idx= 3 #B55229  skin          H=  17.6 S= 0.77 V= 0.71 Y=0.420  RGB5=(22,10, 5) SKINLIKE
+  W05 idx= 4 #F7F7FF  white_trim    H= 240.0 S= 0.03 V= 1.00 Y=0.971  RGB5=(30,30,31) TRUE_WHITE
+  W06 idx= 5 #BDBDC5  white_trim    H= 240.0 S= 0.04 V= 0.77 Y=0.746  RGB5=(23,23,24) PALE
+  W07 idx= 6 #737B84  white_trim    H= 210.0 S= 0.12 V= 0.52 Y=0.478  RGB5=(14,15,16) 
+  W08 idx= 7 #DE3A21  accent        H=   7.8 S= 0.85 V= 0.87 Y=0.408  RGB5=(27, 7, 4) 
+  W09 idx= 8 #AD2910  accent        H=   9.5 S= 0.90 V= 0.68 Y=0.305  RGB5=(21, 5, 2) SKINLIKE
+  W10 idx= 9 #7B1908  accent        H=   8.6 S= 0.93 V= 0.48 Y=0.205  RGB5=(15, 3, 1) SKINLIKE
+  W11 idx=10 #4A0000  accent        H=   0.0 S= 1.00 V= 0.29 Y=0.087  RGB5=( 9, 0, 0) 
+  W12 idx=11 #3A3A4A  primary       H= 240.0 S= 0.22 V= 0.29 Y=0.233  RGB5=( 7, 7, 9) 
+  W13 idx=12 #29293A  primary       H= 240.0 S= 0.29 V= 0.23 Y=0.169  RGB5=( 5, 5, 7) 
+  W14 idx=13 #191929  primary       H= 240.0 S= 0.40 V= 0.16 Y=0.104  RGB5=( 3, 3, 5) 
+  W15 idx=14 #000008  contour       H= 240.0 S= 1.00 V= 0.03 Y=0.004  RGB5=( 0, 0, 1) NEAR_BLACK
+
+========================================================================================
+矢吹真吾 / Shingo Yabuki  UI=0x1C  eng=0x1F  alt=0  pal_idx=0x1F  pal_id=0x08C0
+  schema={'white_trim': [0], 'skin': [1, 2, 3, 4, 5], 'hair': [6], 'primary': [7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFF7  white_trim    H=  60.0 S= 0.03 V= 1.00 Y=0.996  RGB5=(31,31,30) TRUE_WHITE
+  W02 idx= 1 #FFDE9C  skin          H=  40.0 S= 0.39 V= 1.00 Y=0.880  RGB5=(31,27,19) 
+  W03 idx= 2 #F7AD6B  skin          H=  28.2 S= 0.57 V= 0.97 Y=0.735  RGB5=(30,21,13) SKINLIKE
+  W04 idx= 3 #D67B3A  skin          H=  25.3 S= 0.73 V= 0.84 Y=0.561  RGB5=(26,15, 7) SKINLIKE
+  W05 idx= 4 #944208  skin          H=  24.7 S= 0.94 V= 0.58 Y=0.329  RGB5=(18, 8, 1) SKINLIKE
+  W06 idx= 5 #5A2108  skin          H=  18.0 S= 0.91 V= 0.35 Y=0.186  RGB5=(11, 4, 1) SKINLIKE
+  W07 idx= 6 #000000  hair          H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+  W08 idx= 7 #D6CEA5  primary       H=  50.0 S= 0.23 V= 0.84 Y=0.798  RGB5=(26,25,20) 
+  W09 idx= 8 #8C8463  primary       H=  48.0 S= 0.29 V= 0.55 Y=0.511  RGB5=(17,16,12) SKINLIKE
+  W10 idx= 9 #5A523A  primary       H=  45.0 S= 0.36 V= 0.35 Y=0.321  RGB5=(11,10, 7) SKINLIKE
+  W11 idx=10 #314A9C  dark_anchor   H= 226.2 S= 0.68 V= 0.61 Y=0.298  RGB5=( 6, 9,19) 
+  W12 idx=11 #213A8C  dark_anchor   H= 226.2 S= 0.76 V= 0.55 Y=0.234  RGB5=( 4, 7,17) 
+  W13 idx=12 #08216B  dark_anchor   H= 225.0 S= 0.92 V= 0.42 Y=0.133  RGB5=( 1, 4,13) 
+  W14 idx=13 #00083A  dark_anchor   H= 231.4 S= 1.00 V= 0.23 Y=0.045  RGB5=( 0, 1, 7) 
+  W15 idx=14 #000819  contour       H= 220.0 S= 1.00 V= 0.10 Y=0.030  RGB5=( 0, 1, 3) 
+
+========================================================================================
+暴走八神庵 / Orochi Iori  UI=0x1D  eng=0x1C  alt=0  pal_idx=0x1C  pal_id=0x0800
+  schema={'skin': [0, 1, 2, 3], 'white_trim': [4, 5, 6], 'accent': [7, 8, 9, 10], 'primary': [11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFDEDE  skin          H=   0.0 S= 0.13 V= 1.00 Y=0.910  RGB5=(31,27,27) PALE
+  W02 idx= 1 #DEADA5  skin          H=   8.6 S= 0.26 V= 0.87 Y=0.732  RGB5=(27,21,20) SKINLIKE
+  W03 idx= 2 #BD7B7B  skin          H=   0.0 S= 0.35 V= 0.74 Y=0.561  RGB5=(23,15,15) 
+  W04 idx= 3 #843A4A  skin          H= 346.7 S= 0.56 V= 0.52 Y=0.320  RGB5=(16, 7, 9) 
+  W05 idx= 4 #EFFFFF  white_trim    H= 180.0 S= 0.06 V= 1.00 Y=0.981  RGB5=(29,31,31) TRUE_WHITE
+  W06 idx= 5 #ADC5CE  white_trim    H= 195.0 S= 0.16 V= 0.81 Y=0.749  RGB5=(21,24,25) PALE
+  W07 idx= 6 #637B94  white_trim    H= 210.0 S= 0.33 V= 0.58 Y=0.466  RGB5=(12,15,18) 
+  W08 idx= 7 #CE5A42  accent        H=  10.6 S= 0.68 V= 0.81 Y=0.479  RGB5=(25,11, 8) SKINLIKE
+  W09 idx= 8 #9C4229  accent        H=  12.9 S= 0.74 V= 0.61 Y=0.353  RGB5=(19, 8, 5) SKINLIKE
+  W10 idx= 9 #632919  accent        H=  13.3 S= 0.75 V= 0.39 Y=0.221  RGB5=(12, 5, 3) SKINLIKE
+  W11 idx=10 #311008  accent        H=  12.0 S= 0.83 V= 0.19 Y=0.099  RGB5=( 6, 2, 1) 
+  W12 idx=11 #213A6B  primary       H= 220.0 S= 0.69 V= 0.42 Y=0.219  RGB5=( 4, 7,13) 
+  W13 idx=12 #10295A  primary       H= 220.0 S= 0.82 V= 0.35 Y=0.154  RGB5=( 2, 5,11) 
+  W14 idx=13 #00194A  primary       H= 220.0 S= 1.00 V= 0.29 Y=0.090  RGB5=( 0, 3, 9) 
+  W15 idx=14 #000010  contour       H= 240.0 S= 1.00 V= 0.06 Y=0.007  RGB5=( 0, 0, 2) 
+
+========================================================================================
+暴走莉安娜 / Orochi Leona  UI=0x1E  eng=0x1D  alt=0  pal_idx=0x1D  pal_id=0x0840
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9], 'dark_anchor': [10], 'contour': [11], 'accent': [12, 13, 14]}
+  W01 idx= 0 #FFCEB5  skin          H=  20.0 S= 0.29 V= 1.00 Y=0.853  RGB5=(31,25,22) 
+  W02 idx= 1 #F7AD84  skin          H=  21.4 S= 0.47 V= 0.97 Y=0.746  RGB5=(30,21,16) SKINLIKE
+  W03 idx= 2 #DE7B5A  skin          H=  15.0 S= 0.59 V= 0.87 Y=0.585  RGB5=(27,15,11) SKINLIKE
+  W04 idx= 3 #A54A3A  skin          H=   9.2 S= 0.65 V= 0.65 Y=0.389  RGB5=(20, 9, 7) SKINLIKE
+  W05 idx= 4 #732921  skin          H=   6.0 S= 0.71 V= 0.45 Y=0.244  RGB5=(14, 5, 4) 
+  W06 idx= 5 #DEF7F7  primary       H= 180.0 S= 0.10 V= 0.97 Y=0.939  RGB5=(27,30,30) TRUE_WHITE
+  W07 idx= 6 #9CBD9C  primary       H= 120.0 S= 0.17 V= 0.74 Y=0.689  RGB5=(19,23,19) 
+  W08 idx= 7 #6B8C52  primary       H=  94.3 S= 0.41 V= 0.55 Y=0.484  RGB5=(13,17,10) 
+  W09 idx= 8 #425A29  primary       H=  90.0 S= 0.55 V= 0.35 Y=0.304  RGB5=( 8,11, 5) 
+  W10 idx= 9 #293A21  primary       H= 100.0 S= 0.43 V= 0.23 Y=0.195  RGB5=( 5, 7, 4) 
+  W11 idx=10 #102121  dark_anchor   H= 180.0 S= 0.50 V= 0.13 Y=0.110  RGB5=( 2, 4, 4) 
+  W12 idx=11 #000010  contour       H= 240.0 S= 1.00 V= 0.06 Y=0.007  RGB5=( 0, 0, 2) 
+  W13 idx=12 #EF6B84  accent        H= 348.8 S= 0.55 V= 0.94 Y=0.585  RGB5=(29,13,16) 
+  W14 idx=13 #CE3A52  accent        H= 350.0 S= 0.72 V= 0.81 Y=0.410  RGB5=(25, 7,10) 
+  W15 idx=14 #941021  accent        H= 352.5 S= 0.89 V= 0.58 Y=0.226  RGB5=(18, 2, 4) 
+
+========================================================================================
+真七枷社 / Orochi Yashiro  UI=0x1F  eng=0x15  alt=1  pal_idx=0x20  pal_id=0x0900
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #F7B57B  skin          H=  28.0 S= 0.50 V= 0.97 Y=0.761  RGB5=(30,22,15) SKINLIKE
+  W02 idx= 1 #DE844A  skin          H=  23.3 S= 0.67 V= 0.87 Y=0.596  RGB5=(27,16, 9) SKINLIKE
+  W03 idx= 2 #AD5219  skin          H=  23.3 S= 0.86 V= 0.68 Y=0.403  RGB5=(21,10, 3) SKINLIKE
+  W04 idx= 3 #7B2908  skin          H=  17.1 S= 0.93 V= 0.48 Y=0.243  RGB5=(15, 5, 1) SKINLIKE
+  W05 idx= 4 #420800  skin          H=   7.5 S= 1.00 V= 0.26 Y=0.096  RGB5=( 8, 1, 0) 
+  W06 idx= 5 #DEEFEF  white_trim    H= 180.0 S= 0.07 V= 0.94 Y=0.916  RGB5=(27,29,29) TRUE_WHITE
+  W07 idx= 6 #BDD6DE  white_trim    H= 195.0 S= 0.15 V= 0.87 Y=0.813  RGB5=(23,26,27) PALE
+  W08 idx= 7 #94ADB5  white_trim    H= 195.0 S= 0.18 V= 0.71 Y=0.652  RGB5=(18,21,22) 
+  W09 idx= 8 #5A737B  white_trim    H= 195.0 S= 0.27 V= 0.48 Y=0.426  RGB5=(11,14,15) 
+  W10 idx= 9 #314A5A  white_trim    H= 204.0 S= 0.45 V= 0.35 Y=0.269  RGB5=( 6, 9,11) 
+  W11 idx=10 #E6294A  primary       H= 349.6 S= 0.82 V= 0.90 Y=0.398  RGB5=(28, 5, 9) 
+  W12 idx=11 #AD0831  primary       H= 345.0 S= 0.95 V= 0.68 Y=0.244  RGB5=(21, 1, 6) 
+  W13 idx=12 #6B0008  primary       H= 355.4 S= 1.00 V= 0.42 Y=0.129  RGB5=(13, 0, 1) 
+  W14 idx=13 #290000  primary       H=   0.0 S= 1.00 V= 0.16 Y=0.048  RGB5=( 5, 0, 0) 
+  W15 idx=14 #100000  contour       H=   0.0 S= 1.00 V= 0.06 Y=0.019  RGB5=( 2, 0, 0) 
+
+========================================================================================
+真谢尔美 / Orochi Shermie  UI=0x20  eng=0x16  alt=1  pal_idx=0x21  pal_id=0x0940
+  schema={'skin': [0, 1, 2, 3, 4], 'primary': [5, 6, 7, 8, 9], 'accent': [10, 11], 'contour': [12], 'dark_anchor': [13, 14]}
+  W01 idx= 0 #FFD6AD  skin          H=  30.0 S= 0.32 V= 1.00 Y=0.869  RGB5=(31,26,21) 
+  W02 idx= 1 #FFAD7B  skin          H=  22.5 S= 0.52 V= 1.00 Y=0.752  RGB5=(31,21,15) SKINLIKE
+  W03 idx= 2 #E68452  skin          H=  20.0 S= 0.64 V= 0.90 Y=0.610  RGB5=(28,16,10) SKINLIKE
+  W04 idx= 3 #B55229  skin          H=  17.6 S= 0.77 V= 0.71 Y=0.420  RGB5=(22,10, 5) SKINLIKE
+  W05 idx= 4 #732100  skin          H=  17.1 S= 1.00 V= 0.45 Y=0.211  RGB5=(14, 4, 0) SKINLIKE
+  W06 idx= 5 #E6294A  primary       H= 349.6 S= 0.82 V= 0.90 Y=0.398  RGB5=(28, 5, 9) 
+  W07 idx= 6 #AD0831  primary       H= 345.0 S= 0.95 V= 0.68 Y=0.244  RGB5=(21, 1, 6) 
+  W08 idx= 7 #6B0010  primary       H= 350.8 S= 1.00 V= 0.42 Y=0.133  RGB5=(13, 0, 2) 
+  W09 idx= 8 #290008  primary       H= 348.0 S= 1.00 V= 0.16 Y=0.052  RGB5=( 5, 0, 1) 
+  W10 idx= 9 #100000  primary       H=   0.0 S= 1.00 V= 0.06 Y=0.019  RGB5=( 2, 0, 0) 
+  W11 idx=10 #424A31  accent        H=  80.0 S= 0.33 V= 0.29 Y=0.270  RGB5=( 8, 9, 6) 
+  W12 idx=11 #212910  accent        H=  80.0 S= 0.60 V= 0.16 Y=0.141  RGB5=( 4, 5, 2) 
+  W13 idx=12 #080008  contour       H= 300.0 S= 1.00 V= 0.03 Y=0.013  RGB5=( 1, 0, 1) NEAR_BLACK
+  W14 idx=13 #7B428C  dark_anchor   H= 286.7 S= 0.53 V= 0.55 Y=0.359  RGB5=(15, 8,17) 
+  W15 idx=14 #521963  dark_anchor   H= 286.7 S= 0.75 V= 0.39 Y=0.197  RGB5=(10, 3,12) 
+
+========================================================================================
+真克里斯 / Orochi Chris  UI=0x21  eng=0x17  alt=1  pal_idx=0x22  pal_id=0x0980
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9], 'primary': [10, 11, 12], 'dark_anchor': [13], 'contour': [14]}
+  W01 idx= 0 #F7E6AD  skin          H=  46.7 S= 0.30 V= 0.97 Y=0.897  RGB5=(30,28,21) 
+  W02 idx= 1 #EFB573  skin          H=  32.0 S= 0.52 V= 0.94 Y=0.748  RGB5=(29,22,14) SKINLIKE
+  W03 idx= 2 #CE7B4A  skin          H=  22.5 S= 0.64 V= 0.81 Y=0.558  RGB5=(25,15, 9) SKINLIKE
+  W04 idx= 3 #8C3A10  skin          H=  20.0 S= 0.88 V= 0.55 Y=0.304  RGB5=(17, 7, 2) SKINLIKE
+  W05 idx= 4 #5A1000  skin          H=  10.9 S= 1.00 V= 0.35 Y=0.144  RGB5=(11, 2, 0) 
+  W06 idx= 5 #E6F7FF  white_trim    H= 200.0 S= 0.10 V= 1.00 Y=0.952  RGB5=(28,30,31) TRUE_WHITE
+  W07 idx= 6 #BDD6DE  white_trim    H= 195.0 S= 0.15 V= 0.87 Y=0.813  RGB5=(23,26,27) PALE
+  W08 idx= 7 #94ADB5  white_trim    H= 195.0 S= 0.18 V= 0.71 Y=0.652  RGB5=(18,21,22) 
+  W09 idx= 8 #637B84  white_trim    H= 195.0 S= 0.25 V= 0.52 Y=0.459  RGB5=(12,15,16) 
+  W10 idx= 9 #314A5A  white_trim    H= 204.0 S= 0.45 V= 0.35 Y=0.269  RGB5=( 6, 9,11) 
+  W11 idx=10 #B50831  primary       H= 345.7 S= 0.95 V= 0.71 Y=0.253  RGB5=(22, 1, 6) 
+  W12 idx=11 #730010  primary       H= 351.4 S= 1.00 V= 0.45 Y=0.142  RGB5=(14, 0, 2) 
+  W13 idx=12 #310008  primary       H= 350.0 S= 1.00 V= 0.19 Y=0.062  RGB5=( 6, 0, 1) 
+  W14 idx=13 #423A31  dark_anchor   H=  30.0 S= 0.25 V= 0.26 Y=0.232  RGB5=( 8, 7, 6) SKINLIKE
+  W15 idx=14 #100000  contour       H=   0.0 S= 1.00 V= 0.06 Y=0.019  RGB5=( 2, 0, 0) 
+
+========================================================================================
+大蛇 / Orochi  UI=0x22  eng=0x1E  alt=0  pal_idx=0x1E  pal_id=0x0880
+  schema={'skin': [0, 1, 2, 3, 4], 'white_trim': [5, 6, 7, 8, 9, 10, 11], 'accent': [12, 13, 14]}
+  W01 idx= 0 #FFE6BD  skin          H=  37.5 S= 0.26 V= 1.00 Y=0.914  RGB5=(31,28,23) 
+  W02 idx= 1 #FFCE94  skin          H=  32.3 S= 0.42 V= 1.00 Y=0.839  RGB5=(31,25,18) SKINLIKE
+  W03 idx= 2 #EFA57B  skin          H=  21.4 S= 0.48 V= 0.94 Y=0.714  RGB5=(29,20,15) SKINLIKE
+  W04 idx= 3 #C57352  skin          H=  17.1 S= 0.58 V= 0.77 Y=0.533  RGB5=(24,14,10) SKINLIKE
+  W05 idx= 4 #944A31  skin          H=  15.0 S= 0.67 V= 0.58 Y=0.366  RGB5=(18, 9, 6) SKINLIKE
+  W06 idx= 5 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W07 idx= 6 #D6D6D6  white_trim    H=   0.0 S= 0.00 V= 0.84 Y=0.839  RGB5=(26,26,26) PALE
+  W08 idx= 7 #B5B5AD  white_trim    H=  60.0 S= 0.05 V= 0.71 Y=0.706  RGB5=(22,22,21) 
+  W09 idx= 8 #8C8C84  white_trim    H=  60.0 S= 0.06 V= 0.55 Y=0.545  RGB5=(17,17,16) 
+  W10 idx= 9 #525A5A  white_trim    H= 180.0 S= 0.09 V= 0.35 Y=0.345  RGB5=(10,11,11) 
+  W11 idx=10 #213131  white_trim    H= 180.0 S= 0.33 V= 0.19 Y=0.174  RGB5=( 4, 6, 6) 
+  W12 idx=11 #080808  white_trim    H=   0.0 S= 0.00 V= 0.03 Y=0.032  RGB5=( 1, 1, 1) NEAR_BLACK
+  W13 idx=12 #CE3119  accent        H=   8.2 S= 0.88 V= 0.81 Y=0.366  RGB5=(25, 6, 3) SKINLIKE
+  W14 idx=13 #733121  accent        H=  12.0 S= 0.71 V= 0.45 Y=0.263  RGB5=(14, 6, 4) SKINLIKE
+  W15 idx=14 #521008  accent        H=   6.7 S= 0.90 V= 0.32 Y=0.138  RGB5=(10, 2, 1) 
+
+========================================================================================
+经典草薙京 / '94 Kyo  UI=0x23  eng=0x00  alt=1  pal_idx=0x00  pal_id=0x0100
+  schema={'skin': [1, 2, 3, 4], 'white_trim': [0], 'hair': [5, 6], 'primary': [7, 8, 9], 'dark_anchor': [10, 11, 12, 13], 'contour': [14]}
+  W01 idx= 0 #FFFFFF  white_trim    H=   0.0 S= 0.00 V= 1.00 Y=1.000  RGB5=(31,31,31) TRUE_WHITE
+  W02 idx= 1 #FFD6A5  skin          H=  32.7 S= 0.35 V= 1.00 Y=0.865  RGB5=(31,26,20) 
+  W03 idx= 2 #F7AD6B  skin          H=  28.2 S= 0.57 V= 0.97 Y=0.735  RGB5=(30,21,13) SKINLIKE
+  W04 idx= 3 #D67B42  skin          H=  23.3 S= 0.69 V= 0.84 Y=0.564  RGB5=(26,15, 8) SKINLIKE
+  W05 idx= 4 #843A08  skin          H=  24.0 S= 0.94 V= 0.52 Y=0.291  RGB5=(16, 7, 1) SKINLIKE
+  W06 idx= 5 #4A1900  hair          H=  20.0 S= 1.00 V= 0.29 Y=0.144  RGB5=( 9, 3, 0) 
+  W07 idx= 6 #000000  hair          H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+  W08 idx= 7 #BDC59C  primary       H=  72.0 S= 0.21 V= 0.77 Y=0.746  RGB5=(23,24,19) 
+  W09 idx= 8 #6B734A  primary       H=  72.0 S= 0.36 V= 0.45 Y=0.424  RGB5=(13,14, 9) 
+  W10 idx= 9 #3A4219  primary       H=  72.0 S= 0.62 V= 0.26 Y=0.230  RGB5=( 7, 8, 3) 
+  W11 idx=10 #424A31  dark_anchor   H=  80.0 S= 0.33 V= 0.29 Y=0.270  RGB5=( 8, 9, 6) 
+  W12 idx=11 #313A21  dark_anchor   H=  80.0 S= 0.43 V= 0.23 Y=0.205  RGB5=( 6, 7, 4) 
+  W13 idx=12 #212910  dark_anchor   H=  80.0 S= 0.60 V= 0.16 Y=0.141  RGB5=( 4, 5, 2) 
+  W14 idx=13 #001000  dark_anchor   H= 120.0 S= 1.00 V= 0.06 Y=0.038  RGB5=( 0, 2, 0) 
+  W15 idx=14 #000000  contour       H=   0.0 S= 0.00 V= 0.00 Y=0.000  RGB5=( 0, 0, 0) NEAR_BLACK
+
