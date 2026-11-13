@@ -1600,11 +1600,17 @@ def figure_preview_colors(cid: int, colors: List[str]) -> Dict[str, str]:
     }
 
 
-def make_skin_entry(cid: int, theme_id: str, colors: List[str]) -> Dict[str, Any]:
-    """Store a skin together with dummy colors derived from its palette."""
+def make_skin_entry(
+    cid: int,
+    theme_id: str,
+    colors: List[str],
+    vfx_theme: str = "classic",
+) -> Dict[str, Any]:
+    """Store a skin together with dummy colors and VFX theme selection."""
     payload = list(colors)
     return {
         "themeId": theme_id,
+        "vfxTheme": vfx_theme or "classic",
         "colors": payload,
         "preview": figure_preview_colors(cid, payload),
     }
@@ -1769,6 +1775,870 @@ def sync_character_portraits(
 
 
 # ============================================================================
+# Skill / VFX Palette Recoloring Engine (TASK-STUDIO-019)
+# Completely decoupled from the frozen costume OKLCH painter.
+# Uses P1 0x004956 table lookup (never linear formula) and P1 0x00483E sub-slots.
+# ============================================================================
+
+VFX_PRESETS: List[Dict[str, str]] = [
+    {
+        "id": "classic",
+        "name_cn": "\u539f\u7248\u7279\u6548",
+        "badge": "SNK\u539f\u8272",
+        "inner": "#FFFFFF",
+        "outer": "#FF8C1A",
+    },
+    {
+        "id": "sync_skin",
+        "name_cn": "\u8ddf\u968f\u76ae\u80a4\u4e3b\u8272",
+        "badge": "\u81ea\u52a8\u540c\u6b65",
+        "inner": "#F8FAFC",
+        "outer": "#38BDF8",
+    },
+    {
+        "id": "cangyan_blue",
+        "name_cn": "\u82cd\u708e\u84dd",
+        "badge": "\u7535\u5149\u84dd\u7130",
+        "inner": "#D8F8FF",
+        "outer": "#008CFF",
+    },
+    {
+        "id": "mingyan_purple",
+        "name_cn": "\u51a5\u708e\u7d2b",
+        "badge": "\u5927\u86c7\u7d2b\u7130",
+        "inner": "#F6DCFF",
+        "outer": "#9D2BFF",
+    },
+    {
+        "id": "holy_gold",
+        "name_cn": "\u5723\u8000\u91d1",
+        "badge": "\u70bd\u9633\u91d1\u8f89",
+        "inner": "#FFFDE0",
+        "outer": "#FFB300",
+    },
+    {
+        "id": "jade_venom",
+        "name_cn": "\u7fe1\u7fe0\u6bd2\u706b",
+        "badge": "\u8367\u5149\u7fe0\u7130",
+        "inner": "#E4FFD8",
+        "outer": "#00E65B",
+    },
+    {
+        "id": "crimson_flame",
+        "name_cn": "\u8d64\u7130\u7ea2",
+        "badge": "\u72c2\u708e\u7eef\u7ea2",
+        "inner": "#FFE4D4",
+        "outer": "#FF1F2D",
+    },
+    {
+        "id": "aurora_cyan",
+        "name_cn": "\u6781\u5149\u9752",
+        "badge": "\u51b0\u6676\u9752\u5149",
+        "inner": "#E6FFFF",
+        "outer": "#00F0D8",
+    },
+    {
+        "id": "sakura_plasma",
+        "name_cn": "\u6a31\u9b45\u7c89\u7130",
+        "badge": "\u9713\u8679\u7c89\u7130",
+        "inner": "#FFE8F6",
+        "outer": "#FF2B9A",
+    },
+    {
+        "id": "void_ember",
+        "name_cn": "\u865a\u7a7a\u6697\u7130",
+        "badge": "\u5e7d\u84dd\u6697\u7d2b",
+        "inner": "#E4DAFF",
+        "outer": "#4B3BFF",
+    },
+]
+
+VFX_PRESET_MAP: Dict[str, Dict[str, str]] = {p["id"]: p for p in VFX_PRESETS}
+
+# Hardware sentinel / mask padding words embedded inside KOF97 VFX palette blocks:
+# 0x0000 (0,0,0), 0x4553 (11,10,6), 0x305C (0,11,25), 0x304E (0,9,29),
+# 0x20F0 (0,31,0), 0x4F00 (31,0,0), 0x4497 (9,18,14).
+VFX_SENTINEL_WORDS = frozenset({0x0000, 0x4553, 0x305C, 0x304E, 0x20F0, 0x4F00, 0x4497})
+VFX_SUBSLOT_OFFSETS: Tuple[int, ...] = (1, 2, 4, 5, 7, 8, 10, 11)
+_VFX_MAP_CACHE: Dict[Tuple[int, int], Dict[int, Dict[str, Any]]] = {}
+
+
+def _read_p2_slot_words15(p2_data: bytes, pal_id: int) -> List[int]:
+    """Read color indices 1..15 (Big-Endian LSPC2 words) from a P2 palette slot."""
+    off = 0x2CFFF0 + pal_id * 32
+    return list(struct.unpack(">15H", p2_data[off + 2 : off + 32]))
+
+
+def scan_character_vfx_slots(
+    cid: int,
+    p1_data: bytes,
+    p2_clean: bytes,
+) -> Dict[str, Any]:
+    """
+    Scan and whitelist clean VFX palette slots for one roster character.
+    Reads P1 0x004956 directly (handling the 0x15..0x1A interleaving) and filters
+    out solid placeholders, dark shadow silhouettes, and button-variant body flashes.
+    """
+    _, _, pal_idx = get_char_engine_info(cid)
+
+    # 1. Read VFX base ID from P1 0x004956 (35 word entries: 0x00..0x22)
+    vfx_base_off = 0x4956 + pal_idx * 2
+    vfx_base_pid = struct.unpack(">H", p1_data[vfx_base_off : vfx_base_off + 2])[0]
+
+    # 2. Scan vfx_base + 0..15 for real luminous projectile / flame / spark palettes
+    vfx_slots: List[int] = []
+    vfx_signatures: set = set()
+    for s in range(16):
+        pid = vfx_base_pid + s
+        words = _read_p2_slot_words15(p2_clean, pid)
+        active_words = [w for w in words if w not in VFX_SENTINEL_WORDS]
+        if len(set(active_words)) < 2:
+            continue
+        has_energy = any(
+            max(r, g, b) >= 16 and (r, g, b) != (31, 31, 31)
+            for r, g, b, _ in (decode_lspc2(w) for w in active_words)
+        )
+        if not has_energy:
+            continue
+        vfx_slots.append(pid)
+        vfx_signatures.add(tuple(words))
+
+    # 3. Scan character button sub-slots in P1 0x00483E that hold pure uniform VFX
+    btn_base_off = 0x483E + pal_idx * 8
+    btn_pids = [
+        struct.unpack(">H", p1_data[btn_base_off + b * 2 : btn_base_off + b * 2 + 2])[0]
+        for b in range(4)
+    ]
+    char_sub_offsets: List[int] = []
+    char_sub_slots: List[int] = []
+
+    for sub in VFX_SUBSLOT_OFFSETS:
+        banks = [tuple(_read_p2_slot_words15(p2_clean, bp + sub)) for bp in btn_pids]
+        if len(set(banks)) != 1:
+            # Differs per button -> character body/costume flash, never recolor as VFX
+            continue
+        words_tup = banks[0]
+        active_words = [w for w in words_tup if w not in VFX_SENTINEL_WORDS]
+        if len(set(active_words)) < 2:
+            continue
+
+        decoded = [decode_lspc2(w)[:3] for w in active_words]
+        matches_vfx_bank = words_tup in vfx_signatures
+        has_white_core = any(r == 31 and g >= 30 and b >= 27 for r, g, b in decoded)
+        is_slash_spark = decoded[0][0] >= 30 and decoded[0][1] >= 30 and decoded[0][2] >= 28
+        is_pure_flame = len(decoded) >= 5 and all(r >= 28 and r >= b + 4 for r, g, b in decoded)
+        if matches_vfx_bank or has_white_core or is_slash_spark or is_pure_flame:
+            char_sub_offsets.append(sub)
+            for bp in btn_pids:
+                char_sub_slots.append(bp + sub)
+
+    return {
+        "cid": cid,
+        "pal_idx": pal_idx,
+        "vfx_base_pid": vfx_base_pid,
+        "btn_pids": btn_pids,
+        "vfx_slots": vfx_slots,
+        "char_sub_offsets": char_sub_offsets,
+        "char_sub_slots": char_sub_slots,
+        "all_slots": vfx_slots + char_sub_slots,
+        "has_vfx": bool(vfx_slots or char_sub_slots),
+    }
+
+
+def build_character_vfx_map(p1_data: bytes, p2_clean: bytes) -> Dict[int, Dict[str, Any]]:
+    """Build and cache the 36-character VFX palette slot map from P1 and clean P2."""
+    cache_key = (len(p1_data), hash(bytes(p1_data[0x4956:0x499C])))
+    cached = _VFX_MAP_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+    result = {
+        ch["id"]: scan_character_vfx_slots(ch["id"], p1_data, p2_clean)
+        for ch in CHARACTER_ROSTER
+    }
+    _VFX_MAP_CACHE[cache_key] = result
+    return result
+
+
+def _oklch_gamut_word(lum: float, chroma: float, hue: float) -> int:
+    """
+    Encode (L, C, H) into a 16-bit LSPC2 word while binary-searching chroma inside
+    the sRGB gamut so neon hues (cyan, yellow, blue, magenta) never clip-shift.
+    """
+    lum = min(0.99, max(0.08, lum))
+    chroma = max(0.0, chroma)
+    hi = chroma
+    r, g, b = _oklch_to_linear(lum, hi, hue)
+    if min(r, g, b) < 0.0 or max(r, g, b) > 1.0:
+        lo = 0.0
+        for _ in range(12):
+            mid = 0.5 * (lo + hi)
+            mr, mg, mb = _oklch_to_linear(lum, mid, hue)
+            if min(mr, mg, mb) >= 0.0 and max(mr, mg, mb) <= 1.0:
+                lo = mid
+            else:
+                hi = mid
+        chroma = lo
+    return _oklch_word(lum, chroma, hue)
+
+
+def _hex_to_oklch(hex_code: str) -> Tuple[float, float, float]:
+    """Convert #RRGGBB hex string into OKLCH (L, C, H)."""
+    h = str(hex_code or "#FFFFFF").lstrip("#")
+    if len(h) != 6:
+        return 0.75, 0.18, 220.0
+    rf = int(h[0:2], 16) / 255.0
+    gf = int(h[2:4], 16) / 255.0
+    bf = int(h[4:6], 16) / 255.0
+    return _rgb_unit_to_oklch(rf, gf, bf)
+
+
+def _lerp_hue(h0: float, h1: float, t: float) -> float:
+    """Interpolate two OKLCH hue angles along the shortest arc."""
+    delta = ((h1 - h0 + 540.0) % 360.0) - 180.0
+    return (h0 + delta * min(1.0, max(0.0, t))) % 360.0
+
+
+def _dominant_palette_accent(colors: List[str]) -> Tuple[str, str]:
+    """Extract a vivid inner/outer hex pair from a 15-color character palette."""
+    best_hex = "#38BDF8"
+    best_c = -1.0
+    best_l = 0.65
+    for hx in colors or []:
+        lum, chm, _hue = _hex_to_oklch(hx)
+        if chm > best_c and lum >= 0.35:
+            best_c = chm
+            best_l = lum
+            best_hex = hx
+    if best_c < 0.05:
+        return "#F8FAFC", "#38BDF8"
+    # Build bright core shifted slightly warmer/brighter and vivid outer hue
+    lum, chm, hue = _hex_to_oklch(best_hex)
+    inner_word = _oklch_gamut_word(min(0.95, max(0.88, lum + 0.22)), min(0.10, chm * 0.55), hue)
+    outer_word = _oklch_gamut_word(min(0.76, max(0.58, best_l)), max(0.20, min(0.26, chm * 1.35)), hue)
+    return lspc2_to_hex(inner_word), lspc2_to_hex(outer_word)
+
+
+def resolve_vfx_hues(
+    vfx_theme_id: str,
+    skin_entry: Optional[Dict[str, Any]] = None,
+    cid: Optional[int] = None,
+    p1_data: Optional[bytes] = None,
+    p2_clean: Optional[bytes] = None,
+) -> Optional[Tuple[str, str]]:
+    """
+    Resolve (inner_hex, outer_hex) for a VFX preset. Returns None for 'classic'.
+    Supports 'sync_skin' by reading THEME_KEYS, custom skin colors, or clean ROM clothes.
+    """
+    vid = str(vfx_theme_id or "classic")
+    if vid == "classic":
+        return None
+    if vid == "sync_skin":
+        entry = skin_entry or {}
+        skin_tid = str(entry.get("themeId", "classic"))
+        if skin_tid in THEME_KEYS:
+            primary_hex, accent_hex = THEME_KEYS[skin_tid]
+            return primary_hex, accent_hex
+        colors = entry.get("colors")
+        if isinstance(colors, list) and len(colors) == 15 and skin_tid != "classic":
+            return _dominant_palette_accent(colors)
+        if cid is not None and p1_data is not None and p2_clean is not None:
+            _, _, pal_idx = get_char_engine_info(cid)
+            off = 0x483E + pal_idx * 8
+            base_pid = struct.unpack(">H", p1_data[off : off + 2])[0]
+            clean_hexes = [lspc2_to_hex(w) for w in _read_p2_slot_words15(p2_clean, base_pid)]
+            return _dominant_palette_accent(clean_hexes)
+        return "#F8FAFC", "#38BDF8"
+
+    preset = VFX_PRESET_MAP.get(vid)
+    if preset:
+        return preset["inner"], preset["outer"]
+    return None
+
+
+def recolor_vfx_palette(
+    words15: List[int],
+    inner_hex: str,
+    outer_hex: str,
+) -> List[int]:
+    """
+    Independent luminous gradient shader for VFX palettes.
+    - Preserves sentinel mask/padding words verbatim.
+    - Keeps pure white (31,31,31) and high-luminance core near-white incandescent.
+    - Drives mid/high tiers to vivid neon chroma (up to ~0.24 OKLCH, gamut-safe)
+      with smooth inner-to-outer dual-hue progression.
+    """
+    _li, c_in, h_in = _hex_to_oklch(inner_hex)
+    _lo, c_out, h_out = _hex_to_oklch(outer_hex)
+    inner_is_neutral = c_in < 0.03
+    outer_is_neutral = c_out < 0.03
+    if inner_is_neutral and not outer_is_neutral:
+        h_in = h_out
+    elif outer_is_neutral and not inner_is_neutral:
+        h_out = h_in
+
+    non_white_ls: List[float] = []
+    for w in words15:
+        if w in VFX_SENTINEL_WORDS:
+            continue
+        r5, g5, b5, _ = decode_lspc2(w)
+        if r5 >= 31 and g5 >= 31 and b5 >= 31:
+            continue
+        sl, _, _ = _rgb_unit_to_oklch(r5 / 31.0, g5 / 31.0, b5 / 31.0)
+        non_white_ls.append(sl)
+    min_act_l = min(non_white_ls) if non_white_ls else 0.4
+    max_act_l = max(non_white_ls) if non_white_ls else 0.9
+    pale_source_only = len(non_white_ls) >= 2 and min_act_l > 0.62
+
+    out_words: List[int] = []
+    for w in words15:
+        if w in VFX_SENTINEL_WORDS:
+            out_words.append(w)
+            continue
+        r5, g5, b5, _dark = decode_lspc2(w)
+        if r5 >= 31 and g5 >= 31 and b5 >= 31:
+            out_words.append(0x7FFF)
+            continue
+
+        src_l, _src_c, _src_h = _rgb_unit_to_oklch(r5 / 31.0, g5 / 31.0, b5 / 31.0)
+        # Progress from bright flame core (0.0) toward outer aura tail (1.0)
+        grad_t = min(1.0, max(0.0, (0.94 - src_l) / 0.30))
+        target_h = _lerp_hue(h_in, h_out, grad_t)
+
+        if src_l >= 0.90:
+            # Incandescent flame heart: bright, crisp, light inner glow tint
+            target_l = max(src_l, 0.91)
+            target_c = min(0.11, max(0.025, (0.985 - src_l) * 1.15))
+        elif pale_source_only:
+            # Pale cyan/pink sources lack dark steps; stretch midtones to saturated neon
+            sub_max = min(0.899, max_act_l)
+            rank_t = min(1.0, max(0.0, (sub_max - src_l) / max(0.04, sub_max - min_act_l)))
+            target_l = min(0.87, max(0.54, 0.87 - 0.32 * rank_t))
+            target_c = max(0.17, min(0.25, 0.16 + 0.08 * rank_t))
+        elif src_l >= 0.45:
+            # Neon mid/high energy body: preserve brightness hierarchy, lift chroma
+            target_l = min(0.89, max(src_l, 0.48))
+            peak_c = max(0.18, min(0.25, max(c_out, 0.21)))
+            # Gentle peak in the middle luminous band (0.58..0.82)
+            band = 1.0 - 0.18 * abs(src_l - 0.68) / 0.25
+            target_c = max(0.17, min(0.25, peak_c * band))
+        else:
+            # Dark outer ember / trail outline: crisp dark tone with rich tint
+            target_l = max(0.16, src_l * 0.96)
+            target_c = min(0.21, max(0.06, src_l * 0.42))
+
+        out_words.append(_oklch_gamut_word(target_l, target_c, target_h))
+
+    return out_words
+
+
+def generate_vfx_preview_ramp(
+    vfx_theme_id: str,
+    skin_entry: Optional[Dict[str, Any]] = None,
+) -> List[str]:
+    """Generate a 6-step luminous preview hex ramp for UI glow badges."""
+    pair = resolve_vfx_hues(vfx_theme_id, skin_entry)
+    if not pair:
+        pair = ("#FFFFFF", "#FF8C1A")
+    sample_words = [
+        encode_lspc2(31, 31, 31),
+        encode_lspc2(31, 31, 24),
+        encode_lspc2(31, 28, 17),
+        encode_lspc2(31, 21, 6),
+        encode_lspc2(26, 13, 1),
+        encode_lspc2(14, 5, 0),
+    ]
+    recolored = recolor_vfx_palette(sample_words, pair[0], pair[1])
+    return [lspc2_to_hex(w) for w in recolored]
+
+
+def apply_vfx_palettes_to_p2(
+    cid: int,
+    vfx_theme_id: str,
+    skin_entry: Optional[Dict[str, Any]],
+    p1_data: bytes,
+    p2_data: bytearray,
+    p2_clean: bytes,
+) -> int:
+    """
+    Patch whitelisted VFX palette slots (P1 0x004956 + pure-VFX 0x00483E sub-slots)
+    into P2 ROM buffer for one character. Returns count of P2 slots written.
+    """
+    pair = resolve_vfx_hues(vfx_theme_id, skin_entry, cid=cid, p1_data=p1_data, p2_clean=p2_clean)
+    if pair is None:
+        return 0
+    vfx_map = build_character_vfx_map(p1_data, p2_clean)
+    info = vfx_map.get(cid)
+    if not info or not info.get("has_vfx"):
+        return 0
+
+    inner_hex, outer_hex = pair
+    written_slots = 0
+    for pid in info["all_slots"]:
+        if pid <= 0x00FF:
+            # Never touch public UI / system palettes 0x0000..0x00FF
+            continue
+        clean_words = _read_p2_slot_words15(p2_clean, pid)
+        new_words = recolor_vfx_palette(clean_words, inner_hex, outer_hex)
+        p2_addr = 0x2CFFF0 + pid * 32
+        p2_data[p2_addr + 2 : p2_addr + 32] = struct.pack(">15H", *new_words)
+        written_slots += 1
+    return written_slots
+
+
+# ============================================================================
+# P1 68000 Hit-Effect & Victim Elemental Burn/Shock VFX Hook System
+# Keeps P2 public palettes 0x0000..0x00FF and 0x17B0..0x17DF 100% official
+# while dynamically switching Palette RAM slots (0xF8/0xF9/0xFA and 0x51..0x6A)
+# to match the attacking fighter's customized VFX theme on every hit/burn.
+# ============================================================================
+
+VFX_HIT_EFFECT_CAVE_BASE = 0x0F0000
+VFX_HIT_EFFECT_CAVE_SIZE = 0x10000
+VFX_THEME_ENTRY_STRIDE = 0x620
+VFX_RAM_F8_OWNER = 0x6E00
+VFX_RAM_F9_OWNER = 0x6E02
+VFX_RAM_FA_OWNER = 0x6E04
+VFX_RAM_EL_OWNER = 0x6E06
+VFX_RAM_IM_OWNER = 0x6E08
+
+VFX_HIT_EFFECT_DARK_MASKS = frozenset({0x0010, 0x1210})
+VFX_SMOKE_SPLIT_SLOTS = frozenset({0x0058, 0x005F})
+
+# Ordered common effect groups stored per custom theme (+0x000..+0x21F, 17 * 32B)
+VFX_COMMON_EFFECT_GROUPS: Tuple[Tuple[int, int, int, int, int, int, Tuple[int, ...]], ...] = (
+    # (cache_off, common_off, cnt_m1, burn_pal_id, custom_burn_off, classic_burn_ptr, slot_ids)
+    (VFX_RAM_F8_OWNER, 0x0000, 3, 0x00F8, 0x0220, 0x002FF5F0, (0x0057, 0x0058, 0x0059, 0x0061)),
+    (VFX_RAM_F9_OWNER, 0x0080, 3, 0x00F9, 0x0420, 0x002FF7F0, (0x005B, 0x005F, 0x0067, 0x0068)),
+    (VFX_RAM_EL_OWNER, 0x0100, 3, 0x0000, 0x0000, 0x00000000, (0x0052, 0x0062, 0x0053, 0x0054)),
+    (VFX_RAM_IM_OWNER, 0x0180, 4, 0x0000, 0x0000, 0x00000000, (0x0051, 0x0055, 0x0054, 0x0064, 0x006A)),
+    (VFX_RAM_FA_OWNER, 0x0000, 0xFFFF, 0x00FA, 0x0000, 0x002FF9F0, ()),
+)
+
+# Exact 6-byte P1 hook sites and their clean official machine code bytes
+VFX_HIT_HOOK_ORIGINALS: Tuple[Tuple[str, int, bytes, str], ...] = (
+    ("match_init_hook", 0x0251C4, bytes.fromhex("3b7cffff040c"), "match_init_hook"),
+    ("f8_ptr_hook", 0x0041AE, bytes.fromhex("41f9002ff5f0"), "f8_ptr_hook"),
+    ("f9_ptr_hook", 0x0041E6, bytes.fromhex("41f9002ff7f0"), "f9_ptr_hook"),
+    ("fa_ptr_hook", 0x004254, bytes.fromhex("41f9002ff9f0"), "fa_ptr_hook"),
+    ("impact_0", 0x012E64, bytes.fromhex("247b102c3212"), "on_impact_hook"),
+    ("fire_0", 0x012F18, bytes.fromhex("197c00f8003a"), "on_fire_burn_hook"),
+    ("fire_1", 0x012F8C, bytes.fromhex("197c00f8003a"), "on_fire_burn_hook"),
+    ("fire_2", 0x013108, bytes.fromhex("197c00f8003a"), "on_fire_burn_hook"),
+    ("fire_3", 0x013174, bytes.fromhex("197c00f8003a"), "on_fire_burn_hook"),
+    ("purple_0", 0x012F9E, bytes.fromhex("197c00f9003a"), "on_purple_burn_hook"),
+    ("purple_1", 0x01314E, bytes.fromhex("197c00f9003a"), "on_purple_burn_hook"),
+    ("purple_2", 0x01316C, bytes.fromhex("197c00f9003a"), "on_purple_burn_hook"),
+    ("elec_0", 0x012F42, bytes.fromhex("002c000200e3"), "on_elec_shock_hook"),
+    ("elec_1", 0x013184, bytes.fromhex("002c000200e3"), "on_elec_shock_hook"),
+    ("elec_2", 0x03376E, bytes.fromhex("002c000200e3"), "on_elec_shock_hook"),
+    ("fa_flash", 0x01317C, bytes.fromhex("197c00fa003a"), "on_fa_flash_hook"),
+)
+
+
+def _recolor_hit_effect_slot(
+    pal_id: int,
+    p2_clean: bytes,
+    inner_hex: str,
+    outer_hex: str,
+) -> List[int]:
+    """
+    Recolor a single common effect or cyclic victim burn slot while keeping
+    neutral grey smoke in split slots (0x0058/0x005F) and dark outline sentinels intact.
+    """
+    clean_words = _read_p2_slot_words15(p2_clean, pal_id)
+    mask_positions = {
+        idx: w for idx, w in enumerate(clean_words) if w in VFX_HIT_EFFECT_DARK_MASKS
+    }
+    if pal_id in VFX_SMOKE_SPLIT_SLOTS:
+        smoke_head = list(clean_words[:9])
+        flame_tail = recolor_vfx_palette(clean_words[9:15], inner_hex, outer_hex)
+        out_words = smoke_head + flame_tail
+    else:
+        out_words = recolor_vfx_palette(clean_words, inner_hex, outer_hex)
+    for idx, orig_w in mask_positions.items():
+        out_words[idx] = orig_w
+    return out_words
+
+
+class _M68kCodeCaveBuilder:
+    """Minimal relocatable Motorola 68000 assembler for P1 code caves."""
+
+    def __init__(self, base: int) -> None:
+        self.base = base
+        self.buf = bytearray()
+        self.labels: Dict[str, int] = {}
+        self.fixups: List[Tuple[int, str, str]] = []
+
+    @property
+    def pc(self) -> int:
+        return self.base + len(self.buf)
+
+    def label(self, name: str) -> None:
+        if name in self.labels:
+            raise ValueError(f"Duplicate 68k label: {name}")
+        self.labels[name] = self.pc
+
+    def w(self, *words: int) -> None:
+        for val in words:
+            self.buf += struct.pack(">H", val & 0xFFFF)
+
+    def l(self, *longs: int) -> None:
+        for val in longs:
+            self.buf += struct.pack(">I", val & 0xFFFFFFFF)
+
+    def b_branch(self, op_hi: int, target: str) -> None:
+        self.w(op_hi)
+        self.fixups.append((len(self.buf), "wrel", target))
+        self.w(0)
+
+    def dbra(self, dreg: int, target: str) -> None:
+        self.w(0x51C8 | (dreg & 7))
+        self.fixups.append((len(self.buf), "wrel", target))
+        self.w(0)
+
+    def ref_abs32(self, opcode_word: int, target: str) -> None:
+        self.w(opcode_word)
+        self.fixups.append((len(self.buf), "abs32", target))
+        self.l(0)
+
+    def finalize(self) -> bytes:
+        for pos, kind, target in self.fixups:
+            taddr = self.labels[target]
+            if kind == "wrel":
+                disp = taddr - (self.base + pos)
+                if not (-32768 <= disp <= 32767):
+                    raise ValueError(f"Branch displacement out of range for {target}: {disp}")
+                self.buf[pos : pos + 2] = struct.pack(">h", disp)
+            elif kind == "abs32":
+                self.buf[pos : pos + 4] = struct.pack(">I", taddr)
+        return bytes(self.buf)
+
+
+def build_hit_effect_vfx_p1_patch(
+    character_skins: Dict[int, Dict[str, Any]],
+    p1_data: bytes,
+    p2_clean: bytes,
+) -> Optional[Dict[str, Any]]:
+    """
+    Build the P1 0x0F0000 code cave and deduplicated theme tables for dynamic
+    on-hit elemental burn/shock/spark palette switching. Returns None if every
+    character uses the classic VFX theme.
+    """
+    vfx_map = build_character_vfx_map(p1_data, p2_clean)
+    char_slot_table = [0xFFFF] * 36
+    pair_to_idx: Dict[Tuple[str, str], int] = {}
+    unique_pairs: List[Tuple[str, str]] = []
+    orochi_pair: Optional[Tuple[str, str]] = None
+
+    for char_info in CHARACTER_ROSTER:
+        cid = int(char_info["id"])
+        skin_entry = character_skins.get(cid)
+        if not skin_entry:
+            continue
+        vfx_theme = skin_entry.get("vfxTheme", "classic")
+        if vfx_theme == "classic":
+            continue
+        pair = resolve_vfx_hues(
+            vfx_theme, skin_entry, cid=cid, p1_data=p1_data, p2_clean=p2_clean
+        )
+        if pair is None:
+            continue
+        cinfo = vfx_map.get(cid)
+        if not cinfo or not cinfo.get("has_vfx"):
+            continue
+        eid, alt_flag, pal_idx = get_char_engine_info(cid)
+        runtime_slot = 35 if (eid == 0 and alt_flag != 0) else pal_idx
+        if pair not in pair_to_idx:
+            pair_to_idx[pair] = len(unique_pairs)
+            unique_pairs.append(pair)
+        char_slot_table[runtime_slot] = pair_to_idx[pair]
+        if runtime_slot == 30:
+            orochi_pair = pair
+
+    if not unique_pairs:
+        return None
+
+    asm = _M68kCodeCaveBuilder(VFX_HIT_EFFECT_CAVE_BASE)
+
+    # 1. match_init_hook: execute replaced insn & reset owner caches to 0xFFFE
+    asm.label("match_init_hook")
+    asm.w(0x3B7C, 0xFFFF, 0x040C)
+    asm.w(0x2B7C, 0xFFFE, 0xFFFE, VFX_RAM_F8_OWNER)
+    asm.w(0x2B7C, 0xFFFE, 0xFFFE, VFX_RAM_FA_OWNER)
+    asm.w(0x3B7C, 0xFFFE, VFX_RAM_IM_OWNER)
+    asm.w(0x4E75)
+
+    # 2. f8_ptr_hook / f9_ptr_hook / fa_ptr_hook (returns table ptr in a0, preserves d0)
+    for hook_name, cache_reg, burn_off, classic_addr in (
+        ("f8_ptr_hook", VFX_RAM_F8_OWNER, 0x0220, 0x002FF5F0),
+        ("f9_ptr_hook", VFX_RAM_F9_OWNER, 0x0420, 0x002FF7F0),
+    ):
+        classic_lbl = f"{hook_name}_classic"
+        asm.label(hook_name)
+        asm.w(0x2F00)
+        asm.w(0x302D, cache_reg)
+        asm.b_branch(0x6B00, classic_lbl)
+        asm.w(0xC0FC, VFX_THEME_ENTRY_STRIDE)
+        asm.ref_abs32(0x41F9, "theme_entries")
+        asm.w(0xD1C0)  # adda.l d0, a0 (avoid sign-extending products >= 0x8000)
+        asm.w(0xD0FC, burn_off)
+        asm.w(0x201F, 0x4E75)
+        asm.label(classic_lbl)
+        asm.w(0x41F9, (classic_addr >> 16) & 0xFFFF, classic_addr & 0xFFFF)
+        asm.w(0x201F, 0x4E75)
+
+    asm.label("fa_ptr_hook")
+    asm.w(0x4A6D, VFX_RAM_FA_OWNER)
+    asm.b_branch(0x6B00, "fa_ptr_hook_classic")
+    asm.ref_abs32(0x41F9, "fa_custom_table")
+    asm.w(0x4E75)
+    asm.label("fa_ptr_hook_classic")
+    asm.w(0x41F9, 0x002F, 0xF9F0)
+    asm.w(0x4E75)
+
+    # 3. Entry stubs for hit/effect hooks
+    asm.label("on_fire_burn_hook")
+    asm.w(0x197C, 0x00F8, 0x003A)
+    asm.w(0x48E7, 0xF0F0)
+    asm.w(0x7600)
+    asm.b_branch(0x6000, "update_effect_group")
+
+    asm.label("on_purple_burn_hook")
+    asm.w(0x197C, 0x00F9, 0x003A)
+    asm.w(0x48E7, 0xF0F0)
+    asm.w(0x7601)
+    asm.b_branch(0x6000, "update_effect_group")
+
+    asm.label("on_elec_shock_hook")
+    asm.w(0x002C, 0x0002, 0x00E3)
+    asm.w(0x48E7, 0xF0F0)
+    asm.w(0x7602)
+    asm.b_branch(0x6000, "update_effect_group")
+
+    asm.label("on_impact_hook")
+    asm.w(0x45F9, 0x0001, 0x2E92)
+    asm.w(0x2472, 0x1000)
+    asm.w(0x3212)
+    asm.w(0x48E7, 0xF0F0)
+    asm.w(0x7603)
+    asm.b_branch(0x6000, "update_effect_group")
+
+    asm.label("on_fa_flash_hook")
+    asm.w(0x197C, 0x00FA, 0x003A)
+    asm.w(0x48E7, 0xF0F0)
+    asm.w(0x7604)
+
+    # 4. Shared group updater: a4 = victim, d3.w = group_idx (0..4)
+    asm.label("update_effect_group")
+    asm.w(0x206C, 0x00B6)               # movea.l $b6(a4), a0 (attacker fighter)
+    asm.w(0x2008)                       # move.l a0, d0
+    asm.b_branch(0x6700, "atk_classic")
+    asm.w(0x7000)
+    asm.w(0x1028, 0x0070)               # move.b $70(a0), d0
+    asm.w(0x0C00, 0x001F)
+    asm.b_branch(0x6200, "atk_classic")
+    asm.w(0x4A28, 0x01D6)               # tst.b $1d6(a0)
+    asm.b_branch(0x6700, "got_slot")
+    asm.w(0x4A00)
+    asm.b_branch(0x6600, "alt_non_kyo")
+    asm.w(0x7023)                       # 94 Kyo -> runtime slot 35
+    asm.b_branch(0x6000, "got_slot")
+    asm.label("alt_non_kyo")
+    asm.w(0x0600, 0x000B)
+    asm.w(0x0C00, 0x0023)
+    asm.b_branch(0x6200, "atk_classic")
+    asm.label("got_slot")
+    asm.w(0xD040)                       # add.w d0, d0
+    asm.ref_abs32(0x41F9, "char_theme_idx")
+    asm.w(0x3030, 0x0000)               # move.w (a0, d0.w), d0
+    asm.b_branch(0x6000, "have_theme")
+    asm.label("atk_classic")
+    asm.w(0x303C, 0xFFFF)
+
+    asm.label("have_theme")
+    asm.w(0xE94B)                       # lsl.w #4, d3
+    asm.ref_abs32(0x47F9, "group_descs")
+    asm.w(0xD6C3)                       # adda.w d3, a3 (d3 is 0..64)
+    asm.w(0x3413)                       # move.w (a3), d2 (cache_off)
+    asm.w(0x3235, 0x2000)               # move.w (a5, d2.w), d1 (prev_owner)
+    asm.w(0xB041)
+    asm.b_branch(0x6700, "done_exit")
+    asm.w(0x3B80, 0x2000)               # move.w d0, (a5, d2.w)
+
+    asm.w(0x4A40)
+    asm.b_branch(0x6B00, "switch_classic")
+
+    # Custom theme path (d0 >= 0)
+    asm.w(0xC0FC, VFX_THEME_ENTRY_STRIDE)
+    asm.ref_abs32(0x45F9, "theme_entries")
+    asm.w(0xD5C0)                       # adda.l d0, a2
+    asm.w(0x240A)                       # move.l a2, d2 (save ThemeEntry base)
+    asm.w(0x322B, 0x0004)               # common_cnt_m1
+    asm.b_branch(0x6B00, "custom_burn")
+    asm.w(0x2042)                       # movea.l d2, a0
+    asm.w(0xD0EB, 0x0002)               # adda.w 2(a3), a0
+    asm.b_branch(0x6100, "push_n_records")
+    asm.label("custom_burn")
+    asm.w(0x2042)                       # reload ThemeEntry base BEFORE clobbering d2.w
+    asm.w(0x342B, 0x0006)               # burn_pal_id
+    asm.b_branch(0x6700, "done_exit")
+    asm.w(0x0C42, 0x00FA)
+    asm.b_branch(0x6600, "custom_burn_off")
+    asm.ref_abs32(0x41F9, "fa_custom_table")
+    asm.b_branch(0x6000, "call_push_burn")
+    asm.label("custom_burn_off")
+    asm.w(0xD0EB, 0x0008)               # adda.w 8(a3), a0
+    asm.label("call_push_burn")
+    asm.b_branch(0x6100, "push_burn_slot")
+    asm.b_branch(0x6000, "done_exit")
+
+    # Classic restore path (d0 == 0xFFFF)
+    asm.label("switch_classic")
+    asm.w(0x4A41)
+    asm.b_branch(0x6B00, "done_exit")   # 0xFFFE/0xFFFF -> RAM already clean
+    asm.w(0x322B, 0x0004)
+    asm.b_branch(0x6B00, "classic_burn")
+    asm.ref_abs32(0x41F9, "classic_common")
+    asm.w(0xD0EB, 0x0002)
+    asm.b_branch(0x6100, "push_n_records")
+    asm.label("classic_burn")
+    asm.w(0x342B, 0x0006)
+    asm.b_branch(0x6700, "done_exit")
+    asm.w(0x206B, 0x000C)
+    asm.b_branch(0x6100, "push_burn_slot")
+
+    asm.label("done_exit")
+    asm.w(0x4CDF, 0x0F0F)
+    asm.w(0x4E75)
+
+    # Helper: push_n_records (a0 = [pal_id.w, 15 words] * (d1+1))
+    asm.label("push_n_records")
+    asm.w(0x246D, 0x5924)
+    asm.w(0x43ED, 0x5B30)
+    asm.label("pn_loop")
+    asm.w(0xB5C9)
+    asm.b_branch(0x6400, "pn_done")
+    asm.w(0x34D8, 0x34D8)
+    for _ in range(7):
+        asm.w(0x24D8)
+    asm.dbra(1, "pn_loop")
+    asm.label("pn_done")
+    asm.w(0x34BC, 0xFFFF)
+    asm.w(0x2B4A, 0x5924)
+    asm.w(0x4E75)
+
+    # Helper: push_burn_slot (a0 = 32B LSPC record, d2.w = target pal_id 00F8/00F9/00FA)
+    asm.label("push_burn_slot")
+    asm.w(0x246D, 0x5924)
+    asm.w(0x43ED, 0x5B30)
+    asm.w(0xB5C9)
+    asm.b_branch(0x6400, "pb_done")
+    asm.w(0x5488, 0x34C2, 0x34D8)
+    for _ in range(7):
+        asm.w(0x24D8)
+    asm.w(0x34BC, 0xFFFF)
+    asm.w(0x2B4A, 0x5924)
+    asm.label("pb_done")
+    asm.w(0x4E75)
+
+    if len(asm.buf) % 2:
+        asm.buf.append(0)
+
+    # 5. Data tables
+    asm.label("char_theme_idx")
+    for tid in char_slot_table:
+        asm.w(tid)
+
+    asm.label("group_descs")
+    for cache_off, common_off, cnt_m1, burn_id, custom_burn_off, classic_ptr, _ in VFX_COMMON_EFFECT_GROUPS:
+        asm.w(cache_off, common_off, cnt_m1, burn_id, custom_burn_off, 0)
+        asm.l(classic_ptr)
+
+    asm.label("classic_common")
+    for _, _, _, _, _, _, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
+        for pid in slot_ids:
+            clean_w = _read_p2_slot_words15(p2_clean, pid)
+            asm.w(pid, *clean_w)
+
+    asm.label("fa_custom_table")
+    for frame in range(16):
+        src_pid = 0x17D0 + frame
+        if orochi_pair is not None:
+            words15 = _recolor_hit_effect_slot(src_pid, p2_clean, orochi_pair[0], orochi_pair[1])
+        else:
+            words15 = _read_p2_slot_words15(p2_clean, src_pid)
+        asm.w(src_pid, *words15)
+
+    asm.label("theme_entries")
+    for inner_hex, outer_hex in unique_pairs:
+        # +0x000..+0x21F: 17 common hit/flame/shock/spark records (32B each)
+        for _, _, _, _, _, _, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
+            for pid in slot_ids:
+                words15 = _recolor_hit_effect_slot(pid, p2_clean, inner_hex, outer_hex)
+                asm.w(pid, *words15)
+        # +0x220..+0x41F: 0xF8 16 cyclic burn frames (0x17B0..0x17BF)
+        for frame in range(16):
+            src_pid = 0x17B0 + frame
+            words15 = (
+                [0] * 15
+                if frame == 15
+                else _recolor_hit_effect_slot(src_pid, p2_clean, inner_hex, outer_hex)
+            )
+            asm.w(src_pid, *words15)
+        # +0x420..+0x61F: 0xF9 16 cyclic purple-burn frames (0x17C0..0x17CF)
+        for frame in range(16):
+            src_pid = 0x17C0 + frame
+            words15 = (
+                [0] * 15
+                if frame == 15
+                else _recolor_hit_effect_slot(src_pid, p2_clean, inner_hex, outer_hex)
+            )
+            asm.w(src_pid, *words15)
+
+    blob = asm.finalize()
+    if len(blob) > VFX_HIT_EFFECT_CAVE_SIZE:
+        raise ValueError(f"Hit-effect VFX code cave exceeds 64KB limit: {len(blob)} bytes")
+
+    return {
+        "blob": blob,
+        "hooks": dict(asm.labels),
+        "theme_count": len(unique_pairs),
+        "char_slots": sum(1 for v in char_slot_table if v != 0xFFFF),
+    }
+
+
+def restore_hit_effect_vfx_p1(p1_data: bytearray) -> None:
+    """Restore all 16 P1 hit-effect hook sites and clear 0x0F0000..0x0FFFFF to 0xFF."""
+    for _name, off, orig_bytes, _lbl in VFX_HIT_HOOK_ORIGINALS:
+        p1_data[off : off + 6] = orig_bytes
+    p1_data[VFX_HIT_EFFECT_CAVE_BASE : VFX_HIT_EFFECT_CAVE_BASE + VFX_HIT_EFFECT_CAVE_SIZE] = (
+        bytes([0xFF] * VFX_HIT_EFFECT_CAVE_SIZE)
+    )
+
+
+def apply_hit_effect_vfx_to_p1(
+    p1_data: bytearray,
+    character_skins: Dict[int, Dict[str, Any]],
+    p2_clean: bytes,
+) -> Optional[Dict[str, Any]]:
+    """
+    Inject dynamic P1 on-hit elemental burn/shock/flame code cave when any character
+    has custom VFX enabled, or restore pristine official bytes if all are classic.
+    """
+    restore_hit_effect_vfx_p1(p1_data)
+    patch = build_hit_effect_vfx_p1_patch(character_skins, p1_data, p2_clean)
+    if patch is None:
+        return None
+    blob = patch["blob"]
+    p1_data[VFX_HIT_EFFECT_CAVE_BASE : VFX_HIT_EFFECT_CAVE_BASE + len(blob)] = blob
+    hooks = patch["hooks"]
+    for _name, off, _orig, target_lbl in VFX_HIT_HOOK_ORIGINALS:
+        target_addr = hooks[target_lbl]
+        p1_data[off : off + 6] = struct.pack(">HI", 0x4EB9, target_addr)
+    return patch
+
+
+# ============================================================================
 # Asynchronous Thread-Safe Frontend Logging (Decoupled from RPC loop)
 # ============================================================================
 
@@ -1841,9 +2711,10 @@ class KOF97BridgeApi:
         self._cached_p2_base: Optional[int] = None
         self._cached_p2_pid: Optional[int] = None
 
-        # Per-character skin store: char_id -> {themeId, colors, preview}
+        # Per-character skin store: char_id -> {themeId, vfxTheme, colors, preview}
         self._sprite_rom = None
         self._custom_skins = []
+        self._last_vfx_ram_sigs: Dict[int, bytes] = {}
 
         self._character_skins: Dict[int, Dict[str, Any]] = {}
         classic_colors = list(PRESET_THEMES[0]["colors"])
@@ -1908,7 +2779,10 @@ class KOF97BridgeApi:
                     if not colors or len(colors) != 15:
                         preset = next((t for t in PRESET_THEMES if t["id"] == t_id), PRESET_THEMES[0])
                         colors = list(preset["colors"])
-                    self._character_skins[cid] = make_skin_entry(cid, t_id, colors)
+                    v_id = str(entry.get("vfxTheme", "classic"))
+                    if v_id not in VFX_PRESET_MAP:
+                        v_id = "classic"
+                    self._character_skins[cid] = make_skin_entry(cid, t_id, colors, vfx_theme=v_id)
 
             print(f"[INFO] Successfully loaded configuration from {cfg_path}")
 
@@ -1982,6 +2856,26 @@ class KOF97BridgeApi:
     # State synchronization
     # ------------------------------------------------------------------------
 
+    def _load_p1_p2_baseline(self) -> Tuple[bytes, bytes]:
+        """Load Big-Endian P1 data (from workdir or source zip) and clean P2 data."""
+        p1_path = self._workdir / "p1_be.bin"
+        p1_data = p1_path.read_bytes() if p1_path.exists() else None
+        with zipfile.ZipFile(self._source_zip) as z_src:
+            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+            if p1_data is None:
+                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
+        return p1_data, p2_clean
+
+    def _build_vfx_previews(self) -> Dict[str, List[str]]:
+        """Build 6-step luminous ramp previews per character based on current vfxTheme."""
+        out: Dict[str, List[str]] = {}
+        for char in CHARACTER_ROSTER:
+            cid = char["id"]
+            skin_entry = self._character_skins.get(cid, {})
+            vid = skin_entry.get("vfxTheme", "classic")
+            out[str(cid)] = generate_vfx_preview_ramp(vid, skin_entry)
+        return out
+
     def get_initial_state(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Return the current studio configuration state to frontend."""
         p1_path = self._workdir / "p1_be.bin"
@@ -1989,6 +2883,14 @@ class KOF97BridgeApi:
         has_unpacked = p1_path.exists() and p2_path.exists()
         has_zip = self._output_zip.exists()
         zip_crc = crc32_hex(self._output_zip.read_bytes()) if has_zip else ""
+
+        vfx_support: Dict[str, bool] = {str(ch["id"]): True for ch in CHARACTER_ROSTER}
+        try:
+            p1_data, p2_clean = self._load_p1_p2_baseline()
+            vmap = build_character_vfx_map(p1_data, p2_clean)
+            vfx_support = {str(cid): bool(info.get("has_vfx")) for cid, info in vmap.items()}
+        except Exception:
+            pass
 
         return {
             "char_id": self._char_id,
@@ -2004,6 +2906,9 @@ class KOF97BridgeApi:
             "has_zip": has_zip,
             "zip_crc32": zip_crc,
             "custom_skins": list(self._custom_skins),
+            "vfx_presets": VFX_PRESETS,
+            "vfx_support": vfx_support,
+            "vfx_previews": self._build_vfx_previews(),
         }
 
 
@@ -2139,33 +3044,33 @@ class KOF97BridgeApi:
         raw_colors = params.get("colors")
         stored_colors = list(raw_colors) if isinstance(raw_colors, list) and len(raw_colors) == 15 else None
         use_stored = bool(params.get("use_stored_colors")) or is_custom_theme_id(theme_id)
+        explicit_vfx = params.get("vfx_theme")
+        if explicit_vfx is not None and str(explicit_vfx) not in VFX_PRESET_MAP:
+            explicit_vfx = None
 
-        p1_path = self._workdir / "p1_be.bin"
-        p2_path = self._workdir / "p2_be.bin"
-        p1_data = p1_path.read_bytes() if p1_path.exists() else None
-        with zipfile.ZipFile(self._source_zip) as z_src:
-            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
-            if p1_data is None:
-                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
+        p1_data, p2_clean = self._load_p1_p2_baseline()
 
         if use_stored and stored_colors:
-            self._character_skins[char_id] = make_skin_entry(char_id, theme_id, stored_colors)
+            cur_vfx = str(explicit_vfx) if explicit_vfx else str(self._character_skins.get(char_id, {}).get("vfxTheme", "classic"))
+            self._character_skins[char_id] = make_skin_entry(char_id, theme_id, stored_colors, vfx_theme=cur_vfx)
             char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
             cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
             async_log(f"\u5df2\u4fdd\u5b58\u89d2\u8272\u3010{cname}\u3011\u7684\u81ea\u5b9a\u4e49\u76ae\u80a4: \u3010{theme_id}\u3011", "INFO")
         elif scope == "ALL":
             for char_info in CHARACTER_ROSTER:
                 cid = char_info["id"]
+                cur_vfx = str(explicit_vfx) if explicit_vfx else str(self._character_skins.get(cid, {}).get("vfxTheme", "classic"))
                 lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
                 self._character_skins[cid] = make_skin_entry(
-                    cid, theme_id, [lspc2_to_hex(w) for w in lspc_words]
+                    cid, theme_id, [lspc2_to_hex(w) for w in lspc_words], vfx_theme=cur_vfx
                 )
             async_log(f"\u5df2\u5168\u91cf\u8bbe\u7f6e\u5168\u5458 36 \u89d2\u8272\u76ae\u80a4\u4e3a: \u3010{theme_id}\u3011", "INFO")
         else:
+            cur_vfx = str(explicit_vfx) if explicit_vfx else str(self._character_skins.get(char_id, {}).get("vfxTheme", "classic"))
             lspc_words = generate_harmonious_character_palette(char_id, theme_id, p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
             self._character_skins[char_id] = make_skin_entry(
-                char_id, theme_id, hex_colors
+                char_id, theme_id, hex_colors, vfx_theme=cur_vfx
             )
             char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
             cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
@@ -2176,6 +3081,44 @@ class KOF97BridgeApi:
             "success": True,
             "character_skins": {str(k): v for k, v in self._character_skins.items()},
             "custom_skins": list(self._custom_skins),
+            "vfx_previews": self._build_vfx_previews(),
+        }
+
+    def set_character_vfx(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Set skill/VFX palette theme for one character or all 36 characters."""
+        params = params or {}
+        try:
+            char_id = int(params.get("char_id", self._char_id))
+        except (TypeError, ValueError):
+            char_id = self._char_id
+        vfx_theme = str(params.get("vfx_theme") or "classic")
+        if vfx_theme not in VFX_PRESET_MAP:
+            return {"success": False, "error": f"Unknown VFX theme: {vfx_theme}"}
+        scope = params.get("scope", self._scope)
+
+        target_cids = [ch["id"] for ch in CHARACTER_ROSTER] if scope == "ALL" else [char_id]
+        for cid in target_cids:
+            entry = self._character_skins.get(cid)
+            if not entry:
+                entry = make_skin_entry(cid, "classic", list(PRESET_THEMES[0]["colors"]), vfx_theme=vfx_theme)
+                self._character_skins[cid] = entry
+            else:
+                entry["vfxTheme"] = vfx_theme
+
+        preset_info = VFX_PRESET_MAP[vfx_theme]
+        vname = preset_info["name_cn"]
+        if scope == "ALL":
+            async_log(f"\u5df2\u5168\u91cf\u8bbe\u7f6e\u5168\u5458 36 \u89d2\u8272\u6280\u80fd\u7279\u6548\u914d\u8272\u4e3a: \u3010{vname}\u3011", "INFO")
+        else:
+            char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
+            cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"
+            async_log(f"\u5df2\u8bbe\u7f6e\u89d2\u8272\u3010{cname}\u3011\u7684\u6280\u80fd\u7279\u6548\u914d\u8272\u4e3a: \u3010{vname}\u3011", "INFO")
+
+        self._save_config_to_disk()
+        return {
+            "success": True,
+            "character_skins": {str(k): v for k, v in self._character_skins.items()},
+            "vfx_previews": self._build_vfx_previews(),
         }
 
 
@@ -2261,9 +3204,10 @@ class KOF97BridgeApi:
             pool_idx += 1
             theme_id = chosen_theme["id"]
 
+            cur_vfx = str(self._character_skins.get(cid, {}).get("vfxTheme", "classic"))
             lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[cid] = make_skin_entry(cid, theme_id, hex_colors)
+            self._character_skins[cid] = make_skin_entry(cid, theme_id, hex_colors, vfx_theme=cur_vfx)
             randomized_count += 1
 
         self._save_config_to_disk()
@@ -2272,31 +3216,27 @@ class KOF97BridgeApi:
             "success": True,
             "count": randomized_count,
             "character_skins": {str(k): v for k, v in self._character_skins.items()},
+            "vfx_previews": self._build_vfx_previews(),
         }
 
     def reset_all_skins(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Reset all 36 characters to their authentic original SNK classic skins.
+        Reset all 36 characters to their authentic original SNK classic skins and VFX.
         """
-        p1_path = self._workdir / "p1_be.bin"
-        p2_path = self._workdir / "p2_be.bin"
-        p1_data = p1_path.read_bytes() if p1_path.exists() else None
-        with zipfile.ZipFile(self._source_zip) as z_src:
-            p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
-            if p1_data is None:
-                p1_data = bswap16(z_src.read("KOF97_P1.ROM"))
+        p1_data, p2_clean = self._load_p1_p2_baseline()
 
         for char_info in CHARACTER_ROSTER:
             cid = char_info["id"]
             lspc_words = generate_harmonious_character_palette(cid, "classic", p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[cid] = make_skin_entry(cid, "classic", hex_colors)
+            self._character_skins[cid] = make_skin_entry(cid, "classic", hex_colors, vfx_theme="classic")
 
         self._save_config_to_disk()
-        async_log("\u5df2\u5c06\u5168\u5458 36 \u4f4d\u89d2\u8272\u76ae\u80a4\u5168\u90e8\u91cd\u7f6e\u4e3a\u5b98\u65b9\u539f\u7248\u7ecf\u5178\uff01", "SUCCESS")
+        async_log("\u5df2\u5c06\u5168\u5458 36 \u4f4d\u89d2\u8272\u76ae\u80a4\u4e0e\u6280\u80fd\u7279\u6548\u5168\u90e8\u91cd\u7f6e\u4e3a\u5b98\u65b9\u539f\u7248\u7ecf\u5178\uff01", "SUCCESS")
         return {
             "success": True,
             "character_skins": {str(k): v for k, v in self._character_skins.items()},
+            "vfx_previews": self._build_vfx_previews(),
         }
 
     def save_skin(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -2423,17 +3363,30 @@ class KOF97BridgeApi:
                 p1_data[orochi_off] = 0x1E
             async_log("  [P1] \u5df2\u5168\u9762\u89e3\u9501\u9009\u4eba\u754c\u9762\u9690\u85cf\u4eba\u7269 (\u66b4\u8d70\u516b\u795e\u3001\u66b4\u8d70\u8389\u5b89\u5a1c\u3001\u771f\u5927\u86c7\u961f\u4e09\u4eba\u7ec4\u3001\u5927\u86c7\u53ca\u7ecf\u5178\u8349\u8599\u4eac)", "INFO")
 
+            # Load clean baseline p2 bytes for both P1 hit-effect VFX hooks and P2 palette builds
+            with zipfile.ZipFile(self._source_zip) as z_src:
+                p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
+
+            hit_vfx_patch = apply_hit_effect_vfx_to_p1(p1_data, self._character_skins, p2_clean)
+            if hit_vfx_patch:
+                async_log(
+                    f"  [P1-VFX] \u5df2\u6ce8\u5165 68000 \u53d7\u51fb\u71c3\u70e7/\u611f\u7535/\u706b\u82b1\u52a8\u6001\u540c\u6b65 Hook "
+                    f"(0x0F0000, {hit_vfx_patch['theme_count']} \u79cd\u7279\u6548\u4e3b\u9898 / {hit_vfx_patch['char_slots']} \u89d2\u8272\u69fd\uff0c\u4fdd\u7559 P2 0x0000..0x00FF \u539f\u7248)",
+                    "INFO",
+                )
+            else:
+                async_log("  [P1-VFX] \u5df2\u6062\u590d\u539f\u7248\u53d7\u51fb\u71c3\u70e7/\u706b\u82b1\u673a\u5236", "INFO")
+
             p1_path.write_bytes(p1_data)
 
             # 3. Apply Palette & Skin for customized characters to p2_be.bin
             async_log("\u6b63\u5728\u5c06\u5b9a\u5236\u89d2\u8272\u7684\u72ec\u7acb\u8c03\u8272\u677f\u65b9\u6848\u5199\u5165 p2_be.bin...", "INFO")
 
-            # Load clean baseline p2 bytes to ensure untouched characters remain 100% pristine
-            with zipfile.ZipFile(self._source_zip) as z_src:
-                p2_clean = bswap16(z_src.read("KOF97_P2.ROM"))
             p2_data = bytearray(p2_clean)
 
             customized_count = 0
+            vfx_char_count = 0
+            vfx_slot_total = 0
 
             for char_info in CHARACTER_ROSTER:
                 cid = char_info["id"]
@@ -2442,49 +3395,60 @@ class KOF97BridgeApi:
                     continue
 
                 theme_id = skin_entry.get("themeId", "classic")
+                vfx_theme = skin_entry.get("vfxTheme", "classic")
                 # CRITICAL FIX 1: Absolutely do not modify uncustomized characters!
-                if theme_id == "classic":
+                if theme_id == "classic" and vfx_theme == "classic":
                     continue
 
-                customized_count += 1
                 cname = char_info["name_cn"]
 
-                # Button A feeds portraits. Preset themes rebuild each button
-                # from that button's own official colors.
-                _tid, lspc_words = self._lspc_words_for_skin(cid, skin_entry, p1_data, p2_clean)
+                if theme_id != "classic":
+                    customized_count += 1
 
-                _, _, pal_idx = get_char_engine_info(cid)
-                base_off = 0x483E + pal_idx * 8
-                base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
+                    # Button A feeds portraits. Preset themes rebuild each button
+                    # from that button's own official colors.
+                    _tid, lspc_words = self._lspc_words_for_skin(cid, skin_entry, p1_data, p2_clean)
 
-                # Write both Base Skin (pal_id + 0) and MAX Mode Burst Flash (pal_id + 3)
-                # across all 4 color buttons (A, B, C, D) in 0x483E!
-                # In KOF97, 0x0144E2 executes 'ADD.B #3, $30(A4)' on alternate frames during MAX Mode,
-                # switching the character sprite palette from (pal_id + 0) to (pal_id + 3).
-                for btn_idx in range(4):
-                    btn_off = base_off + btn_idx * 2
-                    pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
-                    if is_custom_theme_id(theme_id):
-                        btn_words = lspc_words
-                    else:
-                        btn_words = generate_harmonious_character_palette(
-                            cid, theme_id, p1_data, p2_clean, btn_idx
-                        )
-                    btn_bytes = struct.pack(">15H", *btn_words)
-                    burst_words = generate_burst_character_palette(cid, theme_id, btn_words)
-                    burst_bytes = struct.pack(">15H", *burst_words)
-                    p2_addr_base = 0x2CFFF0 + pal_id * 32
-                    p2_data[p2_addr_base + 2 : p2_addr_base + 32] = btn_bytes
-                    p2_addr_burst = 0x2CFFF0 + (pal_id + 3) * 32
-                    p2_data[p2_addr_burst + 2 : p2_addr_burst + 32] = burst_bytes
+                    _, _, pal_idx = get_char_engine_info(cid)
+                    base_off = 0x483E + pal_idx * 8
+                    base_pid = struct.unpack(">H", p1_data[base_off:base_off + 2])[0]
 
-                # Character select screen and HUD avatar synchronization
-                if self._sync_avatar:
-                    sync_character_portraits(cid, theme_id, base_pid, lspc_words, p2_data, p2_clean)
+                    # Write both Base Skin (pal_id + 0) and MAX Mode Burst Flash (pal_id + 3)
+                    # across all 4 color buttons (A, B, C, D) in 0x483E!
+                    # In KOF97, 0x0144E2 executes 'ADD.B #3, $30(A4)' on alternate frames during MAX Mode,
+                    # switching the character sprite palette from (pal_id + 0) to (pal_id + 3).
+                    for btn_idx in range(4):
+                        btn_off = base_off + btn_idx * 2
+                        pal_id = struct.unpack(">H", p1_data[btn_off:btn_off + 2])[0]
+                        if is_custom_theme_id(theme_id):
+                            btn_words = lspc_words
+                        else:
+                            btn_words = generate_harmonious_character_palette(
+                                cid, theme_id, p1_data, p2_clean, btn_idx
+                            )
+                        btn_bytes = struct.pack(">15H", *btn_words)
+                        burst_words = generate_burst_character_palette(cid, theme_id, btn_words)
+                        burst_bytes = struct.pack(">15H", *burst_words)
+                        p2_addr_base = 0x2CFFF0 + pal_id * 32
+                        p2_data[p2_addr_base + 2 : p2_addr_base + 32] = btn_bytes
+                        p2_addr_burst = 0x2CFFF0 + (pal_id + 3) * 32
+                        p2_data[p2_addr_burst + 2 : p2_addr_burst + 32] = burst_bytes
 
-                async_log(f"  [P2] \u5df2\u4e3a\u3010{cname}\u3011\u6ce8\u5165\u5b9a\u5236\u76ae\u80a4: \u3010{theme_id}\u3011(\u5df2\u914d\u7f6e\u57fa\u7840\u6001\u4e0e MAX \u7206\u6c14\u9ad8\u80fd\u6001\u8c03\u8272\u677f)", "INFO")
+                    # Character select screen and HUD avatar synchronization
+                    if self._sync_avatar:
+                        sync_character_portraits(cid, theme_id, base_pid, lspc_words, p2_data, p2_clean)
 
-            async_log(f"  [P2] \u8c03\u8272\u677f\u6ce8\u5165\u5b8c\u6210\uff01\u5171\u5b9a\u5236 {customized_count} \u4f4d\u89d2\u8272\uff0c\u5176\u4f59\u89d2\u8272\u4fdd\u6301\u5b98\u65b9\u539f\u7248", "SUCCESS")
+                    async_log(f"  [P2] \u5df2\u4e3a\u3010{cname}\u3011\u6ce8\u5165\u5b9a\u5236\u76ae\u80a4: \u3010{theme_id}\u3011(\u5df2\u914d\u7f6e\u57fa\u7840\u6001\u4e0e MAX \u7206\u6c14\u9ad8\u80fd\u6001\u8c03\u8272\u677f)", "INFO")
+
+                if vfx_theme != "classic":
+                    v_written = apply_vfx_palettes_to_p2(cid, vfx_theme, skin_entry, p1_data, p2_data, p2_clean)
+                    if v_written > 0:
+                        vfx_char_count += 1
+                        vfx_slot_total += v_written
+                        vname = VFX_PRESET_MAP.get(vfx_theme, {}).get("name_cn", vfx_theme)
+                        async_log(f"  [P2-VFX] \u5df2\u4e3a\u3010{cname}\u3011\u6ce8\u5165\u6280\u80fd\u7279\u6548: \u3010{vname}\u3011({v_written} \u4e2a\u7279\u6548\u69fd)", "INFO")
+
+            async_log(f"  [P2] \u8c03\u8272\u677f\u6ce8\u5165\u5b8c\u6210\uff01\u5b9a\u5236\u76ae\u80a4 {customized_count} \u4f4d\u89d2\u8272\uff0c\u5b9a\u5236\u7279\u6548 {vfx_char_count} \u4f4d\u89d2\u8272 ({vfx_slot_total} \u69fd)\uff0c\u5176\u4f59\u4fdd\u6301\u5b98\u65b9\u539f\u7248", "SUCCESS")
             p2_path.write_bytes(p2_data)
 
             # 4. Pack into kof97pls.zip with bswap16
@@ -2585,18 +3549,28 @@ class KOF97BridgeApi:
         except Exception as exc:
             return {"running": False, "pid": 0, "error": str(exc)}
 
+    def apply_vfx_live(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Persist VFX preset selection and hot-inject into running WinKawaks if active."""
+        merged = dict(params or {})
+        merged["vfx_only"] = True
+        return self.apply_skin_live(merged)
+
     def apply_skin_live(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
-        Dynamically inject character palette directly into running WinKawaks process memory.
+        Dynamically inject character and VFX palettes directly into running WinKawaks memory.
         Instantly overwrites on-screen Palette RAM (0x007126B0) and loaded P2 ROM memory buffer (0x00712660 + 0x100000).
         """
         params = params or {}
         cid = params.get("char_id", self._char_id)
+        vfx_only = bool(params.get("vfx_only"))
         theme_id = params.get("theme_id", "classic")
         scope = params.get("scope", self._scope)
 
         # 1. Update internal state and persist to disk
-        self.set_character_skin(params)
+        if vfx_only:
+            self.set_character_vfx(params)
+        else:
+            self.set_character_skin(params)
 
         # 2. Check if WinKawaks is running
         pid = self._find_kawaks_pid()
@@ -2746,16 +3720,77 @@ class KOF97BridgeApi:
                         va = pal_ram_va + slot_idx * 32 + 2
                         k32.WriteProcessMemory(h_proc, ctypes.c_void_p(va), bytes(lspc_bytes_le), 30, ctypes.byref(written))
 
+                # D. VFX Palette Hot-Update (P2 ROM + Active Palette RAM)
+                vfx_info = build_character_vfx_map(p1_data, p2_clean).get(target_cid)
+                vfx_theme = skin_entry.get("vfxTheme", "classic")
+                if vfx_info and vfx_info.get("has_vfx"):
+                    vpair = resolve_vfx_hues(
+                        vfx_theme, skin_entry, cid=target_cid, p1_data=p1_data, p2_clean=p2_clean
+                    )
+                    for v_pid in vfx_info["all_slots"]:
+                        if v_pid <= 0x00FF:
+                            continue
+                        clean_v = _read_p2_slot_words15(p2_clean, v_pid)
+                        new_v = clean_v if vpair is None else recolor_vfx_palette(clean_v, vpair[0], vpair[1])
+                        v_le = struct.pack("<15H", *new_v)
+                        v_addr = p2_base + 0x2CFFF0 + v_pid * 32 + 2
+                        k32.WriteProcessMemory(h_proc, ctypes.c_void_p(v_addr), v_le, 30, ctypes.byref(written))
+
+                        clean_vsig = struct.pack("<4H", *clean_v[:4])
+                        prev_vsig = self._last_vfx_ram_sigs.get(v_pid)
+                        for slot_idx in range(16, 256):
+                            slot_data = pal_ram_bytes[slot_idx * 32 + 2 : slot_idx * 32 + 10]
+                            if slot_data == clean_vsig or (prev_vsig and slot_data == prev_vsig):
+                                va = pal_ram_va + slot_idx * 32 + 2
+                                k32.WriteProcessMemory(h_proc, ctypes.c_void_p(va), v_le, 30, ctypes.byref(written))
+                        if vpair is None:
+                            self._last_vfx_ram_sigs.pop(v_pid, None)
+                        else:
+                            self._last_vfx_ram_sigs[v_pid] = v_le[:8]
+
+                    if p1_active_slot != -1 and p1_active_slot < 256:
+                        btn0_pid = vfx_info["btn_pids"][0]
+                        for sub in vfx_info["char_sub_offsets"]:
+                            if p1_active_slot + sub < 256:
+                                clean_sub = _read_p2_slot_words15(p2_clean, btn0_pid + sub)
+                                new_sub = clean_sub if vpair is None else recolor_vfx_palette(clean_sub, vpair[0], vpair[1])
+                                sub_va = pal_ram_va + (p1_active_slot + sub) * 32 + 2
+                                k32.WriteProcessMemory(
+                                    h_proc, ctypes.c_void_p(sub_va), struct.pack("<15H", *new_sub), 30, ctypes.byref(written)
+                                )
+
+                    # Hot-update common battle effect slots in live Palette RAM only (never P2 ROM)
+                    seen_eff_slots: set = set()
+                    for _cache_off, _c_off, _cnt_m1, _b_id, _cb_off, _cl_ptr, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
+                        for eff_pid in slot_ids:
+                            if eff_pid in seen_eff_slots or eff_pid >= 256:
+                                continue
+                            seen_eff_slots.add(eff_pid)
+                            eff_words = (
+                                _read_p2_slot_words15(p2_clean, eff_pid)
+                                if vpair is None
+                                else _recolor_hit_effect_slot(eff_pid, p2_clean, vpair[0], vpair[1])
+                            )
+                            eff_va = pal_ram_va + eff_pid * 32 + 2
+                            k32.WriteProcessMemory(
+                                h_proc, ctypes.c_void_p(eff_va), struct.pack("<15H", *eff_words), 30, ctypes.byref(written)
+                            )
+
                 injected_total += 1
 
             char_info = next((c for c in CHARACTER_ROSTER if c["id"] == cid), None)
             cname = char_info["name_cn"] if char_info else f"0x{cid:02X}"
             target_desc = f"\u3010{cname}\u3011" if scope == "SINGLE" else f"\u5168\u5458 {injected_total} \u4f4d\u89d2\u8272"
-            async_log(f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] \u76ae\u80a4\u3010{theme_id}\u3011\u5df2\u6210\u529f\u5b9e\u65f6\u6ce8\u5165\u8fd0\u884c\u4e2d\u7684\u6e38\u620f (PID={pid}, {target_desc})\uff01\u753b\u9762\u5df2\u5373\u65f6\u53d8\u8272\uff01", "SUCCESS")
+            applied_name = (
+                VFX_PRESET_MAP.get(str(params.get("vfx_theme") or "classic"), {}).get("name_cn", "VFX")
+                if vfx_only
+                else theme_id
+            )
+            async_log(f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] {'\u7279\u6548' if vfx_only else '\u76ae\u80a4'}\u3010{applied_name}\u3011\u5df2\u6210\u529f\u5b9e\u65f6\u6ce8\u5165\u8fd0\u884c\u4e2d\u7684\u6e38\u620f (PID={pid}, {target_desc})\uff01\u753b\u9762\u5df2\u5373\u65f6\u53d8\u8272\uff01", "SUCCESS")
             return {
                 "success": True,
                 "running": True,
-                "message": f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] \u76ae\u80a4\u5df2\u5b9e\u65f6\u70ed\u66f4\u65b0\u5230\u6e38\u620f\u4e2d\uff01{target_desc}\u753b\u9762\u5df2\u5373\u523b\u53d8\u8272\uff01"
+                "message": f"[\u5b9e\u65f6\u70ed\u66f4\u65b0] {'\u6280\u80fd\u7279\u6548' if vfx_only else '\u76ae\u80a4'}\u5df2\u5b9e\u65f6\u70ed\u66f4\u65b0\u5230\u6e38\u620f\u4e2d\uff01{target_desc}\u753b\u9762\u5df2\u5373\u523b\u53d8\u8272\uff01"
             }
         except Exception as exc:
             async_log(f"\u5b9e\u65f6\u70ed\u66f4\u65b0\u5931\u8d25: {exc}", "ERROR")

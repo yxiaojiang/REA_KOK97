@@ -14,6 +14,8 @@ flowchart TD
     P2 --> P3["阶段三: P-ROM 静态数值与防御 Patch (P1)"]
     P3 --> P4["阶段四: 调色板换肤魔改 (P1)"]
     P4 --> P5["阶段五: C-ROM 图像瓦片重绘工具归档 (P2)"]
+    P5 --> P6["阶段六: Mod Studio 工作台与全员 OKLCH 自然染色 (已完成)"]
+    P6 --> P7["阶段七: 人物技能特效调色板与动态受击变色 TASK-STUDIO-019 (已完成)"]
 ```
 
 ---
@@ -86,3 +88,22 @@ flowchart TD
   3. 实现 `.spr` 重构回写至各 C-ROM 镜像，经逐字节与 CRC32 校验达到 100% bit-exact 无损复原；
   4. 支持单瓦片 (`crom-export-tile`) 与瓦片集图集 (`crom-export-sheet`) PNG 格式导出与反向导入；
   5. 完整集成入 `tools/rom_tool.py` 命令行并纳入 `self-test` 全局自检。
+
+---
+
+## 阶段六：Mod Studio 工作台、隐藏人物全解锁与全员 OKLCH 自然染色（已完成，已收敛至 `DIR-002`）
+
+* **Task ID**：`TASK-STUDIO-001` ~ `TASK-STUDIO-018`
+* **状态**：已完成全量测试与 `KOF97ModStudio.exe` 重编译，20 款皮肤色相与 `_paint_costume_natural` 参数已冻结。
+
+---
+
+## 阶段七：人物技能特效调色板定制与动态受击同步（VFX Palette Recoloring，已完成）
+
+* **目标**：在保持服装 OKLCH 自然染色与界面公共色板不变的前提下，为 Mod Studio 新增全员人物技能特效（火焰、雷电、气功波、刀光、能量柱等）定制改色功能。
+* **Task ID**：`TASK-STUDIO-019`（详见 `.claude/Plan.md` 与 `.claude/SessionBrief.md`）
+* **细分步骤**：
+  1. **特效槽位扫描与 `CHARACTER_VFX_MAP` 建表**：基于 `P1 0x004956`（`0x004740` 例程加载，映射 `P2` 连续 16 槽 `vfx_base_pid + 0..15` 至 Palette RAM `0x30..0x4F`）及 `P1 0x00483E` 子槽（`+1, +2, +4..+12` 蓄力/灼烧感电受创色），筛选有效渐变特效槽并剔除全零与固定纯色占位槽；
+  2. **发光渐变 `recolor_vfx_palette` 着色器**：独立于布料低彩度限制，保留高光白核、放开中高段霓虹发光饱和度并支持单/双色相平滑插值；
+  3. **工作台 UI 与打包/注入集成**：增加特效模式（「原版默认」「跟随皮肤」「独立特效预设」）与光效预览，并在 `pack_rom()` 与 `apply_skin_live()` 中注入；
+  4. **自动化回归与实机验证**：验证 `classic` 原版零字节改动与典型角色招式实机效果，重编译 `KOF97ModStudio.exe`。

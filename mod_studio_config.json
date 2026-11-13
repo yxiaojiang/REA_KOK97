@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "active_char_id": 7,
+  "active_char_id": 0,
   "scope": "SINGLE",
   "guard": false,
   "stun": false,
@@ -11,6 +11,7 @@
   "character_skins": {
     "0": {
       "themeId": "emerald_lotus",
+      "vfxTheme": "mingyan_purple",
       "colors": [
         "#FFFFFF",
         "#FFD6A5",
@@ -38,6 +39,7 @@
     },
     "1": {
       "themeId": "crimson_dragon",
+      "vfxTheme": "classic",
       "colors": [
         "#FFEFBD",
         "#FFBD84",
@@ -65,6 +67,7 @@
     },
     "2": {
       "themeId": "sakura_frost",
+      "vfxTheme": "classic",
       "colors": [
         "#FFCE94",
         "#F7A563",
@@ -92,6 +95,7 @@
     },
     "3": {
       "themeId": "crimson_shura",
+      "vfxTheme": "classic",
       "colors": [
         "#FFDEA5",
         "#F7A563",
@@ -119,6 +123,7 @@
     },
     "4": {
       "themeId": "aurora_mirage",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE69C",
         "#FFAD63",
@@ -146,6 +151,7 @@
     },
     "5": {
       "themeId": "magma_inferno",
+      "vfxTheme": "classic",
       "colors": [
         "#FFDEA5",
         "#F7AD6B",
@@ -173,6 +179,7 @@
     },
     "6": {
       "themeId": "paladin_gold",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFFF",
         "#FFD69C",
@@ -200,6 +207,7 @@
     },
     "7": {
       "themeId": "ocean_tempest",
+      "vfxTheme": "holy_gold",
       "colors": [
         "#FFDEA5",
         "#FFAD6B",
@@ -227,6 +235,7 @@
     },
     "8": {
       "themeId": "void_shadow",
+      "vfxTheme": "classic",
       "colors": [
         "#947B00",
         "#FFDEA5",
@@ -254,6 +263,7 @@
     },
     "9": {
       "themeId": "azure_thunder",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE6B5",
         "#FFC57B",
@@ -280,7 +290,8 @@
       }
     },
     "10": {
-      "themeId": "solar_flare",
+      "themeId": "magma_inferno",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFFF",
         "#FFE6AD",
@@ -308,6 +319,7 @@
     },
     "11": {
       "themeId": "phoenix_nirvana",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFFF",
         "#FFEFAD",
@@ -335,6 +347,7 @@
     },
     "12": {
       "themeId": "imperial_gold",
+      "vfxTheme": "classic",
       "colors": [
         "#FFEFB5",
         "#FFBD73",
@@ -362,6 +375,7 @@
     },
     "13": {
       "themeId": "amethyst_phantom",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFFF",
         "#FFD69C",
@@ -389,6 +403,7 @@
     },
     "14": {
       "themeId": "cyber_neon",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE69C",
         "#FFB56B",
@@ -416,6 +431,7 @@
     },
     "15": {
       "themeId": "sunset_overdrive",
+      "vfxTheme": "classic",
       "colors": [
         "#FFEFC5",
         "#F7BD84",
@@ -443,6 +459,7 @@
     },
     "16": {
       "themeId": "shadow_ninja",
+      "vfxTheme": "classic",
       "colors": [
         "#FFEFB5",
         "#FFC584",
@@ -470,6 +487,7 @@
     },
     "17": {
       "themeId": "abyssal_frost",
+      "vfxTheme": "classic",
       "colors": [
         "#080810",
         "#292929",
@@ -497,6 +515,7 @@
     },
     "18": {
       "themeId": "valkyrie_silver",
+      "vfxTheme": "classic",
       "colors": [
         "#FFCE8C",
         "#EF9C5A",
@@ -524,6 +543,7 @@
     },
     "19": {
       "themeId": "toxic_hazard",
+      "vfxTheme": "classic",
       "colors": [
         "#EFB58C",
         "#E69463",
@@ -551,6 +571,7 @@
     },
     "20": {
       "themeId": "emerald_lotus",
+      "vfxTheme": "classic",
       "colors": [
         "#EFBD7B",
         "#BD844A",
@@ -578,6 +599,7 @@
     },
     "21": {
       "themeId": "crimson_dragon",
+      "vfxTheme": "classic",
       "colors": [
         "#FFDE9C",
         "#F7A55A",
@@ -605,6 +627,7 @@
     },
     "22": {
       "themeId": "sakura_frost",
+      "vfxTheme": "classic",
       "colors": [
         "#FFD6AD",
         "#FFAD7B",
@@ -632,6 +655,7 @@
     },
     "23": {
       "themeId": "crimson_shura",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE6AD",
         "#FFB573",
@@ -659,6 +683,7 @@
     },
     "24": {
       "themeId": "aurora_mirage",
+      "vfxTheme": "classic",
       "colors": [
         "#FFD694",
         "#FFAD63",
@@ -686,6 +711,7 @@
     },
     "25": {
       "themeId": "magma_inferno",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE6B5",
         "#FFC584",
@@ -713,6 +739,7 @@
     },
     "26": {
       "themeId": "paladin_gold",
+      "vfxTheme": "classic",
       "colors": [
         "#FFDEA5",
         "#FFB56B",
@@ -740,6 +767,7 @@
     },
     "27": {
       "themeId": "ocean_tempest",
+      "vfxTheme": "classic",
       "colors": [
         "#FFF7B5",
         "#F7C584",
@@ -767,6 +795,7 @@
     },
     "28": {
       "themeId": "void_shadow",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFF7",
         "#FFDE9C",
@@ -794,6 +823,7 @@
     },
     "29": {
       "themeId": "azure_thunder",
+      "vfxTheme": "crimson_flame",
       "colors": [
         "#FFDEDE",
         "#DEADA5",
@@ -820,7 +850,8 @@
       }
     },
     "30": {
-      "themeId": "solar_flare",
+      "themeId": "magma_inferno",
+      "vfxTheme": "classic",
       "colors": [
         "#FFCEB5",
         "#F7AD84",
@@ -848,6 +879,7 @@
     },
     "31": {
       "themeId": "phoenix_nirvana",
+      "vfxTheme": "classic",
       "colors": [
         "#F7B57B",
         "#DE844A",
@@ -875,6 +907,7 @@
     },
     "32": {
       "themeId": "imperial_gold",
+      "vfxTheme": "classic",
       "colors": [
         "#FFD6AD",
         "#FFAD7B",
@@ -902,6 +935,7 @@
     },
     "33": {
       "themeId": "amethyst_phantom",
+      "vfxTheme": "classic",
       "colors": [
         "#F7E6AD",
         "#EFB573",
@@ -929,6 +963,7 @@
     },
     "34": {
       "themeId": "cyber_neon",
+      "vfxTheme": "classic",
       "colors": [
         "#FFE6BD",
         "#FFCE94",
@@ -956,6 +991,7 @@
     },
     "35": {
       "themeId": "sunset_overdrive",
+      "vfxTheme": "classic",
       "colors": [
         "#FFFFFF",
         "#FFD6A5",
@@ -983,5 +1019,5 @@
     }
   },
   "custom_skins": [],
-  "last_saved": "2026-11-12 10:13:11"
+  "last_saved": "2026-11-13 11:05:43"
 }

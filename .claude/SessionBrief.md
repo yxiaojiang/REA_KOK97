@@ -1,25 +1,19 @@
 # SessionBrief.md — KOF97 逆向魔改工程会话简报
 
 ## 当前目标
-全员 36 名角色（含八神庵、暴走八神、大门五郎、陈国汉、神乐千鹤、山崎龙二等）的 20 款皮肤已统一采用 OKLCH 自然染色算法（`_paint_costume_natural` / `_natural_cloth_word`），详见 `ProjectMemory.md` 第 13 节。
+1. **已冻结基线（严禁回退）**：全员 36 名角色的 20 款服装皮肤继续统一走 OKLCH 自然染色器（`_paint_costume_natural` / `_natural_cloth_word`，详见 `ProjectMemory.md` 第 13 节），服装明暗与色相参数保持锁定。
+2. **已完成的里程碑（`TASK-STUDIO-019` 全功能 + 68000 动态受击变色同步）**：
+   - 角色技能特效调色板定制已在 `tools/kof97_webview_app.py` 与 `tools/web/index.html` 落地，支持 `classic` 原版、`sync_skin` 跟随皮肤与苍炎蓝/冥炎紫/赤焰红/圣耀金等 8 款高饱和发光渐变预设。
+   - **68000 动态受击效果同步（`0x0F0000` Code Cave）**：解决招式命中对手后紫炎/赤炎灼烧（`0xF8`/`0xF9` + 附着火苗 `0x57..0x68`）、感电火花（`$e3 |= 2` + `0x52, 0x62, 0x53, 0x54`）、大蛇闪光（`0xFA`）与冲击火花（`0x51, 0x55, 0x54, 0x64, 0x6A`）仍显示原版紫/橙的问题；保留 `0x0058/0x005F` 中性灰烟雾与 `0x0010/0x1210` 暗色遮罩，保持 `P2 0x0000..0x00FF` 与 `P2 0x17B0..0x17DF` 100% 官方原版，支持 1P/2P 各自独立特效色并在切回 `classic` 时无损还原。
 
-本阶段关键改动：
-1. **OKLCH 自然染色算法全员统一落地（TASK-STUDIO-017 & 018）**：
-   - 用户实机验证神乐、龙二的 OKLCH 盖色后反馈「皮肤质感跟 SNK 的几乎一样，就是我要的」，并要求将该算法写入项目记忆、推广至全员 36 名角色（包括八神、大门、陈国汉）。
-   - 算法核心：锁死原画每格槽位的 OKLCH 明度 `L`（白衣仍是浅色、黑西装仍是深色、上下装深浅对比完整保留）；按明度断层（`> 0.24`）自动拆分上下装簇；彩度 `C` 按明度钟形曲线封顶到 SNK 官方 B/C/D 换色实测范围（`light: 0.105`, `full: 0.11`, `dark: 0.13`），原画高饱和部位（如八神红发）允许保留原彩度上限 `min(src_c, 0.20)`；原画有色部位保留纯白镜面高光并取 `THEME_KEYS` 标志色相，原画无彩色（白/灰/黑）部位全格染色并从 `THEME_RAMPS` 取色相；`accent` 组在浅色/白色辅色主题下自动做明度抬升（`lift_neutral`），使红头带变成干净白色而非暗灰。
-2. 打包和注入时，A/B/C/D 四个按键各自用该键自己的官方 15 色生成（暴走八神借用普通八神同键的服装明暗曲线，保留自身皮肤与白衬衣）。
-3. 主界面去掉了自定义皮肤页、底部「游戏未运行」和「实时应用皮肤」，以及「换肤即刻生效」。「全部随机」「重置原皮肤」移到底栏。「全部随机」包含八神。批处理在 `tools\`，`BuildStudio.bat` 打包生成 `KOF97ModStudio.exe`。
-4. 站立图解码规则不变，见 `ProjectMemory.md` 第 11 节。
+## 已核实的硬件与代码基线（详见 `ProjectMemory.md` 第 14 节）
+1. **主技能特效表（`P1 0x004956`）**：按 `pal_idx` 直接查表（`0x15..0x17` 与 `0x18..0x1A` 交错），映射 `vfx_base_pid`（`0x09C0..0x0BE0`）；跳过占位纯色及人物本体受创闪烁子槽（仅联动 `VFX_SUBSLOT_OFFSETS` 纯光效子槽）。
+2. **P1 动态受击同步 Hook（`0x0F0000..0x0FFFFF`）**：挂钩 16 处 6 字节指令（`0x0251C4`、`0x0041AE/E6/0x004254`、`0x012E64`、`0x012F18..0x013184`、`0x03376E`），经受击者 `$b6(a4)` 查攻击者运行时槽位 `0..35`，通过 `$5924(a5)` 队列更新 Palette RAM，缓存于未用 Work RAM `A5+$6E00..$6E08`。不占用现有 `0x000300..0x000530` 战斗 Hook。
 
-## 关键约束与安全基线
-1. 宿主 `C:\Program Files (x86)\KOF97\roms` 只读。魔改只写工作区与 `output/roms`。
-2. 68000 大端、16 位偶数对齐、LSPC2 调色板位布局不变。不要臆测未验证的地址。
-3. 工具源码注释与命名保持英文。
-4. 肤色槽位（`skin`）、锁定白边（`white_trim`）与纯黑勾边（`contour`）不参与换色。全员服装与毛发统一走 `_paint_costume_natural`，不要退回旧版直抄 Tailwind 高彩度色阶的做法。
-5. 服装染色仍只走 `_paint_costume_natural`，不要改 OKLCH 参数。技能色和界面用的公共色板保持官方原色。
-
-## 实测对照
-用户实机运行确认神乐、龙二等角色的皮肤质感与 SNK 官方原皮几乎一致，并指令将该方法固化到记忆文件、统一应用到全员 36 名角色（含八神、大门、陈国汉）。全量测试套件（`test_full_roster_skins_suite.py`、`test_highlight_luma.py`、`test_upgrade_suite.py`、`verify_anti_blowout_and_clarity.py`）均 100% 通过。
+## 关键约束与验证现状
+1. 宿主 `C:\Program Files (x86)\KOF97\roms` 只读；`P2 0x0000..0x00FF` 官方界面公共色板零改动。
+2. 工具链源码注释与标识符 100% 全英文；`apply_skin_live` 仅写运行态显存 Palette RAM 与 P2 `> 0x00FF` 槽。
+3. 全量回归测试（`tools/rom_tool.py self-test`、`tools/test_vfx_palette_suite.py` 6/6、`tools/test_full_roster_skins_suite.py`）已通过，根目录 `KOF97ModStudio.exe` 与 `dist/KOF97ModStudio.exe` 已同步至最新编译版。
 
 ## 下一步
-20 款皮肤的色相与 OKLCH 参数保持不动。技能色和界面色保持官方原样。不要提交官方 ROM 或本机模拟器配置。
+- 当前工作区与记忆文件已同步更新；后续如需新增机制或新特性，按 `.claude/Rules.md` 从 `PlanDocs` 或独立 `TASK-STUDIO-020` 启动。

@@ -429,6 +429,89 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .sidebar-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--panel2);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    flex: none;
+  }
+  .sidebar-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--mute);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 7px 8px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .sidebar-tab.on {
+    background: linear-gradient(135deg, rgba(255, 179, 25, 0.22), rgba(255, 120, 20, 0.16));
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(255, 179, 25, 0.45);
+  }
+  .vfx-panel {
+    display: none;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .vfx-panel.on { display: flex; }
+  .theme-panel {
+    display: none;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .theme-panel.on { display: flex; }
+  .vfx-hint {
+    font-size: 11px;
+    line-height: 1.45;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.24);
+    color: #bae6fd;
+  }
+  .vfx-hint.unsupported {
+    background: rgba(245, 158, 11, 0.09);
+    border-color: rgba(245, 158, 11, 0.28);
+    color: #fde68a;
+  }
+  .vfx-chip {
+    width: 52px;
+    height: 30px;
+    border-radius: 8px;
+    flex: none;
+    position: relative;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  }
+  .vfx-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+  .vfx-orb {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    flex: none;
+  }
+  .char-vfx-spark {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+    margin-left: 2px;
+  }
+  }
 
   .sidebar-footer {
     margin-top: auto;
@@ -1074,16 +1157,32 @@
             <span class="cname" id="bannerCharName">八神庵</span>
             <span style="color:var(--line);">|</span>
             <span class="tname" id="bannerThemeName">原版经典</span>
+            <span style="color:var(--line);">|</span>
+            <span class="vfx-pill-badge" id="bannerVfxBadge" title="当前技能特效配色">
+              <span class="vfx-orb" id="bannerVfxOrb" style="background:#FF8C1A;box-shadow:0 0 6px #FF8C1A;"></span>
+              <span id="bannerVfxName">特效: 原版</span>
+            </span>
           </div>
         </div>
 
         <!-- Column 3: Palette Theme Sidebar -->
         <div class="theme-sidebar">
-          <div class="sidebar-header">精选配色库 (10套全新皮肤)</div>
-          <div id="themeList" style="display:flex;flex-direction:column;gap:9px;"></div>
-          <div class="sidebar-footer">
-            <span>同步头像立绘</span>
-            <div class="switch on" id="swAvatar"></div>
+          <div class="sidebar-tabs" id="sidebarTabs">
+            <button class="sidebar-tab on" data-tab="skin">人物皮肤</button>
+            <button class="sidebar-tab" data-tab="vfx">技能特效 (VFX)</button>
+          </div>
+          <div class="theme-panel on" id="skinPanel">
+            <div class="sidebar-header">精选配色库 (20套全新皮肤)</div>
+            <div id="themeList" style="display:flex;flex-direction:column;gap:9px;"></div>
+            <div class="sidebar-footer">
+              <span>同步头像立绘</span>
+              <div class="switch on" id="swAvatar"></div>
+            </div>
+          </div>
+          <div class="vfx-panel" id="vfxPanel">
+            <div class="sidebar-header">技能火焰 / 气功发光调色板</div>
+            <div class="vfx-hint" id="vfxCharHint">保留白炽核高光，支持高饱和霓虹渐变与随皮肤同步。</div>
+            <div id="vfxList" style="display:flex;flex-direction:column;gap:9px;"></div>
           </div>
         </div>
 
@@ -1506,14 +1605,28 @@ const state = {
   dizzyDuration: 5.0,
   damageIdx: 3,       // Default: "halved" (50%)
   syncAvatar: true,
-  // Per-character skin mapping: charId -> { themeId: string, colors: array }
+  // Per-character skin mapping: charId -> { themeId: string, vfxTheme: string, colors: array }
   characterSkins: {}
 };
 
-// Initialize all 36 characters to default "classic" theme
+const VFX_THEMES_DEFAULT = [
+  { id: "classic",       name_cn: "原版特效",     badge: "SNK原色",     inner: "#FFFFFF", outer: "#FF8C1A" },
+  { id: "sync_skin",     name_cn: "跟随皮肤主色", badge: "智能同步",    inner: "#F8FAFC", outer: "#38BDF8" },
+  { id: "cangyan_blue",  name_cn: "苍炎蓝",       badge: "电光蓝焰",    inner: "#D8F8FF", outer: "#008CFF" },
+  { id: "mingyan_purple",name_cn: "冥炎紫",       badge: "大蛇紫焰",    inner: "#F6DCFF", outer: "#9D2BFF" },
+  { id: "holy_gold",     name_cn: "圣耀金",       badge: "炽阳金辉",    inner: "#FFFDE0", outer: "#FFB300" },
+  { id: "jade_venom",    name_cn: "翡翠毒火",     badge: "荧光翠焰",    inner: "#E4FFD8", outer: "#00E65B" },
+  { id: "crimson_flame", name_cn: "赤焰红",       badge: "狂炎绯红",    inner: "#FFE4D4", outer: "#FF1F2D" },
+  { id: "aurora_cyan",   name_cn: "极光青",       badge: "冰晶青光",    inner: "#E6FFFF", outer: "#00F0D8" },
+  { id: "sakura_plasma", name_cn: "樱魅粉焰",     badge: "霓虹粉焰",    inner: "#FFE8F6", outer: "#FF2B9A" },
+  { id: "void_ember",    name_cn: "虚空暗焰",     badge: "幽蓝暗紫",    inner: "#E4DAFF", outer: "#4B3BFF" }
+];
+
+// Initialize all 36 characters to default "classic" theme and VFX
 CHARACTERS.forEach(c => {
   state.characterSkins[c.id] = {
     themeId: "classic",
+    vfxTheme: "classic",
     colors: [...THEMES[0].colors]
   };
 });
@@ -1523,6 +1636,9 @@ const $ = s => document.querySelector(s);
 state.customSkins = [];
 state.slotLabels = [];
 state.officialColors = [];
+state.vfxPresets = [...VFX_THEMES_DEFAULT];
+state.vfxSupport = {};
+state.vfxPreviews = {};
 const $$ = s => document.querySelectorAll(s);
 const rootStyle = document.documentElement.style;
 
@@ -1625,25 +1741,168 @@ function refreshIdlePreview(charId, colors, targets) {
 /* UI Rendering & State Sync                                                 */
 /* ========================================================================= */
 
+function getVfxById(vfxId) {
+  const list = state.vfxPresets && state.vfxPresets.length ? state.vfxPresets : VFX_THEMES_DEFAULT;
+  return list.find(v => v.id === vfxId) || list[0];
+}
+
+function getVfxDotColor(charId, skinInfo) {
+  const vfxId = (skinInfo && skinInfo.vfxTheme) || "classic";
+  const ramp = state.vfxPreviews && state.vfxPreviews[String(charId)];
+  if (vfxId !== "classic" && Array.isArray(ramp) && ramp.length >= 4) {
+    return ramp[3];
+  }
+  return getVfxById(vfxId).outer;
+}
+
+function syncVfxStageUI(charId) {
+  const skinInfo = state.characterSkins[charId] || { themeId: "classic", vfxTheme: "classic" };
+  const vfxId = skinInfo.vfxTheme || "classic";
+  const preset = getVfxById(vfxId);
+  const supported = state.vfxSupport[String(charId)] !== false;
+  const dotColor = getVfxDotColor(charId, skinInfo);
+
+  const orb = $("#bannerVfxOrb");
+  const nameEl = $("#bannerVfxName");
+  if (orb) {
+    orb.style.background = dotColor;
+    orb.style.boxShadow = `0 0 8px ${dotColor}`;
+  }
+  if (nameEl) {
+    nameEl.textContent = !supported && vfxId === "classic"
+      ? "特效: 无独立投射物"
+      : `特效: ${preset.name_cn}`;
+  }
+
+  const hintEl = $("#vfxCharHint");
+  if (hintEl) {
+    if (!supported) {
+      hintEl.className = "vfx-hint unsupported";
+      hintEl.textContent = "该角色（纯体术系）无独立火焰/气功特效槽；切换至「全员」仍可批量配置其余角色。";
+    } else {
+      hintEl.className = "vfx-hint";
+      hintEl.textContent = "保留白炽核高光，支持高饱和霓虹渐变；可在原版/随皮肤同步/独立光效间自由组合。";
+    }
+  }
+
+  // Highlight active VFX card
+  $$("#vfxList .vfx-card").forEach(c => {
+    c.classList.toggle("on", c.dataset.vid === vfxId);
+  });
+
+  // Update center stage halo subtly to reflect active VFX aura when modded
+  if (vfxId !== "classic") {
+    rootStyle.setProperty("--glow", dotColor);
+  }
+}
+
+function renderVfxCards() {
+  const listEl = $("#vfxList");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  const list = state.vfxPresets && state.vfxPresets.length ? state.vfxPresets : VFX_THEMES_DEFAULT;
+  const activeSkin = state.characterSkins[state.activeCharId] || { themeId: "classic", vfxTheme: "classic" };
+  const activeVfx = activeSkin.vfxTheme || "classic";
+
+  list.forEach(v => {
+    const card = document.createElement("div");
+    card.className = "theme-card vfx-card" + (v.id === activeVfx ? " on" : "");
+    card.dataset.vid = v.id;
+    let innerC = v.inner;
+    let outerC = v.outer;
+    if (v.id === "sync_skin" && activeVfx === "sync_skin") {
+      const ramp = state.vfxPreviews && state.vfxPreviews[String(state.activeCharId)];
+      if (Array.isArray(ramp) && ramp.length >= 5) {
+        innerC = ramp[1];
+        outerC = ramp[3];
+      }
+    }
+    card.innerHTML = `
+      <div class="vfx-chip" style="background:linear-gradient(110deg, #FFFFFF 0%, ${innerC} 38%, ${outerC} 100%);"></div>
+      <div class="theme-info">
+        <div class="title">${v.name_cn}</div>
+        <div class="sub">${v.badge || ""}</div>
+      </div>
+    `;
+    card.onclick = () => applyVfx(v.id);
+    listEl.appendChild(card);
+  });
+}
+
+function applyVfx(vfxId) {
+  const preset = getVfxById(vfxId);
+  if (state.scope === "ALL") {
+    CHARACTERS.forEach(c => {
+      if (!state.characterSkins[c.id]) {
+        state.characterSkins[c.id] = { themeId: "classic", vfxTheme: vfxId, colors: [...THEMES[0].colors] };
+      } else {
+        state.characterSkins[c.id].vfxTheme = vfxId;
+      }
+    });
+    toast(`已全员应用技能特效【${preset.name_cn}】`);
+    log(`已批量应用技能特效【${preset.name_cn}】至全员 36 位角色`, "INFO");
+  } else {
+    if (!state.characterSkins[state.activeCharId]) {
+      state.characterSkins[state.activeCharId] = { themeId: "classic", vfxTheme: vfxId, colors: [...THEMES[0].colors] };
+    } else {
+      state.characterSkins[state.activeCharId].vfxTheme = vfxId;
+    }
+    const char = CHARACTERS.find(c => c.id === state.activeCharId);
+    toast(`已为【${char ? char.name : ""}】设置技能特效：${preset.name_cn}`);
+  }
+
+  renderCharacterList();
+  renderVfxCards();
+  syncVfxStageUI(state.activeCharId);
+
+  callBackend("apply_vfx_live", {
+    char_id: state.activeCharId,
+    vfx_theme: vfxId,
+    scope: state.scope
+  }).then(res => {
+    callBackend("get_initial_state").then(st => {
+      if (st && st.character_skins) {
+        Object.keys(st.character_skins).forEach(cidStr => {
+          state.characterSkins[parseInt(cidStr, 10)] = st.character_skins[cidStr];
+        });
+      }
+      if (st && st.vfx_previews) state.vfxPreviews = st.vfx_previews;
+      renderCharacterList();
+      renderVfxCards();
+      syncVfxStageUI(state.activeCharId);
+    });
+    if (res && res.running && res.message) {
+      log(res.message, "SUCCESS");
+    }
+  });
+}
+
 // Render the 36-character list in the left column
 function renderCharacterList() {
   const container = $("#charScrollBox");
   container.innerHTML = "";
 
   CHARACTERS.forEach((c, idx) => {
-    const skinInfo = state.characterSkins[c.id] || { themeId: "classic" };
-    const theme = getThemeById(skinInfo.themeId);
+    const skinInfo = state.characterSkins[c.id] || { themeId: "classic", vfxTheme: "classic" };
     const isModded = skinInfo.themeId !== "classic";
+    const vfxId = skinInfo.vfxTheme || "classic";
+    const isVfxModded = vfxId !== "classic";
     const isActive = c.id === state.activeCharId;
+    const vfxColor = getVfxDotColor(c.id, skinInfo);
 
     const row = document.createElement("div");
     row.className = "char-row" + (isActive ? " on" : "");
     row.id = `char-row-${c.id}`;
 
+    const vfxSparkHtml = isVfxModded
+      ? `<span class="char-vfx-spark" title="特效: ${getVfxById(vfxId).name_cn}" style="background:${vfxColor};box-shadow:0 0 6px ${vfxColor};"></span>`
+      : "";
+
     row.innerHTML = `
       <div class="char-row-left">
         <span class="idx">${String(idx + 1).padStart(2, '0')}</span>
         <span class="name">${c.name}</span>
+        ${vfxSparkHtml}
       </div>
       <div class="char-skin-tag ${isModded ? 'modded' : ''}" id="skin-tag-${c.id}">
         <span class="char-skin-dot" style="background:${skinPreviewColors(skinInfo).hair};"></span>
@@ -1660,7 +1919,7 @@ function renderCharacterList() {
 function selectCharacter(charId, silent = false) {
   state.activeCharId = charId;
   const char = CHARACTERS.find(c => c.id === charId) || CHARACTERS[27];
-  const skinInfo = state.characterSkins[charId] || { themeId: "classic" };
+  const skinInfo = state.characterSkins[charId] || { themeId: "classic", vfxTheme: "classic" };
   const theme = getThemeById(skinInfo.themeId);
 
   // Update Left List Highlights
@@ -1682,9 +1941,12 @@ function selectCharacter(charId, silent = false) {
   refreshIdlePreview(charId);
 
   // Update Right Theme Cards selection
-  $$(".theme-card").forEach(c => {
+  $$(".theme-card[data-tid]").forEach(c => {
     c.classList.toggle("on", c.dataset.tid === theme.id);
   });
+
+  renderVfxCards();
+  syncVfxStageUI(charId);
 
   // Notify backend of active character switch
   if (!silent) {
@@ -1709,8 +1971,10 @@ function applyTheme(themeId) {
   if (state.scope === "ALL") {
     // Bulk apply to all 36 characters
     CHARACTERS.forEach(c => {
+      const prevVfx = (state.characterSkins[c.id] && state.characterSkins[c.id].vfxTheme) || "classic";
       state.characterSkins[c.id] = {
         themeId: theme.id,
+        vfxTheme: prevVfx,
         colors: [...theme.colors]
       };
       // Update badge in character list
@@ -1726,8 +1990,10 @@ function applyTheme(themeId) {
 
   } else {
     // Apply specifically to the current active character
+    const prevVfx = (state.characterSkins[state.activeCharId] && state.characterSkins[state.activeCharId].vfxTheme) || "classic";
     state.characterSkins[state.activeCharId] = {
       themeId: theme.id,
+      vfxTheme: prevVfx,
       colors: [...theme.colors]
     };
 
@@ -1739,7 +2005,7 @@ function applyTheme(themeId) {
     }
 
     const char = CHARACTERS.find(c => c.id === state.activeCharId);
-    toast(`已为【${char ? char.name : ''}】设置皮肤：${theme.name}`);
+    toast(`已为【${char ? char.name : ""}】设置皮肤：${theme.name}`);
     log(`角色【${char ? char.name : ''}】皮肤已更新为: ${theme.name}`, "INFO");
   }
 
@@ -1747,7 +2013,7 @@ function applyTheme(themeId) {
   $("#bannerThemeName").textContent = theme.name;
 
   // Update theme card active styles
-  $$(".theme-card").forEach(c => {
+  $$(".theme-card[data-tid]").forEach(c => {
     c.classList.toggle("on", c.dataset.tid === theme.id);
   });
 
@@ -1758,6 +2024,9 @@ function applyTheme(themeId) {
     scope: state.scope,
     colors: theme.colors
   }).then(res => {
+    if (res && res.vfx_previews) {
+      state.vfxPreviews = res.vfx_previews;
+    }
     if (res && res.character_skins) {
       Object.keys(res.character_skins).forEach(cidStr => {
         const cid = parseInt(cidStr, 10);
@@ -1770,6 +2039,20 @@ function applyTheme(themeId) {
     }
   });
 }
+
+// Sidebar Tab Switcher (Skins vs Skill VFX)
+$$("#sidebarTabs .sidebar-tab").forEach(tab => {
+  tab.onclick = () => {
+    const mode = tab.dataset.tab;
+    $$("#sidebarTabs .sidebar-tab").forEach(t => t.classList.toggle("on", t === tab));
+    $("#skinPanel").classList.toggle("on", mode === "skin");
+    $("#vfxPanel").classList.toggle("on", mode === "vfx");
+    if (mode === "vfx") {
+      renderVfxCards();
+      syncVfxStageUI(state.activeCharId);
+    }
+  };
+});
 
 // Build Right Theme Cards
 THEMES.forEach((t) => {
@@ -1909,13 +2192,15 @@ $$(".tool-tile").forEach(t => {
     } else if (act === "restore") {
       log("正在还原官方原版基准风云再起...", "INFO");
       callBackend("restore_baseline").then(() => {
-        // Reset all local skin mappings to classic
+        // Reset all local skin and VFX mappings to classic
         CHARACTERS.forEach(c => {
-          state.characterSkins[c.id] = { themeId: "classic", colors: [...THEMES[0].colors] };
+          state.characterSkins[c.id] = { themeId: "classic", vfxTheme: "classic", colors: [...THEMES[0].colors] };
         });
+        state.vfxPreviews = {};
         renderCharacterList();
+        renderVfxCards();
         selectCharacter(state.activeCharId);
-        toast("已成功还原官方原版基准！全员皮肤已复原。");
+        toast("已成功还原官方原版基准！全员皮肤与特效已复原。");
       });
     } else if (act === "selftest") {
       log("正在执行全局工具链自检 (bswap16/LSPC2/瓦片)...", "INFO");
@@ -1972,6 +2257,7 @@ $("#btnRandomOthers").onclick = () => {
   toast("正在为全部角色随机分配精选皮肤...");
   callBackend("randomize_other_skins").then(res => {
     if (res && res.success) {
+      if (res.vfx_previews) state.vfxPreviews = res.vfx_previews;
       if (res.character_skins) {
         Object.keys(res.character_skins).forEach(cidStr => {
           const cid = parseInt(cidStr, 10);
@@ -1979,6 +2265,7 @@ $("#btnRandomOthers").onclick = () => {
         });
       }
       renderCharacterList();
+      renderVfxCards();
       selectCharacter(state.activeCharId, true);
       toast(`已为全部 ${res.count || 36} 位角色随机分配皮肤。保存并打包后生效。`);
       log(`已为全部 ${res.count || 36} 位角色随机分配皮肤。`, "SUCCESS");
@@ -1994,6 +2281,7 @@ $("#btnResetAll").onclick = () => {
   toast("↺ 正在重置全员角色为官方原版...");
   callBackend("reset_all_skins").then(res => {
     if (res && res.success) {
+      if (res.vfx_previews) state.vfxPreviews = res.vfx_previews;
       if (res.character_skins) {
         Object.keys(res.character_skins).forEach(cidStr => {
           const cid = parseInt(cidStr, 10);
@@ -2001,8 +2289,9 @@ $("#btnResetAll").onclick = () => {
         });
       }
       renderCharacterList();
+      renderVfxCards();
       selectCharacter(state.activeCharId, true);
-      toast("↺ 已将全员 36 位角色皮肤全部重置恢复为官方原版经典！");
+      toast("↺ 已将全员 36 位角色皮肤与特效全部重置恢复为官方原版经典！");
       log("已成功将全员 36 角色皮肤全部重置恢复为官方原版经典。", "SUCCESS");
     } else {
       toast("重置失败: " + (res ? res.error : "未知错误"));
@@ -2070,6 +2359,15 @@ window.onBackendLog = function(msg, level) {
 
 // Initial state sync callback from Python
 window.onBackendState = function(s) {
+  if (s.vfx_presets) {
+    state.vfxPresets = s.vfx_presets;
+  }
+  if (s.vfx_support) {
+    state.vfxSupport = s.vfx_support;
+  }
+  if (s.vfx_previews) {
+    state.vfxPreviews = s.vfx_previews;
+  }
   if (s.character_skins) {
     Object.keys(s.character_skins).forEach(cidStr => {
       const cid = parseInt(cidStr, 10);
