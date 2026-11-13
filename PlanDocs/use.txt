@@ -1,6 +1,6 @@
 计划审核怎么用
 代码与二进制 Patch 审核走 CRDocs/。方向、顺序和验收口径走 PlanDocs/。
-技术基线方案写在 Docs/ 中。讨论收口后把决定写进 PlanDocs/DECISIONS.md，并更新 .claude/Plan.md。
+技术基线方案写在 Docs/ 中。讨论收口后，先将完整讨论过程按日期归档到 PlanDocs/YYYY-MM-DD_<DIR-ID>_<TaskID>.md 供复盘，再把决定写进 PlanDocs/DECISIONS.md，并更新根目录 Plan.md 与 .claude/Plan.md。
 
 按角色交互指令：
 
@@ -14,4 +14,4 @@
 > 读取 PlanDocs，按 REVIEW.md 修正提案并交接。
 
 用户确认可以收口：
-> 读取 PlanDocs，讨论已收敛，写入决定并更新计划。
+> 读取 PlanDocs，讨论已收敛，按日期归档讨论过程，写入决定并更新计划。

@@ -23,17 +23,19 @@ import zipfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-try:
-    from tools import crom_tool
-except ImportError:
-    import crom_tool
+_ROOT_STR = str(Path(__file__).resolve().parents[2])
+if _ROOT_STR not in sys.path:
+    sys.path.insert(0, _ROOT_STR)
+
+from src.core.paths import PROJECT_ROOT as WORKSPACE_ROOT
+from src.palette.color_utils import decode_lspc2, encode_lspc2
+from src.rom import crom_tool
 
 
 DEFAULT_SOURCE_ROM_DIR = Path(r"C:\Program Files (x86)\KOF97\roms")
 DEFAULT_KOF97_ZIP = DEFAULT_SOURCE_ROM_DIR / "kof97.ZIP"
 DEFAULT_KOF97PLS_ZIP = DEFAULT_SOURCE_ROM_DIR / "kof97pls.zip"
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_UNPACK_DIR = WORKSPACE_ROOT / "build" / "unpacked"
 DEFAULT_OUTPUT_ZIP = WORKSPACE_ROOT / "output" / "roms" / "kof97pls.zip"
 DEFAULT_SANDBOX_DIR = WORKSPACE_ROOT / "sandbox"
@@ -74,41 +76,6 @@ def bswap16(data: bytes) -> bytes:
     buf = bytearray(data)
     buf[0::2], buf[1::2] = buf[1::2], buf[0::2]
     return bytes(buf)
-
-
-def encode_lspc2(r5: int, g5: int, b5: int, dark: int = 0) -> int:
-    """
-    Encode 5-bit RGB components (0..31) into a 16-bit Neo-Geo LSPC2-A2 color word.
-    Bit 15: Dark bit (D)
-    Bit 14: R0 (LSB of Red)
-    Bit 13: G0 (LSB of Green)
-    Bit 12: B0 (LSB of Blue)
-    Bits 11..8: R4..R1 (top 4 bits of Red)
-    Bits 7..4:  G4..G1 (top 4 bits of Green)
-    Bits 3..0:  B4..B1 (top 4 bits of Blue)
-    """
-    r0 = r5 & 1
-    r_hi = (r5 >> 1) & 0xF
-    g0 = g5 & 1
-    g_hi = (g5 >> 1) & 0xF
-    b0 = b5 & 1
-    b_hi = (b5 >> 1) & 0xF
-    return ((dark & 1) << 15) | (r0 << 14) | (g0 << 13) | (b0 << 12) | (r_hi << 8) | (g_hi << 4) | b_hi
-
-
-def decode_lspc2(val: int) -> Tuple[int, int, int, int]:
-    """
-    Decode a 16-bit Neo-Geo LSPC2-A2 color word into 5-bit RGB components (0..31) and dark bit.
-    Returns (r5, g5, b5, dark).
-    """
-    dark = (val >> 15) & 1
-    r0 = (val >> 14) & 1
-    g0 = (val >> 13) & 1
-    b0 = (val >> 12) & 1
-    r5 = (((val >> 8) & 0xF) << 1) | r0
-    g5 = (((val >> 4) & 0xF) << 1) | g0
-    b5 = ((val & 0xF) << 1) | b0
-    return r5, g5, b5, dark
 
 
 def crc32_hex(data: bytes) -> str:
@@ -1639,8 +1606,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if args.command == "gui":
-        from tools import kof97_gui
-        kof97_gui.main()
+        from src.studio import legacy_tk_gui
+        legacy_tk_gui.main()
         return 0
 
     return 1

@@ -12,18 +12,11 @@ import sys
 import types
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-if "webview" not in sys.modules:
-    try:
-        import webview  # noqa: F401
-    except ImportError:
-        _webview_stub = types.ModuleType("webview")
-        _webview_stub.Window = object
-        sys.modules["webview"] = _webview_stub
-
-from kof97_webview_app import (  # noqa: E402
+from src.palette.color_utils import (
     _hex_hsv,
     _rgb5_to_hsv,
     hex_to_rgb5,

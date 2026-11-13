@@ -43,12 +43,13 @@
     - `PROPOSAL.md`：只由提案方（Antigravity）填写，遵循固定标题。
     - `REVIEW.md`：只由审核方（Argon）填写，遵循固定标题，同意也要指出核对过的文件。
     - `STATUS.md`：由当前交棒方更新状态（`IDLE` / `PROPOSING` / `READY_FOR_REVIEW` / `CHANGES_REQUESTED` / `CONVERGED` / `ADOPTED` / `BLOCKED`）。
-    - `DECISIONS.md`：用户/Argon 确认收口后追加短决定，写回 `.claude/Plan.md`。
+    - `DECISIONS.md`：用户/Argon 确认收口后追加短决定，写回 `.claude/Plan.md` 与 `Plan.md`。
+    - `YYYY-MM-DD_<DIR-ID>_<TaskID>.md`：讨论收敛（`CONVERGED -> ADOPTED`）收口时，必须将本话题完整多轮讨论过程（各轮 `PROPOSAL` 与 `REVIEW`）按日期命名归档在 `PlanDocs/` 目录下，再重置活跃交接文件，以便日后复盘。
   - **用户最简交互**：
     - 对提案方：`读取 PlanDocs，把这件事写成提案并交接。`
     - 对审核方：`读取 PlanDocs，独立审核这一轮提案。`
     - 审核意见处理：`读取 PlanDocs，按 REVIEW.md 修正提案并交接。`
-    - 确认收口：`读取 PlanDocs，讨论已收敛，写入决定并更新计划。`
+    - 确认收口：`读取 PlanDocs，讨论已收敛，按日期归档讨论过程，写入决定并更新计划。`
 
 - **CRDocs 代码与 Patch 审查交接（强制规程）**：
   - 工程根目录 `CRDocs/` 是执行者与审核者之间唯一的代码与二进制修改交接区。

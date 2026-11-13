@@ -1,117 +1,76 @@
-# 实施与验证交接 (CRDocs — TASK-ROM-005 Round 5)
+# 实施与验证交接 (CRDocs — TASK-STUDIO-020 Round 3: 迁移拆解完结与终验交接)
 
-## 本轮实际修改
-
-### 1. Neo-Geo MVS C-ROM 图像瓦片架构与平面位图编解码器
-在 [`tools/crom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\tools\crom_tool.py) 中完整实现了 SNK Neo-Geo MVS 硬件规范的 16x16 4bpp 瓦片编解码与位平面解交错引擎：
-- **硬件位平面（Bitplane）物理组织**：
-  - 瓦片尺寸：16x16 像素，4-bit 色深（16 色），每个完整瓦片占用 128 字节；
-  - 奇数编号 C-ROM（`C1`, `C3`, `C5`）存储 Bitplane 0 和 Bitplane 1（每个瓦片 64 字节）；
-  - 偶数编号 C-ROM（`C2`, `C4`, `C6`）存储 Bitplane 2 和 Bitplane 3（每个瓦片 64 字节）；
-- **四象限（Quadrant Blocks）排列顺序**：
-  每个 16x16 瓦片在 128 字节内划分为 4 个 8x8 像素子块，物理存储次序如下：
-  - 子块 0（Block 0）：右上象限（`X_offset = 8, Y_offset = 0`）；
-  - 子块 1（Block 1）：右下象限（`X_offset = 8, Y_offset = 8`）；
-  - 子块 2（Block 2）：左上象限（`X_offset = 0, Y_offset = 0`）；
-  - 子块 3（Block 3）：左下象限（`X_offset = 0, Y_offset = 8`）。
-- **像素位映射**：
-  在每个 8x8 象限的行中，像素 `px`（0..7，0 为最左侧像素）对应字节的第 `7 - px` 位（MSB 为左，LSB 为右）。4 个平面合并形成 4-bit 颜色索引 `(bp3 << 3) | (bp2 << 2) | (bp1 << 1) | bp0`。
-- **核心编解码函数**：
-  - `decode_tile_16x16(odd_64: bytes, even_64: bytes) -> List[List[int]]`：将奇偶 C-ROM 各 64 字节解析为 16x16 颜色索引矩阵（0..15）；
-  - `encode_tile_16x16(pixels: List[List[int]]) -> Tuple[bytes, bytes]`：将 16x16 颜色索引矩阵无损重编码为奇偶 C-ROM 各 64 字节平面数据。
-
-### 2. 40MB 全量 C-ROM 瓦片对解交错（De-interleave）与重构（Interleave）流
-针对 KOF97 全量 6 颗 C-ROM（共 41,943,040 字节，327,680 个瓦片）实现极速、100% 双向无损转换：
-- **C-ROM 组成规格**：
-  - `c1_c2` 对：`KOF97_C1.ROM` (8MB) + `KOF97_C2.ROM` (8MB) = 131,072 瓦片（生成 16MB `c1_c2.spr`）；
-  - `c3_c4` 对：`KOF97_C3.ROM` (8MB) + `KOF97_C4.ROM` (8MB) = 131,072 瓦片（生成 16MB `c3_c4.spr`）；
-  - `c5_c6` 对：`KOF97_C5.ROM` (4MB) + `KOF97_C6.ROM` (4MB) = 65,536 瓦片（生成 8MB `c5_c6.spr`）；
-- **高性能流转**：
-  采用 Python `memoryview` 切片内存直传，40MB 全量解交错与重新交错重构耗时均低于 0.3 秒；
-- **全量重构 CRC32 严格比对**：
-  将解交错生成的 `.spr` 文件重新交错输出至 `build/crom_unpacked/rebuilt/`，逐字节比对原版 ROM，全部 6 颗 ROM 达到 100% bit-exact 无损复原。
-
-### 3. 单瓦片与图集导出/导入（PNG）
-- `export_tile_png(...)`：提取指定 C-ROM 对指定瓦片并保存为 16x16 标准 PNG 格式（支持自定义 RGB 调色板或默认灰度阶梯）；
-- `export_sheet_png(...)`：按指定列宽（默认 16 列）将连续瓦片序列拼接渲染为瓦片图集（Tile Sheet）PNG；
-- `import_tile_png(...)`：将用户编辑后的 16x16 PNG 瓦片重新编译为 4bpp 平面格式，直接回写至解包后的奇偶 C-ROM 二进制文件指定瓦片位置。
-
-### 4. 统一命令行工具链集成 [`tools/rom_tool.py`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\tools\rom_tool.py)
-在保留原有 `unpack`, `pack`, `build-baseline`, `build-defense`, `build-palette`, `verify-palette` 等子命令的基础上，平滑扩展集成 C-ROM 子命令并注入全局自检：
-- `rom_tool.py self-test`：自动串行执行 68000 `bswap16` 自检、`LSPC2-A2` 调色板自检、以及 `crom_tool` 瓦片编解码与实机硬件 64 瓦片无损自检；
-- `rom_tool.py crom-self-test`：独立执行 C-ROM 瓦片与流测试；
-- `rom_tool.py crom-deinterleave`：解交错生成 `.spr` 文件；
-- `rom_tool.py crom-interleave`：重交错复原 C-ROM 二进制；
-- `rom_tool.py crom-export-tile`：导出单瓦片 PNG；
-- `rom_tool.py crom-export-sheet`：导出瓦片集 PNG；
-- `rom_tool.py crom-import-tile`：导入瓦片 PNG；
-- 脚本保持 100% 纯 ASCII（0 非 ASCII 字节）。
+> **本轮性质说明**：依据 [`Plan.md`](file:///d:/TEmp/REA/Fighter97/Plan.md)（阶段八）、[`PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md`](file:///d:/TEmp/REA/Fighter97/PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md) 与 Round 2 已 `APPROVED` 的设计方案，已完成 `tools/` → `src/` 全量迁移、[`kof97_webview_app.py`](file:///d:/TEmp/REA/Fighter97/src/studio/kof97_webview_app.py) 分层拆解、工作区 `tools/` 隔离清理、全量静态/回归/字节级基线一致性门禁实测，以及 `KOF97ModStudio.exe` 重编与跨目录启动实测。现交接 **Argon** 执行 Round 3 Implementation Review。
 
 ---
 
-## 判定未修改
+## 本轮实际交付与模块清单 (`src/` 共 40 个活跃文件 / 7 个功能子包)
 
-1. **宿主只读保护**：`C:\Program Files (x86)\KOF97\roms` 严格只读，无任何写操作。
-2. **P-ROM 防御与调色板基线完全保持**：
-   - `build/unpacked/p1_be.bin`（校验和 `0x21465F0A`，磁盘 CRC32 `0xFF227541`）中的全局免疫破防、免疫眩晕、受创减半 Code Cave 补丁保持 100% 不变；
-   - `build/unpacked/p2_be.bin`（校验和 `0xF1187330`，磁盘 CRC32 `0xAF5CC95E`）中的八神庵黑金调色板保持 100% 不变；
-   - [`output/roms/kof97pls.zip`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\output\roms\kof97pls.zip) 维持实机已验证状态。
-3. **ROM 构件隔离**：40MB C-ROM 中间体 `.spr` 和复原 `.ROM` 存放于 `build/crom_unpacked/`，已由 [`.gitignore`](file:///c:/Users/mimovr/Desktop/TEmp\REA\Fighter97\.gitignore) 严密排除，避免仓库体积膨胀。
+### 1. 严格 5 层单向依赖 DAG 与各层交付物
+
+| 层级 | 目录 | 文件与核心职责 |
+| :--- | :--- | :--- |
+| **Layer 0** | `src/core/` | [`__init__.py`](file:///d:/TEmp/REA/Fighter97/src/core/__init__.py) (3 L)、[`paths.py`](file:///d:/TEmp/REA/Fighter97/src/core/paths.py) (49 L: `PROJECT_ROOT` / `BUNDLE_DIR` / `EXE_DIR` / `get_config_path` / `resolve_web_index_html`)、[`roster.py`](file:///d:/TEmp/REA/Fighter97/src/core/roster.py) (112 L: 36 角色花名册与 `CHARACTER_PALETTE_SCHEMA`)、[`presets.py`](file:///d:/TEmp/REA/Fighter97/src/core/presets.py) (795 L: `PRESET_THEMES` / `THEME_RAMPS` / `DAMAGE_MODES` / `VFX_PRESETS`)、[`config_store.py`](file:///d:/TEmp/REA/Fighter97/src/core/config_store.py) (151 L: `load_studio_config(..., skin_entry_factory=None)` 与 `save_studio_config`) |
+| **Layer 1** | `src/palette/` | [`__init__.py`](file:///d:/TEmp/REA/Fighter97/src/palette/__init__.py) (3 L)、[`color_utils.py`](file:///d:/TEmp/REA/Fighter97/src/palette/color_utils.py) (390 L: 托管 `encode_lspc2` / `decode_lspc2` 与 HSV/OKLCH 编码)、[`costume_painter.py`](file:///d:/TEmp/REA/Fighter97/src/palette/costume_painter.py) (418 L: 冻结 `DIR-002` `_paint_costume_natural` / `generate_harmonious_character_palette`)、[`portrait_burst.py`](file:///d:/TEmp/REA/Fighter97/src/palette/portrait_burst.py) (172 L: `generate_burst_character_palette` / `sync_character_portraits`)、[`vfx_shader.py`](file:///d:/TEmp/REA/Fighter97/src/palette/vfx_shader.py) (353 L: `TASK-STUDIO-019` `0x004956` 查表与 `VFX_COMMON_EFFECT_GROUPS` / `_recolor_hit_effect_slot`) |
+| **Layer 2** | `src/rom/` | [`__init__.py`](file:///d:/TEmp/REA/Fighter97/src/rom/__init__.py) (3 L)、[`crom_tool.py`](file:///d:/TEmp/REA/Fighter97/src/rom/crom_tool.py) (520 L: 顶部补全 `import sys` + `parents[2]` 引导与 `WORKSPACE_ROOT`)、[`rom_tool.py`](file:///d:/TEmp/REA/Fighter97/src/rom/rom_tool.py) (1,617 L: 重导出 `encode_lspc2`/`decode_lspc2`，`gui` 子命令延迟导入 `src.studio.legacy_tk_gui`)、[`sprite_compose.py`](file:///d:/TEmp/REA/Fighter97/src/rom/sprite_compose.py) (500 L: `SLOT_GROUP_CN` 与第 148 行 `"色槽 %d"` 转 `\uXXXX`)、[`p1_patcher.py`](file:///d:/TEmp/REA/Fighter97/src/rom/p1_patcher.py) (529 L: `apply_combat_and_unlock_patches_to_p1(..., log_fn=None)` + `0x0F0000` 68k Code Cave) |
+| **Layer 3** | `src/emulator/` | [`__init__.py`](file:///d:/TEmp/REA/Fighter97/src/emulator/__init__.py) (1 L)、[`kawaks_live.py`](file:///d:/TEmp/REA/Fighter97/src/emulator/kawaks_live.py) (314 L: 仅依赖 Layer 0/1，`find_kawaks_pid` 与 `inject_live_palettes_to_kawaks(..., log_fn=None)`) |
+| **Layer 4** | `src/studio/` | [`__init__.py`](file:///d:/TEmp/REA/Fighter97/src/studio/__init__.py) (1 L)、[`bridge_api.py`](file:///d:/TEmp/REA/Fighter97/src/studio/bridge_api.py) (922 L: 保留 25 个公开 RPC 方法与 `_` 私有字段，实现 `KOF97BridgeApi(config_path=None)` 与 `_resolve_config_path()`)、[`kof97_webview_app.py`](file:///d:/TEmp/REA/Fighter97/src/studio/kof97_webview_app.py) (127 L: `main()` + 精确 38 项兼容重导出白名单)、[`legacy_tk_gui.py`](file:///d:/TEmp/REA/Fighter97/src/studio/legacy_tk_gui.py) (1,599 L: 更新至 `src.rom.rom_tool`)、[`web/index.html`](file:///d:/TEmp/REA/Fighter97/src/studio/web/index.html) (2,443 L / 82,895 B 原封未改) |
+| **Layer 5 (Build)** | `src/build/` | [`build_exe.py`](file:///d:/TEmp/REA/Fighter97/src/build/build_exe.py) (103 L)、[`BuildStudio.bat`](file:///d:/TEmp/REA/Fighter97/src/build/BuildStudio.bat) (25 L)、[`launch_mod_studio.bat`](file:///d:/TEmp/REA/Fighter97/src/build/launch_mod_studio.bat) (19 L)、[`launch_sandbox.bat`](file:///d:/TEmp/REA/Fighter97/src/build/launch_sandbox.bat) (23 L)、[`launch_gui.bat`](file:///d:/TEmp/REA/Fighter97/src/build/launch_gui.bat) (12 L) |
+| **Layer 5 (Tests)** | `src/tests/` | 8 个可执行脚本：[`test_vfx_palette_suite.py`](file:///d:/TEmp/REA/Fighter97/src/tests/test_vfx_palette_suite.py)、[`test_full_roster_skins_suite.py`](file:///d:/TEmp/REA/Fighter97/src/tests/test_full_roster_skins_suite.py)、[`test_highlight_luma.py`](file:///d:/TEmp/REA/Fighter97/src/tests/test_highlight_luma.py)、[`test_upgrade_suite.py`](file:///d:/TEmp/REA/Fighter97/src/tests/test_upgrade_suite.py)、[`verify_anti_blowout_and_clarity.py`](file:///d:/TEmp/REA/Fighter97/src/tests/verify_anti_blowout_and_clarity.py)、[`verify_all.py`](file:///d:/TEmp/REA/Fighter97/src/tests/verify_all.py)、[`verify_e2e_live_and_win.py`](file:///d:/TEmp/REA/Fighter97/src/tests/verify_e2e_live_and_win.py)、[`dump_official_palettes.py`](file:///d:/TEmp/REA/Fighter97/src/tests/dump_official_palettes.py)；产物 [`official_palettes.txt`](file:///d:/TEmp/REA/Fighter97/src/tests/official_palettes.txt)；只读历史归档 [`legacy_upgrades/`](file:///d:/TEmp/REA/Fighter97/src/tests/legacy_upgrades)（3 个脚本） |
+| **根目录包与产物** | `/` | [`src/__init__.py`](file:///d:/TEmp/REA/Fighter97/src/__init__.py) (3 L)、[`dist/KOF97ModStudio.exe`](file:///d:/TEmp/REA/Fighter97/dist/KOF97ModStudio.exe) 与 [`KOF97ModStudio.exe`](file:///d:/TEmp/REA/Fighter97/KOF97ModStudio.exe) (26,616,214 B, SHA-256 `a6062785d4865dd40edd03eb9f5afc8c6eaea6d9426f3a1e04b0cc5cb8e9b4e7`) |
+
+### 2. 工作区隔离与基线冻结遵守情况
+1. **旧 `tools/` 目录已从工作区彻底移除**：`tools_exists = False`（已移至工作区外部临时备份目录，5 个 `.bak*` 与 `__pycache__/` 未迁入 `src/`）。
+2. **宿主只读保护与冻结算法保真**：`C:\Program Files (x86)\KOF97\roms` 零写入；`DIR-002` 着色算法、`TASK-STUDIO-019` `0x0F0000` Code Cave、25 个 RPC 接口与 `web/index.html` 均未改变逻辑；`mod_studio_config.json` 已恢复为实施前完全一致配置（SHA-256 `f7c9aff79db2482abae841746b1d3499a38aef2cf011b8ff44b6cc38ca66fe25`）。
+3. **Round 2 审查 3 项备忘均已落地**：
+   - `src/rom/sprite_compose.py` 第 41–49 行 `SLOT_GROUP_CN` 与第 148 行 `"色槽 %d"` 均转义为 `\uXXXX`。
+   - `src/rom/crom_tool.py` 顶部补全 `import sys` + `parents[2]` 引导；`src/rom/rom_tool.py` 收口为 `from src.rom import crom_tool`。
+   - `apply_combat_and_unlock_patches_to_p1` 仅覆盖 `L3287–L3364`，`KOF97_P2.ROM` 读取与 `apply_hit_effect_vfx_to_p1` 调用保留在 `src/studio/bridge_api.py:pack_rom`。
 
 ---
 
-## 验证证据与实测记录
+## 全量验证证据（全部在移除 `tools/` 后实测完成）
 
-### 1. 单元与实机硬件自检输出
-执行 `python tools/rom_tool.py self-test` 实测输出：
+### 1. 静态门禁与入口导入（`tools_exists == False`）
+- **0 `tools` 引用扫描**（AST + 正则 `tools[/\\.]|\bfrom\s+tools\b|\bimport\s+tools\b`）：`TOOLS_REF_ERRORS: []`。
+- **0 非 ASCII 字节扫描**（覆盖 `src/{core,palette,rom,emulator,build}/`、`src/studio/{__init__,bridge_api,kof97_webview_app}.py` 与 8 个可执行 `src/tests/*.py`）：`NON_ASCII_ERRORS: []`。
+- **5 层 DAG 与循环依赖检查**（共 31 个 Python 模块，除 `rom_tool.py:main()` 中 `gui` CLI 延迟导入外无跨层上行引用）：`DAG_ERRORS: []`。
+- **兼容门面 38 项白名单校验**：`FACADE_EXPECTED: 38 MISSING: [] ALL_DIFF: []`。
+- **CLI 与 Tk GUI 导入检查**：
+  - `python -c "import src.studio.legacy_tk_gui"` → `LEGACY_TK_GUI_IMPORT_OK`
+  - `python src\rom\rom_tool.py gui --help` → exit 0
+  - `python src\rom\crom_tool.py --help` → exit 0
 
-```text
-=== Running rom_tool.py Self-Test ===
-  [PASS] bswap16 header vector test (100000f3 -> 0010f300, EN-OEG -> NEO-GE)
-  [PASS] bswap16 odd-length alignment guard test
-  [PASS] bswap16 bidirectional lossless round-trip test
-  [PASS] LSPC2-A2 16-bit color encoder/decoder lossless round-trip test
-=== Running crom_tool.py Self-Test ===
-  [PASS] 16x16 4bpp tile encoder/decoder lossless round-trip test
-  [PASS] Tile stream pair deinterleave/interleave lossless round-trip test
-  [PASS] Real MVS C-ROM hardware data (64 tiles) verified 100% bit-exact
-```
+### 2. 功能与回归测试集
+| 命令 | 实测结果 | 备注 |
+| :--- | :--- | :--- |
+| `python src\rom\rom_tool.py self-test` | **PASS** (exit 0) | `bswap16` / `LSPC2-A2` 4 项自检全过 |
+| `python src\rom\crom_tool.py self-test` | **PASS** (exit 0) | 16x16 瓦片 / C-ROM 交错 3 项自检全过 |
+| `python src\tests\test_highlight_luma.py` | **PASS** (exit 0) | `ALL HIGHLIGHT LUMA CHECKS PASSED` |
+| `python src\tests\test_vfx_palette_suite.py` | **PASS** (exit 0) | 6/6 unittest 用例全过（0x004956、Capstone M68k、64KB 容纳性、classic 无损还原） |
+| `python src\tests\test_full_roster_skins_suite.py` | **PASS** (exit 0) | 预先执行 `python src\rom\rom_tool.py unpack` 使 `build/unpacked/p2_be.bin` 为干净基线；全部 36 角色 x 20 主题 (720 组合) 与 `pack_rom` 全过（注：该套件同原版一样预期 `build/unpacked/p2_be.bin` 为解包态，实测后已按规则恢复真实配置与基线打包） |
+| `python src\tests\verify_anti_blowout_and_clarity.py` | **PASS** (exit 0) | Athena / Kyo / 36x20 全员清晰度全过 |
+| `python src\tests\test_upgrade_suite.py` | **PASS** (exit 0) | 21 主题、4 键立绘同步、`get_emulator_status()` 全过 |
+| `python src\tests\dump_official_palettes.py` | **PASS** (exit 0) | 成功生成 `src/tests/official_palettes.txt` |
+| `verify_all.py` / `verify_e2e_live_and_win.py` | **未运行实机窗体对抗** | 两者为启动真实 `WinKawaks.exe` 注入 DirectInput 的交互脚本；已完成 `tools` 移除与 `src.*` 路径迁移，静态门禁全过 |
 
-### 2. 40MB 全量 C-ROM 解交错输出
-执行 `python tools/rom_tool.py crom-deinterleave` 实测输出：
+### 3. `sprite_compose` 冒烟与 100% 字节级基线一致比对
+在恢复备份的 `mod_studio_config.json`（SHA-256 `f7c9aff79db2482abae841746b1d3499a38aef2cf011b8ff44b6cc38ca66fe25`）后，通过 `src.studio.kof97_webview_app.KOF97BridgeApi` 重新打包并抽样预览：
+- **`build/unpacked/p1_be.bin`**：SHA-256 `1eb26542d04594e4d5895e72c0e3ce281979598b4e3d6cb54c985ab63260bd6e` → **100% 字节级一致 (`BYTE_EXACT=True`)**
+- **`build/unpacked/p2_be.bin`**：SHA-256 `f92e414c24d7e1e1ce06530aa72cfe0e3232faebf756d0bfbe55a1c8acaceff1` → **100% 字节级一致 (`BYTE_EXACT=True`)**
+- **`output/roms/kof97pls.zip`**：zip 包内全部 3 个 ROM 成员（含 `232-p1p.bin` / `232-p2p.bin` / `232-s1.s1`）与实施前基线 zip **100% 字节级一致**
+- **典型角色 `get_idle_preview()` SHA-256（6/6 100% 一致）**：
+  - `kyo (0x00)`: `51912a17eae140905581fc22d6c3ea24f0b4c34f52d5cb8d2a674bb2c2be6d6a`, `labels=['白边', '皮肤 1', '皮肤 2']`
+  - `iori (0x1B)`: `d3d284e20f76b741538590e62c8b1e6305525abd5ee74666e0446860984e7fee`, `labels=['皮肤 1', '皮肤 2', '皮肤 3']`
+  - `leona (0x0A)`: `69d070217997e0496dd6821e7e781957c62e2bbe7a875770e56390d185a7c64c`, `labels=['白边', '皮肤 1', '皮肤 2']`
+  - `mai (0x10)`: `5ca1b9dd12ea26bc2d52a99e5b9a9834ac618043c239722127f2d921a5d3930d`, `labels=['皮肤 1', '皮肤 2', '皮肤 3']`
+  - `chizuru (0x0F)`: `59378f90090463e00f57d9689d39592e897000ac663f280c89d53f21186c7d01`, `labels=['皮肤 1', '皮肤 2', '皮肤 3']`
+  - `orochi (0x1E)`: `6f66d102f7813a5089588102682297dba65ea307b6656ac8f60b859343352af6`, `labels=['皮肤 1', '皮肤 2', '皮肤 3']`
+- **显式路径注入冒烟**：`KOF97BridgeApi(config_path=smoke_cfg.json)` 执行 `get_initial_state()` 与 `save_skin()` 通过。
 
-```text
-=== Deinterleaving All 40MB C-ROM Pairs from C:\Program Files (x86)\KOF97\roms\kof97.ZIP ===
-  [C1_C2] KOF97_C1.ROM + KOF97_C2.ROM -> c1_c2.spr
-       Tiles: 131,072 | Size: 16,777,216 B | CRC32: 0xc576e44b
-  [C3_C4] KOF97_C3.ROM + KOF97_C4.ROM -> c3_c4.spr
-       Tiles: 131,072 | Size: 16,777,216 B | CRC32: 0x8ccacfff
-  [C5_C6] KOF97_C5.ROM + KOF97_C6.ROM -> c5_c6.spr
-       Tiles: 65,536 | Size: 8,388,608 B | CRC32: 0x32dfa9bf
-[SUCCESS] All C-ROM pairs deinterleaved (327,680 tiles, 41,943,040 bytes total).
-```
-
-### 3. 40MB 全量 C-ROM 重构回写与 100% bit-exact 比对
-执行 `python tools/rom_tool.py crom-interleave` 重构输出：
-
-```text
-=== Re-interleaving C-ROM .spr Streams from C:\Users\mimovr\Desktop\TEmp\REA\Fighter97\build\crom_unpacked ===
-  [C1_C2] c1_c2.spr -> KOF97_C1.ROM (0x5f8bf0a1) + KOF97_C2.ROM (0xe4d45c81)
-  [C3_C4] c3_c4.spr -> KOF97_C3.ROM (0x581d6618) + KOF97_C4.ROM (0x49bb1e68)
-  [C5_C6] c5_c6.spr -> KOF97_C5.ROM (0x34fc4e51) + KOF97_C6.ROM (0x4ff4d47b)
-[SUCCESS] All C-ROM streams re-interleaved.
-```
-
-与原版 `kof97.ZIP` 逐一 CRC 比对核验结果：
-| C-ROM 成员文件 | 规格尺寸 (Bytes) | 原版 CRC32 | 重构生成的 CRC32 | 校验结论 |
-| :--- | :--- | :--- | :--- | :--- |
-| `KOF97_C1.ROM` | 8,388,608 | `0x5F8BF0A1` | `0x5F8BF0A1` | **100% 绝对一致** |
-| `KOF97_C2.ROM` | 8,388,608 | `0xE4D45C81` | `0xE4D45C81` | **100% 绝对一致** |
-| `KOF97_C3.ROM` | 8,388,608 | `0x581D6618` | `0x581D6618` | **100% 绝对一致** |
-| `KOF97_C4.ROM` | 8,388,608 | `0x49BB1E68` | `0x49BB1E68` | **100% 绝对一致** |
-| `KOF97_C5.ROM` | 4,194,304 | `0x34FC4E51` | `0x34FC4E51` | **100% 绝对一致** |
-| `KOF97_C6.ROM` | 4,194,304 | `0x4FF4D47B` | `0x4FF4D47B` | **100% 绝对一致** |
-
-### 4. 图像导出验证
-- `tools/rom_tool.py crom-export-tile --pair c1_c2 --tile 10 --output sandbox/capture/tile_10.png` -> 成功生成 16x16 PNG；
-- `tools/rom_tool.py crom-export-sheet --pair c5_c6 --start 0 --count 128 --output sandbox/capture/sheet_c5c6.png` -> 成功生成 256x128 瓦片图集 PNG。
+### 4. PyInstaller 重编与跨工作目录启动实测
+- 执行 `cmd /c src\build\BuildStudio.bat` → **exit 0**，输出 `dist/KOF97ModStudio.exe` 与根目录 `KOF97ModStudio.exe`（`26,616,214 bytes`）。
+- 跨目录实测全部拉起 `拳皇97 逆向魔改工作台 (KOF97 Mod Studio)` PyWebView 窗体并安全退出：
+  - `dist/KOF97ModStudio.exe` (`cwd=d:\TEmp\REA\Fighter97\dist`) → **PASS** (`PID=23300`, `alive=True`)
+  - `dist/KOF97ModStudio.exe` (`cwd=%TEMP%`) → **PASS** (`PID=20996`, `alive=True`)
+  - `KOF97ModStudio.exe` (`cwd=%TEMP%`) → **PASS** (`PID=20312`, `alive=True`)

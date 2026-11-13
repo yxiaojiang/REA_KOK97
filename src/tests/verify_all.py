@@ -16,11 +16,12 @@ import ctypes.wintypes as wt
 from pathlib import Path
 
 # Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from tools.kof97_webview_app import KOF97BridgeApi
-from tools.rom_tool import start_sandbox_kawaks
+from src.rom.rom_tool import start_sandbox_kawaks
+from src.studio.bridge_api import KOF97BridgeApi
 
 def run_verification():
     print("=== Starting Full E2E Verification ===")
@@ -89,7 +90,8 @@ def run_verification():
         pngs = sorted(glob.glob(str(capture_dir / "*.png")), key=os.path.getmtime)
         assert pngs, f"No screenshot generated for {tag}"
         latest = Path(pngs[-1])
-        artifacts_dir = Path(r"C:\Users\mimovr\.gemini\antigravity\brain\3f9cc201-9f7e-4ce0-b657-b6debcec509d")
+        artifacts_dir = PROJECT_ROOT / "sandbox" / "capture" / "verified"
+        artifacts_dir.mkdir(parents=True, exist_ok=True)
         dest = artifacts_dir / f"{tag}.png"
         shutil.copy2(latest, dest)
         print(f"[{tag}] Saved screenshot to: {dest}")

@@ -17,19 +17,16 @@ import sys
 import zipfile
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from kof97_webview_app import (
-    CHARACTER_ROSTER,
-    PRESET_THEMES,
-    THEME_RAMPS,
-    bswap16,
-    generate_harmonious_character_palette,
-    get_char_engine_info,
-    sync_character_portraits,
-    KOF97BridgeApi,
-)
+from src.core.presets import PRESET_THEMES, THEME_RAMPS
+from src.core.roster import CHARACTER_ROSTER, get_char_engine_info
+from src.palette.costume_painter import generate_harmonious_character_palette
+from src.palette.portrait_burst import sync_character_portraits
+from src.rom.rom_tool import bswap16
+from src.studio.bridge_api import KOF97BridgeApi
 
 
 def test_themes_count_and_integrity():

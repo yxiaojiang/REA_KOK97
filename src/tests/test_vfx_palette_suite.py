@@ -16,12 +16,13 @@ import unittest
 import zipfile
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-import rom_tool
-import kof97_webview_app as app
+import src.core.paths as _paths
+from src.rom import rom_tool
+from src.studio import kof97_webview_app as app
 
 
 class TestVfxPaletteSuite(unittest.TestCase):
@@ -145,7 +146,9 @@ class TestVfxPaletteSuite(unittest.TestCase):
             cfg_file = tmp_path / "mod_studio_config.json"
 
             orig_cfg_fn = app.get_config_path
+            orig_paths_cfg_fn = _paths.get_config_path
             app.get_config_path = lambda: cfg_file
+            _paths.get_config_path = lambda: cfg_file
             try:
                 rom_tool.unpack_rom_set(rom_tool.DEFAULT_KOF97_ZIP, workdir)
                 api = app.KOF97BridgeApi()
@@ -228,6 +231,7 @@ class TestVfxPaletteSuite(unittest.TestCase):
                         )
             finally:
                 app.get_config_path = orig_cfg_fn
+                _paths.get_config_path = orig_paths_cfg_fn
 
     def test_hit_effect_p1_hooks_burn_and_restore(self) -> None:
         """
@@ -247,7 +251,9 @@ class TestVfxPaletteSuite(unittest.TestCase):
             cfg_file = tmp_path / "mod_studio_config.json"
 
             orig_cfg_fn = app.get_config_path
+            orig_paths_cfg_fn = _paths.get_config_path
             app.get_config_path = lambda: cfg_file
+            _paths.get_config_path = lambda: cfg_file
             try:
                 rom_tool.unpack_rom_set(rom_tool.DEFAULT_KOF97_ZIP, workdir)
                 api = app.KOF97BridgeApi()
@@ -335,6 +341,7 @@ class TestVfxPaletteSuite(unittest.TestCase):
                 )
             finally:
                 app.get_config_path = orig_cfg_fn
+                _paths.get_config_path = orig_paths_cfg_fn
 
     def test_hit_effect_worst_case_36_unique_themes_fits_64kb(self) -> None:
         """Even 36 simultaneously distinct custom hues must fit cleanly inside 0x0F0000..0x0FFFFF."""

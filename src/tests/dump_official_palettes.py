@@ -6,18 +6,13 @@ import struct
 import zipfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-from tools.rom_tool import DEFAULT_KOF97_ZIP, bswap16, decode_lspc2
-from tools.kof97_webview_app import (
-    CHARACTER_ROSTER,
-    CHARACTER_PALETTE_SCHEMA,
-    get_char_engine_info,
-    lspc2_to_hex,
-    _rgb5_to_hsv,
-    _unit_luma,
-)
+from src.core.roster import CHARACTER_PALETTE_SCHEMA, CHARACTER_ROSTER, get_char_engine_info
+from src.palette.color_utils import _rgb5_to_hsv, _unit_luma, decode_lspc2, lspc2_to_hex
+from src.rom.rom_tool import DEFAULT_KOF97_ZIP, bswap16
 
 def group_of(schema, idx):
     for name, slots in schema.items():
@@ -102,7 +97,7 @@ def main():
             )
         emit("")
 
-    out_path = ROOT / "tools" / "_official_palettes.txt"
+    out_path = ROOT / "src" / "tests" / "official_palettes.txt"
     out_path.write_text("\n".join(out_lines) + "\n", encoding="utf-8")
     print("Wrote %s" % out_path)
 

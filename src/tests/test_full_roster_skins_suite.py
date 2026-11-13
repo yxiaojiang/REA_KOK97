@@ -15,19 +15,16 @@ import sys
 import zipfile
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from kof97_webview_app import (
-    CHARACTER_ROSTER,
-    PRESET_THEMES,
-    CHARACTER_PALETTE_SCHEMA,
-    KOF97BridgeApi,
-    generate_harmonious_character_palette,
-    decode_lspc2,
-    lspc2_to_hex,
-    bswap16,
-)
+from src.core.presets import PRESET_THEMES
+from src.core.roster import CHARACTER_PALETTE_SCHEMA, CHARACTER_ROSTER
+from src.palette.color_utils import decode_lspc2, lspc2_to_hex
+from src.palette.costume_painter import generate_harmonious_character_palette
+from src.rom.rom_tool import bswap16
+from src.studio.bridge_api import KOF97BridgeApi
 
 def _luma5(word: int) -> float:
     r5, g5, b5, _ = decode_lspc2(word)

@@ -2,24 +2,28 @@
 
 ## 活跃任务
 
-### 1. `TASK-STUDIO-019`：人物技能特效调色板（VFX Palette）逆向映射与 Mod Studio 改色集成（已完成，2026-11-13）
+### 1. `TASK-STUDIO-020` / `DIR-003`：`tools/` 全量代码向 `src/` 功能目录迁移与 `kof97_webview_app.py` 拆分解耦（**已完成，APPROVED**）
+- **状态**：**已完成（`PlanDocs` `ADOPTED` / `CRDocs` Round 3 Implementation Review `APPROVED`，2026-11-13）**
+- **决策与设计文档**：
+  - [`PlanDocs/DECISIONS.md`](file:///d:/TEmp/REA/Fighter97/PlanDocs/DECISIONS.md) (`DIR-003`) 与讨论按日期归档 [`PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md`](file:///d:/TEmp/REA/Fighter97/PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md)
+  - 完整实施蓝图、实测记录与终验结论：[`Plan.md`](file:///d:/TEmp/REA/Fighter97/Plan.md)（阶段八）、[`CRDocs/IMPLEMENTATION.md`](file:///d:/TEmp/REA/Fighter97/CRDocs/IMPLEMENTATION.md) 与 [`CRDocs/REVIEW.md`](file:///d:/TEmp/REA/Fighter97/CRDocs/REVIEW.md)
+- **Hydrogen 执行摘要与 Argon Round 2 实施备忘（必读）**：
+  1. **严格 5 层单向无环 DAG（迁入 `src/` 7 个功能目录：`core`, `palette`, `rom`, `emulator`, `studio`, `build`, `tests`）**：
+     - `encode_lspc2`/`decode_lspc2` 迁入 `src/palette/color_utils.py`（`rom_tool.py` 重导出）；
+     - `config_store.py` 通过 `skin_entry_factory` 回调解耦 `make_skin_entry`（`src/core/` 零外依赖）；
+     - 共用受击 VFX 表（`VFX_RAM_*_OWNER`、`VFX_HIT_EFFECT_DARK_MASKS`、`VFX_SMOKE_SPLIT_SLOTS`、`VFX_COMMON_EFFECT_GROUPS`）与 `_recolor_hit_effect_slot` 移入 `src/palette/vfx_shader.py`（消除 `emulator <-> rom` 耦合）；
+     - `p1_patcher` 与 `kawaks_live` 均通过可选 `log_fn` 回调记录日志，且 `kawaks_live` 接收 `bridge_api` 传入的 `(p1_data, p2_clean)`；
+     - `sprite_compose.py` 改从 `src.palette.color_utils` 导入 `lspc2_to_hex`。
+  2. **Argon Round 2 3 项非阻塞实施细节（编码时同步落实）**：
+     - [`tools/sprite_compose.py:L148`](file:///d:/TEmp/REA/Fighter97/tools/sprite_compose.py#L148) 的 `labels = ["色槽 %d" ...]` 与 `L41–L49` `SLOT_GROUP_CN`、以及 `L2803` `"自定义皮肤"` 须全部转为 `\uXXXX` 转义，确保活跃 `src/` 代码及可执行测试 **0 非 ASCII 字节**（仅 `legacy_tk_gui.py` 与只读 `legacy_upgrades/*` 列为历史豁免）；
+     - [`tools/crom_tool.py`](file:///d:/TEmp/REA/Fighter97/tools/crom_tool.py#L18-L25) 顶部添加 `parents[2]` `sys.path` 引导时须将原仅在 `L514` 的 `import sys` 提到顶部；`rom_tool.py` 统一收口为 `from src.rom import crom_tool`；
+     - `pack_rom` 与 `p1_patcher` 精确边界：仅 `L3287–L3364`（纯 68k 战斗/破防/眩晕/无限气/伤害/隐藏解锁）抽入 `src/rom/p1_patcher.py` 的 `apply_combat_and_unlock_patches_to_p1(..., log_fn=None)`；`L3366–L3379` 读取 `KOF97_P2.ROM`、`bswap16` 并调用 `apply_hit_effect_vfx_to_p1` 留在 `bridge_api.py` 的 `pack_rom` 中。
+  3. **路径 / Frozen / Monkeypatch / 硬编码**：全部 13 个可执行两级脚本顶部加 `parents[2]` `sys.path`；`paths.py` frozen 探测 `"src"`/`"sandbox"`；`rom_tool`/`crom_tool` 复用 `src.core.paths.PROJECT_ROOT`；`bridge_api`/`config_store` 经 `_paths.get_config_path()` 与 `_resolve_config_path()` 解析配置；`kof97_webview_app.py` 保留 38 项兼容门面重导出白名单；替换 `bridge_api:L3844`、`legacy_tk_gui:L28,L32,L1573`、`rom_tool:L27,L1642`、`dump_official_palettes:L9,L12-13,L105`、`verify_all:L92`、`build_exe.py` 及 4 个 `.bat`。
+  4. **不可跳过的验收顺序**：快照基线 SHA-256 与预览 → 按 DAG 迁移拆分 → **先移除/隔离 `tools/`** → 零 `tools` 引用 / 纯 ASCII / 无导入环 / `legacy_tk_gui` & `rom_tool.py gui --help` + 全量回归测试 + `sprite_compose`/`get_idle_preview()` 烟雾测试 + `p1_be.bin`/`p2_be.bin` 100% 字节级一致比对 + 恢复 `mod_studio_config.json` 基线 → `BuildStudio.bat` 重编并在 `dist/` 与 `%TEMP%` 等非根目录实测启动 `KOF97ModStudio.exe` → 更新 `CRDocs/IMPLEMENTATION.md` 提交 Argon Round 3 Implementation Review。
+- **下一步**：`TASK-STUDIO-020` 已完成终验并签批结项（`CRDocs/STATUS.md` 为 `APPROVED`）。后续如开启新特性或优化任务，按 `.claude/Rules.md` 与 `PlanDocs/` 流程发起新议题。
+
+### 2. `TASK-STUDIO-019`：人物技能特效调色板（VFX Palette）逆向映射与 Mod Studio 改色集成（已完成，2026-11-13）
 - **状态**：**已完成并全量验证**（`rom_tool.py self-test`、`test_vfx_palette_suite.py` 6/6、`test_full_roster_skins_suite.py` 全部通过；`KOF97ModStudio.exe` 已重编译）。
-- **追加完成的 68000 受击联动系统（`P1 0x0F0000` Code Cave）**：
-  - 在不触碰 `P2 0x0000..0x00FF` 公共界面调色板的前提下，挂钩 `0x0251C4`、`0x0041AE/E6/0x004254`、`0x012E64`、`0x012F18..0x013184` 与 `0x03376E` 共 16 处指令；攻击命中时按 `$b6(a4)` 动态匹配攻击者特效主题并经 `$5924(a5)` 更新 `0xF8/0xF9/0xFA` 及 `0x51..0x6A` 附着火苗/感电/冲击火花（保护 `0x0058/0x005F` 中性灰烟雾），`classic` 全关时字节级无损还原。
-- **目标**：在不触碰已冻结的服装 OKLCH 自然染色器（`_paint_costume_natural`）与界面公共色板的前提下，为 `KOF97ModStudio` 新增人物专属技能特效（火焰、雷电、气功波、刀光、能量柱等）改色功能，支持「原版默认」「跟随皮肤主题色」与「独立特效预设（苍炎蓝、冥炎紫、圣耀金、翡翠毒火、赤焰红、极光青等）」。
-- **已核实的 68000 硬件与 ROM 事实基线（本轮已静态核验）**：
-  1. **主技能特效调色板表（`P1 0x004956`，由 `0x004740` 加载）**：
-     - 68000 例程 `0x004740..0x004768` 计算 `pal_idx = engine_cid + (0x0B if alt_flag and engine_cid != 0 else 0)`，查表 **`P1 0x004956 + pal_idx * 2`**（共 35 项，紧邻 `0x00483E` 角色表之后、`0x00499C` 立绘表之前；须直接读取表项，因 `0x15..0x17` 与 `0x18..0x1A` 顺序交错，不可硬套线性公式），取出 `vfx_base_pid`（`0x09C0..0x0BE0`）。
-     - 随后从 `P2 0x2CFFF0 + vfx_base_pid * 32`（物理区间 `0x2E37F0..0x2E7DF0`）连续拷贝 **16 个调色板（`vfx_base_pid + 0..15`）** 至运行态 Palette RAM 槽位 **`$30(A4) + 0x20`**（1P 为 `0x30..0x3F`，2P 为 `0x40..0x4F`）。
-     - 已核实典型角色专属特效槽：草薙京（`pal_idx=0x00`）`0x09C0..0x09C6` 赤炎、二阶堂红丸（`0x01`）`0x09D0..0x09D3` 雷光、特瑞（`0x03`）`0x09F0..0x09F3` 能量喷泉/气功、雅典娜（`0x0C`）`0x0A80..0x0A87` 精神力球、不知火舞（`0x10`）`0x0AC0..0x0AC5` 龙炎舞、八神庵（`0x1B`）`0x0B70..0x0B73` 八神紫炎、暴走八神（`0x1C`）`0x0B80..0x0B83` 紫炎、大蛇（`0x1E`）`0x0BA0..0x0BA5` 阳光普照/灵气柱、真克里斯（`0x22`）`0x0BE1..0x0BE4` 暗黑大蛇薙紫炎。
-     - 注意：`vfx_base_pid + 0..15` 中填充固定纯色 `(11, 10, 6)`、`(0, 11, 25)` 或全 `0x0000` 的占位空槽严禁修改。
-  2. **角色子槽辅助特效与受创闪烁簇（`P1 0x00483E`，由 `0x004796` 加载）**：
-     - 4 按键各自的 `base_pid + btn_idx * 16`（载入 Palette RAM `0x10..0x1F` / `0x20..0x2F`）中，除已用的 `+0`（本体）、`+3`（MAX 爆气闪烁）、`+13..+15`（立绘/HUD）外，部分角色的 `+1, +2, +4..+12` 存放蓄力/残影/元素受创闪烁色（如 `+6` 感电紫、`+9` 灼烧受创，以及草薙京/红丸/大蛇的 `+1/+2/+4/+5/+7/+8/+10/+11`），而八神/特瑞等在 `+1/+2/+4/+5/+7/+8/+10..+12` 为全零空槽；需按非空且非人物肤色/制服的发光梯度规则筛选后再联动染色。
-- **实施分步顺序**：
-  1. **第 1 步（特效槽位扫描与白名单建表）**：编写扫描与校验逻辑，基于 `P1 0x004956`（`vfx_base_pid + 0..15`）及 `P1 0x00483E`（`base_pid + btn*16 + sub`）自动识别有效渐变特效槽（剔除全零、`(11,10,6)` 与 `(0,11,25)` 占位槽及含人物肤色/衣物梯度的子槽），建立 36 角色 `CHARACTER_VFX_MAP`。
-  2. **第 2 步（发光渐变 `recolor_vfx_palette` 算法设计）**：独立于布料 `_paint_costume_natural`（布料限制 `C <= 0.13`），针对火焰/雷电/气功的「白炽高光核 + 高饱和外焰 + 暗部半透明光晕」结构设计发光着色器：保留高光核（`L >= 0.90`）接近纯白/浅亮黄，放开中段彩度上限（允许高饱和霓虹色 `C` 达 `0.18..0.25`），支持单色相与双色相（内焰→外焰）平滑过渡。
-  3. **第 3 步（`pack_rom`、实时注入与 Studio UI 集成）**：在 `KOF97BridgeApi` 与 `mod_studio_config.json` 中增加特效色配置项（默认 `classic` 原版 / `sync_skin` 跟随皮肤 / 独立特效色预设），在前端角色定制页增加特效色选择控件与光效预览，在 `pack_rom()` 与 `apply_skin_live()` 中同步写入 `P2` 的 `vfx_base_pid` 有效槽位（及运行态 Palette RAM `0x30..0x4F` 对应槽位）。
-  4. **第 4 步（回归测试与重新打包交付）**：编写自动化测试验证 36 角色特效改色与 `classic` 100% 字节无损还原，实机验证八神、草薙京、红丸、特瑞、大蛇等招式特效，重编译根目录 `KOF97ModStudio.exe`。
 
 ---
 

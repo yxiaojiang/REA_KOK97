@@ -51,3 +51,26 @@
 5. **全员 36 名角色统一 OKLCH 自然染色标准（最终定稿）**：
    - 全员服装与毛发统一采用 `_paint_costume_natural` / `_natural_cloth_word`（见 `.claude/ProjectMemory.md` 第 13 节）：锁死原画每格槽位 OKLCH 明度 `L`，按感知明度断层（`> 0.24`）自动拆分上下装簇，彩度按钟形曲线封顶到 SNK 官方 B/C/D 换色实测范围（`light: 0.105`、`full: 0.11`、`dark: 0.13`，原画高饱和部位放宽至 `min(src_c, 0.20)`），`accent` 组遇浅色/白色主题执行明度补偿（`lift_neutral`）。
    - `skin`（肤色）、`white_trim`（锁定白边）与 `contour`（纯黑勾边 `0x0000`）严禁参与换色；已取代旧版高彩度直接覆盖方案，不得回退生成器。
+
+---
+
+## DIR-003（2026-11-13）`tools/` 全量代码向 `src/` 功能目录迁移与 `kof97_webview_app.py` 模块化拆分解耦方案
+
+本决定经 `PlanDocs` 与 `CRDocs` 两轮双 AI（Antigravity 提案 / Argon 审核）收敛并通过（Round 2：`CONVERGED` / `APPROVED`），完整多轮讨论过程已按日期归档至 [`PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md`](file:///d:/TEmp/REA/Fighter97/PlanDocs/2026-11-13_DIR-003_TASK-STUDIO-020.md)，交由 **Hydrogen** 按 [`Plan.md`](file:///d:/TEmp/REA/Fighter97/Plan.md) 阶段八执行实施并在完成后提交 `CRDocs` Round 3 Implementation Review。
+
+**决定**：
+1. **7 个功能子目录全量迁入 `src/`**：将 `tools/`（共 28 个文件：23 个有效文件 + 5 个 `.bak*` 历史备份，不含 `__pycache__/`）的全部 23 个有效文件迁入 `src/` 下 7 个功能子目录：`src/core/`、`src/palette/`、`src/rom/`、`src/emulator/`、`src/studio/`（含 `web/index.html` 与历史归档 `legacy_tk_gui.py`）、`src/build/` 与 `src/tests/`（含只读不可执行历史归档 `legacy_upgrades/`）；5 个 `.bak*` 与 `__pycache__/` 不迁入 `src/`，交由 git 历史留档。
+2. **严格无环的 5 层单向依赖 DAG**：
+   - `Layer 0 [src/core/]`（`paths`, `roster`, `presets`, `config_store`）对外部 `src.*` 包**零依赖**（`load_studio_config` 通过可选 `skin_entry_factory` 回调解耦 `make_skin_entry`）。
+   - `Layer 1 [src/palette/]`（`color_utils`, `costume_painter`, `portrait_burst`, `vfx_shader`）仅依赖 Layer 0/1；将 `encode_lspc2`/`decode_lspc2` 迁自 `rom_tool.py`（`rom_tool.py` 保留重导出），并将共用受击 VFX 表（`VFX_RAM_*_OWNER`、`VFX_HIT_EFFECT_DARK_MASKS`、`VFX_SMOKE_SPLIT_SLOTS`、`VFX_COMMON_EFFECT_GROUPS`）与 `_recolor_hit_effect_slot` 归入 `vfx_shader.py`。
+   - `Layer 2 [src/rom/]`（`crom_tool`, `rom_tool`, `sprite_compose`, `p1_patcher`）仅依赖 Layer 0/1/2；`sprite_compose.py` 改从 `src.palette.color_utils` 导入 `lspc2_to_hex`；`p1_patcher.py` 接收可选 `log_fn` 回调；`apply_combat_and_unlock_patches_to_p1(..., log_fn=None)` 覆盖 `L3287–L3364`，`L3366–L3379` 的 `KOF97_P2.ROM` 读取与 `apply_hit_effect_vfx_to_p1` 编排留在 `bridge_api.py` 的 `pack_rom`。
+   - `Layer 3 [src/emulator/]`（`kawaks_live`）仅依赖 Layer 0/1，接收 `bridge_api` 传入的 `(p1_data, p2_clean)`、`lspc_words_fn` 与可选 `log_fn` 回调，禁止反向导入 `src.rom` 或 `src.studio`。
+   - `Layer 4 [src/studio/]`（`bridge_api`, `kof97_webview_app`, `legacy_tk_gui`, `web/`）依赖 Layer 0..3；`bridge_api` 保留 `KOF97BridgeApi` 全部 25 个公开 RPC 方法与 `_` 私有字段，经由 `import src.core.paths as _paths` 与 `_resolve_config_path()` 解析配置路径并兼容 `app.get_config_path` monkeypatch；`kof97_webview_app.py` 保留 38 项兼容门面重导出白名单。
+   - `Layer 5 [src/build/, src/tests/]`：构建、打包与全量测试/验证脚本。
+3. **两级目录 `sys.path` 引导、Frozen 路径修复与全英文/纯 ASCII 口径**：
+   - 全部 13 个可直接执行的 `src/` 两级脚本顶部（任何 `from src...` 导入前）插入 `Path(__file__).resolve().parents[2]` 到 `sys.path`（其中 `crom_tool.py` 须将 `import sys` 提到顶部导入区，`rom_tool.py` 统一收口为 `from src.rom import crom_tool`）。
+   - `paths.py` frozen 模式探测 `"src"` / `"sandbox"`，`resolve_web_index_html()` 探测 `src/studio/web/index.html`；`rom_tool`/`crom_tool` 统一从 `src.core.paths` 导入 `PROJECT_ROOT as WORKSPACE_ROOT`。
+   - `L2803` `"自定义皮肤"`、`sprite_compose.py:L41–L49`（`SLOT_GROUP_CN`）及 `sprite_compose.py:L148`（`"色槽 %d"`）全部转为 `\uXXXX` 转义，使活跃 `src/` 代码及可执行测试 0 非 ASCII 字节（`legacy_tk_gui.py` 与只读 `legacy_upgrades/*` 列为历史豁免）。
+4. **冻结红线与先清理再终验顺序**：
+   - 严禁改动 `DIR-002` 服装 OKLCH 染色参数、`TASK-STUDIO-019` VFX 与 `0x0F0000` Code Cave、`P2 0x0000..0x00FF` 公共色板及只读宿主目录 `C:\Program Files (x86)\KOF97\roms`。
+   - 实施必须遵循：**先快照基线 SHA-256 与预览 → 自底向上分层迁移 → 先移除/隔离 `tools/` 目录 → 静态门禁（0 `tools` 引用 / 0 非 ASCII / 0 导入环 / `legacy_tk_gui` 与 `rom_tool.py gui --help`）+ 全量回归测试 + `sprite_compose`/`get_idle_preview()` 烟雾测试 + `p1_be.bin`/`p2_be.bin` 100% 字节级一致比对 + 恢复 `mod_studio_config.json` 基线 → `BuildStudio.bat` 重编并从非根目录启动 `KOF97ModStudio.exe` 实测**。

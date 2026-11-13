@@ -27,9 +27,9 @@ import zipfile
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, Iterator
 
-from tools.crom_tool import decode_tile_16x16
-from tools.kof97_gui import lspc2_to_hex
-from tools.rom_tool import bswap16, decode_lspc2
+from src.palette.color_utils import decode_lspc2, lspc2_to_hex
+from src.rom.crom_tool import decode_tile_16x16
+from src.rom.rom_tool import bswap16
 
 DEV = 0x100000
 P1_PAL_BASE = 0x483E
@@ -39,13 +39,13 @@ C_CALL_TABLE = 0x150000
 ACT_TABLE = 0x200002
 
 SLOT_GROUP_CN = {
-    "skin": "皮肤",
-    "white_trim": "白边",
-    "hair": "头发",
-    "primary": "衣服",
-    "dark_anchor": "暗部",
-    "accent": "辅色",
-    "contour": "勾边",
+    "skin": "\u76ae\u80a4",
+    "white_trim": "\u767d\u8fb9",
+    "hair": "\u5934\u53d1",
+    "primary": "\u8863\u670d",
+    "dark_anchor": "\u6697\u90e8",
+    "accent": "\u8f85\u8272",
+    "contour": "\u52fe\u8fb9",
 }
 
 Sprite = Tuple[int, int, int, bool, bool]  # x, y, tile, hflip, vflip
@@ -145,7 +145,7 @@ def official_header_word(p1: bytes, p2: bytes, pal_idx: int, btn_idx: int = 0) -
 
 def slot_labels(schema: Dict[str, List[int]]) -> List[str]:
     """Chinese body-part labels for the 15 gameplay slots, from the character schema."""
-    labels = ["色槽 %d" % (i + 1) for i in range(15)]
+    labels = ["\u8272\u69fd %d" % (i + 1) for i in range(15)]
     for group, idxs in schema.items():
         base = SLOT_GROUP_CN.get(group, group)
         if len(idxs) == 1:

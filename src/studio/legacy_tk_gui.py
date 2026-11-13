@@ -25,11 +25,11 @@ from tkinter import colorchooser, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 # Ensure project root is in sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from tools.rom_tool import (
+from src.rom.rom_tool import (
     DEFAULT_KOF97_ZIP,
     DEFAULT_OUTPUT_ZIP,
     DEFAULT_SANDBOX_DIR,
@@ -1570,7 +1570,7 @@ class KOF97ModStudioGUI(tk.Tk):
         def _task() -> None:
             try:
                 self.log("正在执行全局工具链自检 (bswap16 / LSPC2 / 瓦片测试)...", "INFO")
-                cmd = [sys.executable, str(PROJECT_ROOT / "tools" / "rom_tool.py"), "self-test"]
+                cmd = [sys.executable, str(PROJECT_ROOT / "src" / "rom" / "rom_tool.py"), "self-test"]
                 res = subprocess.run(cmd, capture_output=True, text=True, cwd=str(PROJECT_ROOT))
                 if res.returncode == 0:
                     self.log(res.stdout.strip(), "INFO")

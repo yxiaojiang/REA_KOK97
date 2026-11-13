@@ -7,12 +7,12 @@ venv/
 env/
 
 # PyInstaller build artifacts
-build_pyinstaller/
-dist/
+/build_pyinstaller/
+/dist/
 
 # Unpacked ROM binaries & packaged ROM archives (copyrighted / generated artifacts)
-build/
-output/
+/build/
+/output/
 *.zip
 *.7z
 *.spr

@@ -9,17 +9,14 @@ Strict adherence to Rules.md (100% English variable names, comments, docstrings)
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(PROJECT_ROOT / "tools"))
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-from kof97_webview_app import (
-    CHARACTER_ROSTER,
-    PRESET_THEMES,
-    THEME_RAMPS,
-    generate_harmonious_character_palette,
-    decode_lspc2,
-    lspc2_to_hex,
-)
+from src.core.presets import PRESET_THEMES, THEME_RAMPS
+from src.core.roster import CHARACTER_ROSTER
+from src.palette.color_utils import decode_lspc2, lspc2_to_hex
+from src.palette.costume_painter import generate_harmonious_character_palette
 
 def test_athena_clarity():
     print("[TEST 1] Verifying Athena Asamiya (0x0C) crisp sailor uniform & skirt...")

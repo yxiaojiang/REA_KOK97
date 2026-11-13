@@ -3,23 +3,24 @@
 """
 Build script to package KOF97 Mod Studio into a standalone Windows executable.
 Uses PyInstaller with pywebview and edgechromium dependencies.
-
-All comments, identifiers, and variables strictly follow 100% English specification (Rules.md).
 """
 
-import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_ROOT = Path(__file__).resolve().parents[2]
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
+from src.core.paths import PROJECT_ROOT
 
 
 def build_executable() -> bool:
     """Run PyInstaller to create standalone KOF97ModStudio.exe."""
-    entry_script = PROJECT_ROOT / "tools" / "kof97_webview_app.py"
-    html_asset = PROJECT_ROOT / "tools" / "web" / "index.html"
+    entry_script = PROJECT_ROOT / "src" / "studio" / "kof97_webview_app.py"
+    html_asset = PROJECT_ROOT / "src" / "studio" / "web" / "index.html"
 
     if not entry_script.exists():
         print(f"[ERROR] Entry script not found: {entry_script}")
@@ -40,7 +41,8 @@ def build_executable() -> bool:
         "--onefile",
         "--noconsole",
         "--clean",
-        f"--add-data={html_asset};tools/web",
+        f"--paths={PROJECT_ROOT}",
+        f"--add-data={html_asset};src/studio/web",
         "--hidden-import=webview",
         "--hidden-import=webview.platforms.winforms",
         "--hidden-import=webview.platforms.edgechromium",
@@ -51,9 +53,21 @@ def build_executable() -> bool:
         "--hidden-import=PIL",
         "--hidden-import=PIL.Image",
         "--hidden-import=PIL.PngImagePlugin",
-        "--hidden-import=tools.sprite_compose",
-        "--hidden-import=tools.crom_tool",
-        "--hidden-import=tools.kof97_gui",
+        "--hidden-import=src.core.paths",
+        "--hidden-import=src.core.roster",
+        "--hidden-import=src.core.presets",
+        "--hidden-import=src.core.config_store",
+        "--hidden-import=src.palette.color_utils",
+        "--hidden-import=src.palette.costume_painter",
+        "--hidden-import=src.palette.portrait_burst",
+        "--hidden-import=src.palette.vfx_shader",
+        "--hidden-import=src.rom.rom_tool",
+        "--hidden-import=src.rom.crom_tool",
+        "--hidden-import=src.rom.sprite_compose",
+        "--hidden-import=src.rom.p1_patcher",
+        "--hidden-import=src.emulator.kawaks_live",
+        "--hidden-import=src.studio.bridge_api",
+        "--hidden-import=src.studio.legacy_tk_gui",
         f"--distpath={dist_dir}",
         f"--workpath={build_dir}",
         f"--specpath={build_dir}",
@@ -74,7 +88,6 @@ def build_executable() -> bool:
 
     print(f"[SUCCESS] Standalone executable created: {built_exe} ({built_exe.stat().st_size:,} bytes)")
 
-    # Also copy a shortcut copy to project root for instant user convenience
     root_exe = PROJECT_ROOT / "KOF97ModStudio.exe"
     try:
         shutil.copy2(built_exe, root_exe)

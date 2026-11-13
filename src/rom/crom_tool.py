@@ -18,11 +18,17 @@ Neo-Geo Sprite Tile Layout (16x16, 4bpp, 128 bytes per tile):
 import argparse
 import binascii
 import hashlib
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 import zipfile
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
+_ROOT_STR = str(Path(__file__).resolve().parents[2])
+if _ROOT_STR not in sys.path:
+    sys.path.insert(0, _ROOT_STR)
+
+from src.core.paths import PROJECT_ROOT as WORKSPACE_ROOT
+
 DEFAULT_SOURCE_ROM = Path(r"C:\Program Files (x86)\KOF97\roms\kof97.ZIP")
 DEFAULT_CROM_DIR = WORKSPACE_ROOT / "build" / "crom_unpacked"
 
@@ -511,5 +517,4 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 
 if __name__ == "__main__":
-    import sys
     sys.exit(main())

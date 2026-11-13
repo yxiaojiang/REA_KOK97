@@ -204,7 +204,7 @@
 - 图定义 6 字节：有符号 X、Y，然后 `af`。`af & 0x3FF` 为 C 调用号；`0x4000` 竖翻，`0x8000` 横翻，`0x2000` 表示后面还有一组 6 字节要叠画（如陈国汉）。
 - C-ROM 16×16 的四个 8×8 顺序是 TR、BR、TL、BL（`crom_tool.BLOCK_OFFSETS`）。每一行 8 个像素里，**bit 0（LSB）是最左边，bit 7（MSB）是最右边**。`decode_tile_16x16` 与 `encode_tile_16x16` 必须一致。
 - 列距在 `zoom_x=15` 时是 16 像素。游戏里 sticky 列距等于前一列的 `(zoom_x+1)`，不是“永远 16”；但站立角色默认 `RoleShrinkRate=0xFFFF`、水平系数 `0xFF` 时仍是满尺寸 16 像素。不要靠乱缩列距去补缝。
-- 实现文件：`tools/sprite_compose.py`。Studio 中间预览走 `render_idle_png`。
+- 实现文件：`src/rom/sprite_compose.py`。Studio 中间预览走 `render_idle_png`。
 
 ### 踩过的坑（不要再走）
 
@@ -233,7 +233,7 @@
 2. **明暗与上下装对比丢失**：若用固定色阶区间直接覆盖原槽位明度，会把白上衣压暗、黑裤子提亮，导致整个人物上下装融成同一块颜色，丧失原画的布料立体感与深浅层次。
 3. **无彩色衣物无法靠纯色相旋转上色**：纯白（神乐上衣、金家藩道服）、纯黑/深灰（龙二西装、八神外套）原槽位饱和度接近 0，仅旋转色相不会变色。
 
-### 13.2 核心算法（`tools/kof97_webview_app.py` 中的 `_paint_costume_natural` 与 `_natural_cloth_word`）
+### 13.2 核心算法（`src/palette/costume_painter.py` 中的 `_paint_costume_natural` 与 `_natural_cloth_word`）
 全员 36 名角色（`0x00..0x23`，含八神庵、暴走八神、大门五郎、陈国汉、神乐千鹤、山崎龙二等）统一走 `_paint_costume_natural`：
 
 1. **部位分组与色源映射（`_NATURAL_GROUPS`）**：
@@ -264,12 +264,27 @@
 
 ### 14.2 命中敌人后受击变色/附着火焰/感电/火花动态同步（`P1 0x0F0000`）
 - **为什么不能静态改动 P2 `0x0000..0x00FF`**：`P2` 公共区 `0x0050..0x006F` 为对战双方共用效果色板（`0x004358(0)` 开局加载一次），静态修改既违反「界面公共色板保持官方原样」约束，也无法支持 1P/2P 不同特效配色（或一方改色、一方 `classic`）。
-- **68000 动态挂钩方案（`tools/kof97_webview_app.py`）**：
+- **68000 动态挂钩方案（`src/rom/p1_patcher.py` & `src/palette/vfx_shader.py`）**：
   - 使用 `P1` 连续 `0xFF` 空闲区 **`0x0F0000..0x0FFFFF`（64KB）** 存放 68000 机器码与去重主题表（每主题条目 `0x620` 字节：17 个公共效果记录 + 16 帧 `F8` + 16 帧 `F9`，另附 `FA` 表；即使全员 36 槽全部独立自定义亦不超过 ~58KB）。`P2 0x0000..0x00FF` 与 `P2 0x17B0..0x17DF` 保持 100% 官方原样。
   - 挂钩全部 16 个 6 字节点位（`VFX_HIT_HOOK_ORIGINALS`）：回合初始化 `0x0251C4`（重置工作内存缓存 `A5+$6E00..$6E08 = 0xFFFE`）；任务 `0x004186 / 0x004224` 指针 `0x0041AE`（`F8`）、`0x0041E6`（`F9`）、`0x004254`（`FA`）；受击分发 `0x012E64`（共通打击/斩击/能量火花 `0x51, 0x55, 0x54, 0x64, 0x6A`）；赤炎燃烧 `0x012F18 / 0x012F8C / 0x013108 / 0x013174`（`0xF8` + `0x57, 0x58, 0x59, 0x61`）；紫炎燃烧 `0x012F9E / 0x01314E / 0x01316C`（`0xF9` + `0x5B, 0x5F, 0x67, 0x68`）；感电触电 `0x012F42 / 0x013184 / 0x03376E`（`$e3 |= 2` + `0x52, 0x62, 0x53, 0x54`）；大蛇闪光 `0x01317C`（`0xFA`）。
   - 命中时通过受击者 `$b6(a4)` 找到攻击者对象（`$70` + `$1d6` 映射至 `0..35` 号运行时槽位，`'94 草薙京` 为 35），主题切换时通过硬件调色板队列 `$5924(a5)`（保护上限 `$5B30(a5)`）即时写入对应 Palette RAM 槽位；切回 `classic` 方时自动还原原版火/紫/电色板，全员为 `classic` 时 `restore_hit_effect_vfx_p1` 还原全部 16 处原版指令并将 `0x0F0000..0x0FFFFF` 填回 `0xFF`。
   - **混合烟雾与轮廓保护**：`0x0058` / `0x005F` 的前 9 格（`words[0:9]`）是中性灰黑烟雾，必须原样保留，仅重着色火焰区 `words[9:15]`；暗色遮罩字 `{0x0010, 0x1210}` 原样保留。
-- **回归验证**：`tools/rom_tool.py self-test`、`tools/test_vfx_palette_suite.py`（6 项全部通过，含 Capstone 68000 全指令反汇编校验）与 `tools/test_full_roster_skins_suite.py` 全量通过。
+- **回归验证**：`src/rom/rom_tool.py self-test`、`src/tests/test_vfx_palette_suite.py`（6 项全部通过，含 Capstone 68000 全指令反汇编校验）与 `src/tests/test_full_roster_skins_suite.py` 全量通过。
+
+---
+
+## 15. `src/` 5 层单向模块架构（`TASK-STUDIO-020` / `DIR-003`，2026-11-13 Round 3 APPROVED）
+
+- **全量迁移与清理**：原 `tools/` 目录（28 个文件含 5 个 `.bak*`）已从工作区彻底清理移除；有效代码与 3,907 行 `kof97_webview_app.py` 按严格 5 层单向无环 DAG 迁入并拆解至 `src/` 下 7 个功能子包（共 40 个文件）。
+- **5 层单向依赖 DAG**：
+  - **Layer 0 `src/core/`**（零外部 `src.*` 依赖）：`paths.py`（支持源码 `parents[2]` 与 PyInstaller `--onefile` 冻结态探测 `"src"` / `"sandbox"`，`get_config_path()`、`resolve_web_index_html()`）、`roster.py`（36 角色花名册与 `CHARACTER_PALETTE_SCHEMA`）、`presets.py`（21 套主题、6 套伤害模式、10 套 VFX 预设）、`config_store.py`（通过可选 `skin_entry_factory` 回调解耦 JSON 持久化）。
+  - **Layer 1 `src/palette/`**（仅依赖 Layer 0/1）：`color_utils.py`（托管 `encode_lspc2`/`decode_lspc2` 与 HSV/OKLCH 转换）、`costume_painter.py`（冻结 `DIR-002` `_paint_costume_natural` 与 `generate_harmonious_character_palette`）、`portrait_burst.py`（MAX 爆气闪光与四键立绘同步）、`vfx_shader.py`（`0x004956` 查表与受击通用效果组表/`_recolor_hit_effect_slot`）。
+  - **Layer 2 `src/rom/`**（仅依赖 Layer 0/1/2）：`crom_tool.py`（顶部 `import sys` + `parents[2]` 引导）、`rom_tool.py`（重导出 `encode_lspc2`/`decode_lspc2`，`gui` 子命令延迟导入 `src.studio.legacy_tk_gui`）、`sprite_compose.py`（ACT 00 站立图拼装，中文标签已 `\uXXXX` 转义）、`p1_patcher.py`（`apply_combat_and_unlock_patches_to_p1(..., log_fn=None)` 与 `0x0F0000` 68k 动态受击 VFX Code Cave）。
+  - **Layer 3 `src/emulator/`**（仅依赖 Layer 0/1）：`kawaks_live.py`（`find_kawaks_pid` 与 `inject_live_palettes_to_kawaks(..., log_fn=None)`，由调用方传入 `p1_data`/`p2_clean` 与 `lspc_words_fn`）。
+  - **Layer 4 `src/studio/`**：`bridge_api.py`（`KOF97BridgeApi(config_path=None)`、25 个公开 RPC 方法、经 `_paths` 与 `_resolve_config_path()` 兼容 `get_config_path` monkeypatch）、`kof97_webview_app.py`（`main()` 与精确 38 项 `__all__` 兼容门面）、`legacy_tk_gui.py`、`web/index.html`。
+  - **Layer 5 `src/build/` 与 `src/tests/`**：`build_exe.py`（`--paths`、`--add-data=...;src/studio/web`、全量 `src.*` `--hidden-import`）、4 个 `.bat` 脚本（`%~dp0..\..`）、8 个可执行测试验证脚本（均带 `parents[2]` `sys.path` 引导）、`official_palettes.txt` 与只读归档 `legacy_upgrades/`。
+- **规范与交付门禁**：活跃 `src/` 代码 0 非 ASCII 字节、0 `tools` 引用；重编后 `dist/KOF97ModStudio.exe` 与根目录 `KOF97ModStudio.exe` 已实测从 `dist/` 与 `%TEMP%` 启动通过。
+
 
 
 
