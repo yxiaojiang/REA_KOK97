@@ -22,6 +22,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 import src.core.paths as _paths
 from src.rom import rom_tool
+from src.palette import vfx_shader
 from src.studio import kof97_webview_app as app
 
 
@@ -342,6 +343,124 @@ class TestVfxPaletteSuite(unittest.TestCase):
             finally:
                 app.get_config_path = orig_cfg_fn
                 _paths.get_config_path = orig_paths_cfg_fn
+
+    def _p2_bank(self, bank: int, addr: int, size: int) -> bytes:
+        off = bank * 0x100000 + (addr - 0x200000)
+        return self.p2_clean[off : off + size]
+
+    def _spark_anim_palettes(self, anim: int) -> set:
+        """Palette ids drawn by one common-effect (object 0x20) animation, via P1/P2 tables."""
+        obj = 0x20
+        p1 = self.p1_clean
+        anim_tbl = struct.unpack(">I", p1[0xAFBCA + obj * 4 : 0xAFBCA + obj * 4 + 4])[0]
+        d2 = struct.unpack(">H", p1[anim_tbl + anim * 2 : anim_tbl + anim * 2 + 2])[0]
+        script_tbl = struct.unpack(">I", self._p2_bank(2, 0x200002 + obj * 4, 4))[0]
+        pos = struct.unpack(">I", self._p2_bank(2, script_tbl + d2 * 4, 4))[0]
+        frame_tbl = struct.unpack(">I", self._p2_bank(1, 0x200002 + obj * 4, 4))[0]
+        def_tbl = struct.unpack(">I", self._p2_bank(1, 0x250000 + obj * 4, 4))[0]
+        pals = set()
+        for _ in range(64):
+            head = self._p2_bank(2, pos, 4)
+            if head[0] >= 0x80:
+                if 0x100 - head[0] in (1, 2):
+                    break
+                pos += 6
+                continue
+            frame = struct.unpack(">H", head[2:4])[0]
+            rec = frame_tbl + frame * 6
+            sprite_def = struct.unpack(">H", self._p2_bank(1, rec + 4, 2))[0] & 0x3FF
+            dptr = struct.unpack(">I", self._p2_bank(1, def_tbl + sprite_def * 4, 4))[0]
+            pals.add(self._p2_bank(1, dptr, 1)[0])
+            pos += 6
+        return pals
+
+    def test_hit_dispatcher_spark_palettes_covered_by_groups(self) -> None:
+        """Every spark the P1 0x012E5C hit/guard dispatcher can spawn must use a slot of the group it triggers."""
+        p1 = self.p1_clean
+        w = lambda a: struct.unpack(">H", p1[a : a + 2])[0]
+        groups = {g[0]: set(g[6]) for g in vfx_shader.VFX_COMMON_EFFECT_GROUPS[:4]}
+        im, f8, f9, el = (groups[k] for k in (0x6E08, 0x6E00, 0x6E02, 0x6E06))
+        multi = lambda tbl: {w(tbl + i * 2) for i in range(4)}
+
+        # (class -> extra anims and the group responsible for them), records at P1 0x012E92
+        spawned: list = []
+        for eff in range(20):
+            rec = struct.unpack(">I", p1[0x12E92 + eff * 4 : 0x12E96 + eff * 4])[0]
+            cls = w(rec)
+            spawned.append((w(rec + 2), el if cls == 3 else im))
+            if cls == 1:
+                spawned.append((w(rec + 4), im))
+                spawned += [(a, im) for a in multi(0x1347A)]
+            elif cls == 2:
+                spawned += [(a, f8) for a in multi(0x1348A)]
+            elif cls == 3:
+                spawned += [(a, el) for a in multi(0x13482)]
+            elif cls == 4:
+                spawned += [(a, im) for a in multi(0x1347A)]
+            elif cls == 6:
+                spawned += [(a, f9) for a in multi(0x13492)]
+        spawned += [(a, f8) for a in multi(0x1349A)]
+        spawned += [(a, f9) for a in multi(0x134A4)]
+        spawned += [(a, el) for a in multi(0x134AE)]
+
+        for anim, group in spawned:
+            for pal in self._spark_anim_palettes(anim):
+                words = app._read_p2_slot_words15(self.p2_clean, pal)
+                if all(x in app.VFX_SENTINEL_WORDS for x in words):
+                    continue
+                self.assertIn(pal, group, f"spark anim 0x{anim:02X} draws pal 0x{pal:02X} outside its group")
+
+        # Guard sparks (blue 0x53, orange 0x54) switch on every impact
+        self.assertTrue({0x51, 0x53, 0x54, 0x55} <= im)
+
+    def test_hit_effect_groups_disjoint_and_attacker_id_low_byte(self) -> None:
+        """Owner-cached groups must not share slots; attacker id is the low byte ($71) of word $70."""
+        seen: set = set()
+        for g in vfx_shader.VFX_COMMON_EFFECT_GROUPS[:4]:
+            self.assertFalse(seen & set(g[6]), f"slot shared between groups: {seen & set(g[6])}")
+            seen |= set(g[6])
+
+        skins = {
+            0: {"themeId": "classic", "vfxTheme": "cangyan_blue"},
+            1: {"themeId": "classic", "vfxTheme": "holy_gold"},
+            27: {"themeId": "classic", "vfxTheme": "crimson_flame"},
+        }
+        patch = app.build_hit_effect_vfx_p1_patch(skins, self.p1_clean, self.p2_clean)
+        assert patch is not None
+        blob = patch["blob"]
+        code_len = patch["hooks"]["char_theme_idx"] - app.VFX_HIT_EFFECT_CAVE_BASE
+        self.assertIn(bytes.fromhex("10280071"), blob[:code_len])
+        self.assertNotIn(bytes.fromhex("10280070"), blob[:code_len])
+
+        entries = patch["hooks"]["theme_entries"] - app.VFX_HIT_EFFECT_CAVE_BASE
+        for idx in range(patch["theme_count"]):
+            base = entries + idx * app.VFX_THEME_ENTRY_STRIDE
+            for _, common_off, _, _, _, _, slot_ids in vfx_shader.VFX_COMMON_EFFECT_GROUPS[:4]:
+                for i, pid in enumerate(slot_ids):
+                    rec = base + common_off + i * 32
+                    self.assertEqual(struct.unpack(">H", blob[rec : rec + 2])[0], pid)
+            self.assertEqual(struct.unpack(">H", blob[base + 0x220 : base + 0x222])[0], 0x17B0)
+            self.assertEqual(struct.unpack(">H", blob[base + 0x420 : base + 0x422])[0], 0x17C0)
+        self.assertEqual(len(blob) - entries, patch["theme_count"] * app.VFX_THEME_ENTRY_STRIDE)
+
+    def test_live_hit_effect_p1_writes(self) -> None:
+        """Live writes install cave + hooks for custom configs and restore pristine hooks for classic."""
+        from src.rom.p1_patcher import VFX_HIT_HOOK_ORIGINALS, build_live_hit_effect_p1_writes
+
+        skins = {27: {"themeId": "classic", "vfxTheme": "crimson_flame"}}
+        live = build_live_hit_effect_p1_writes(skins, self.p1_clean, self.p2_clean)
+        self.assertTrue(live["active"])
+        self.assertEqual(live["writes"][0][0], app.VFX_HIT_EFFECT_CAVE_BASE)
+        hook_writes = dict(live["writes"][1:])
+        for _name, off, _orig, _lbl in VFX_HIT_HOOK_ORIGINALS:
+            self.assertEqual(hook_writes[off][:2], b"\x4e\xb9")
+
+        classic = build_live_hit_effect_p1_writes({}, self.p1_clean, self.p2_clean)
+        self.assertFalse(classic["active"])
+        self.assertEqual(
+            dict(classic["writes"]),
+            {off: orig for _name, off, orig, _lbl in VFX_HIT_HOOK_ORIGINALS},
+        )
 
     def test_hit_effect_worst_case_36_unique_themes_fits_64kb(self) -> None:
         """Even 36 simultaneously distinct custom hues must fit cleanly inside 0x0F0000..0x0FFFFF."""

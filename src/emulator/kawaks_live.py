@@ -15,13 +15,21 @@ from src.palette.portrait_burst import (
     sync_character_portraits,
 )
 from src.palette.vfx_shader import (
-    VFX_COMMON_EFFECT_GROUPS,
+    VFX_OWNER_STALE,
+    VFX_RAM_F8_OWNER,
     _read_p2_slot_words15,
-    _recolor_hit_effect_slot,
     build_character_vfx_map,
     recolor_vfx_palette,
     resolve_vfx_hues,
 )
+
+
+def _swap_words(be_bytes: bytes) -> bytes:
+    """Convert Big-Endian 68000 words to the little-endian word layout WinKawaks keeps in memory."""
+    out = bytearray(len(be_bytes))
+    out[0::2] = be_bytes[1::2]
+    out[1::2] = be_bytes[0::2]
+    return bytes(out)
 
 
 def find_kawaks_pid(running_proc: Optional[subprocess.Popen] = None) -> Optional[int]:
@@ -81,6 +89,7 @@ def inject_live_palettes_to_kawaks(
     last_vfx_ram_sigs: Dict[int, bytes],
     lspc_words_fn: Callable[[int, Dict[str, Any], bytes, bytes], tuple],
     log_fn: Optional[Callable[[str, str], None]] = None,
+    hit_effect_p1_writes: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Hot-inject character and VFX palettes into active WinKawaks memory."""
     def _log(msg: str, lvl: str = "INFO") -> None:
@@ -265,28 +274,28 @@ def inject_live_palettes_to_kawaks(
                                 ctypes.byref(written),
                             )
 
-                # Hot-update common battle effect slots in live Palette RAM only (never P2 ROM)
-                seen_eff_slots: set = set()
-                for _cache_off, _c_off, _cnt_m1, _b_id, _cb_off, _cl_ptr, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
-                    for eff_pid in slot_ids:
-                        if eff_pid in seen_eff_slots or eff_pid >= 256:
-                            continue
-                        seen_eff_slots.add(eff_pid)
-                        eff_words = (
-                            _read_p2_slot_words15(p2_clean, eff_pid)
-                            if vpair is None
-                            else _recolor_hit_effect_slot(eff_pid, p2_clean, vpair[0], vpair[1])
-                        )
-                        eff_va = pal_ram_va + eff_pid * 32 + 2
-                        k32.WriteProcessMemory(
-                            h_proc,
-                            ctypes.c_void_p(eff_va),
-                            struct.pack("<15H", *eff_words),
-                            30,
-                            ctypes.byref(written),
-                        )
-
             injected_total += 1
+
+        # E. Refresh the P1 hit-effect code cave so on-hit/guard effects follow the new config
+        if hit_effect_p1_writes is not None:
+            for p1_off, be_bytes in hit_effect_p1_writes["writes"]:
+                k32.WriteProcessMemory(
+                    h_proc,
+                    ctypes.c_void_p(prom_va + p1_off),
+                    _swap_words(be_bytes),
+                    len(be_bytes),
+                    ctypes.byref(written),
+                )
+            if hit_effect_p1_writes["active"] and work_ram_va != 0:
+                # Positive non-theme owner forces both the custom and classic paths to re-push
+                stale_owner = struct.pack("<H", VFX_OWNER_STALE) * 5
+                k32.WriteProcessMemory(
+                    h_proc,
+                    ctypes.c_void_p(work_ram_va + 0x8000 + VFX_RAM_F8_OWNER),
+                    stale_owner,
+                    len(stale_owner),
+                    ctypes.byref(written),
+                )
 
         char_info = next((c for c in CHARACTER_ROSTER if c["id"] == char_id), None)
         cname = char_info["name_cn"] if char_info else f"0x{char_id:02X}"

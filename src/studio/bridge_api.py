@@ -38,6 +38,7 @@ from src.palette.vfx_shader import (
 from src.rom.p1_patcher import (
     apply_combat_and_unlock_patches_to_p1,
     apply_hit_effect_vfx_to_p1,
+    build_live_hit_effect_p1_writes,
 )
 from src.rom.rom_tool import (
     DEFAULT_KOF97_ZIP,
@@ -849,6 +850,9 @@ class KOF97BridgeApi:
             last_vfx_ram_sigs=self._last_vfx_ram_sigs,
             lspc_words_fn=self._lspc_words_for_skin,
             log_fn=async_log,
+            hit_effect_p1_writes=build_live_hit_effect_p1_writes(
+                self._character_skins, p1_data, p2_clean
+            ),
         )
 
     # ------------------------------------------------------------------------

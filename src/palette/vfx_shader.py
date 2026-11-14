@@ -30,17 +30,21 @@ VFX_RAM_F9_OWNER = 0x6E02
 VFX_RAM_FA_OWNER = 0x6E04
 VFX_RAM_EL_OWNER = 0x6E06
 VFX_RAM_IM_OWNER = 0x6E08
+VFX_OWNER_STALE = 0x7FFF
 
 VFX_HIT_EFFECT_DARK_MASKS = frozenset({0x0010, 0x1210})
 VFX_SMOKE_SPLIT_SLOTS = frozenset({0x0058, 0x005F})
 
-# Ordered common effect groups stored per custom theme (+0x000..+0x21F, 17 * 32B)
+# Ordered common effect groups stored per custom theme.
+# 16 records fill +0x000..+0x1FF and are padded to +0x21F so F8/F9 stay at +0x220/+0x420.
+# Slot sets must stay disjoint: each group has its own owner cache, so a slot shared
+# by two groups is skipped by whichever group still believes it owns the slot.
 VFX_COMMON_EFFECT_GROUPS: Tuple[Tuple[int, int, int, int, int, int, Tuple[int, ...]], ...] = (
     # (cache_off, common_off, cnt_m1, burn_pal_id, custom_burn_off, classic_burn_ptr, slot_ids)
     (VFX_RAM_F8_OWNER, 0x0000, 3, 0x00F8, 0x0220, 0x002FF5F0, (0x0057, 0x0058, 0x0059, 0x0061)),
     (VFX_RAM_F9_OWNER, 0x0080, 3, 0x00F9, 0x0420, 0x002FF7F0, (0x005B, 0x005F, 0x0067, 0x0068)),
-    (VFX_RAM_EL_OWNER, 0x0100, 3, 0x0000, 0x0000, 0x00000000, (0x0052, 0x0062, 0x0053, 0x0054)),
-    (VFX_RAM_IM_OWNER, 0x0180, 4, 0x0000, 0x0000, 0x00000000, (0x0051, 0x0055, 0x0054, 0x0064, 0x006A)),
+    (VFX_RAM_EL_OWNER, 0x0100, 1, 0x0000, 0x0000, 0x00000000, (0x0052, 0x0062)),
+    (VFX_RAM_IM_OWNER, 0x0140, 5, 0x0000, 0x0000, 0x00000000, (0x0051, 0x0055, 0x0053, 0x0054, 0x0064, 0x006A)),
     (VFX_RAM_FA_OWNER, 0x0000, 0xFFFF, 0x00FA, 0x0000, 0x002FF9F0, ()),
 )
 

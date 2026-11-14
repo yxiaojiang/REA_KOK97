@@ -112,6 +112,14 @@ def build_hit_effect_vfx_p1_patch(
     on-hit elemental burn/shock/spark palette switching. Returns None if every
     character uses the classic VFX theme.
     """
+    common_cursor = 0
+    for _, common_off, cnt_m1, _, _, _, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
+        if common_off != common_cursor or cnt_m1 != len(slot_ids) - 1:
+            raise ValueError(f"VFX common group layout mismatch at +0x{common_off:03X}")
+        common_cursor += len(slot_ids) * 32
+    if common_cursor > 0x220:
+        raise ValueError(f"VFX common records overflow theme entry: 0x{common_cursor:X}")
+
     vfx_map = build_character_vfx_map(p1_data, p2_clean)
     char_slot_table = [0xFFFF] * 36
     pair_to_idx: Dict[Tuple[str, str], int] = {}
@@ -222,7 +230,7 @@ def build_hit_effect_vfx_p1_patch(
     asm.w(0x2008)                       # move.l a0, d0
     asm.b_branch(0x6700, "atk_classic")
     asm.w(0x7000)
-    asm.w(0x1028, 0x0070)               # move.b $70(a0), d0
+    asm.w(0x1028, 0x0071)               # move.b $71(a0), d0 (low byte of char id word $70)
     asm.w(0x0C00, 0x001F)
     asm.b_branch(0x6200, "atk_classic")
     asm.w(0x4A28, 0x01D6)               # tst.b $1d6(a0)
@@ -359,11 +367,12 @@ def build_hit_effect_vfx_p1_patch(
 
     asm.label("theme_entries")
     for inner_hex, outer_hex in unique_pairs:
-        # +0x000..+0x21F: 17 common hit/flame/shock/spark records (32B each)
+        # +0x000..+0x21F: common hit/flame/shock/spark records, padded to 0x220
         for _, _, _, _, _, _, slot_ids in VFX_COMMON_EFFECT_GROUPS[:4]:
             for pid in slot_ids:
                 words15 = _recolor_hit_effect_slot(pid, p2_clean, inner_hex, outer_hex)
                 asm.w(pid, *words15)
+        asm.buf += bytes(0x220 - common_cursor)
         # +0x220..+0x41F: 0xF8 16 cyclic burn frames (0x17B0..0x17BF)
         for frame in range(16):
             src_pid = 0x17B0 + frame
@@ -424,6 +433,28 @@ def apply_hit_effect_vfx_to_p1(
         target_addr = hooks[target_lbl]
         p1_data[off : off + 6] = struct.pack(">HI", 0x4EB9, target_addr)
     return patch
+
+
+def build_live_hit_effect_p1_writes(
+    character_skins: Dict[int, Dict[str, Any]],
+    p1_data: bytes,
+    p2_clean: bytes,
+) -> Dict[str, Any]:
+    """
+    Return Big-Endian (p1_offset, bytes) writes that bring a running P1 image in line
+    with the current VFX config: the code cave first, then the hook sites.
+    """
+    patch = build_hit_effect_vfx_p1_patch(character_skins, p1_data, p2_clean)
+    writes: List[Tuple[int, bytes]] = []
+    if patch is None:
+        for _name, off, orig_bytes, _lbl in VFX_HIT_HOOK_ORIGINALS:
+            writes.append((off, orig_bytes))
+        return {"active": False, "writes": writes}
+    writes.append((VFX_HIT_EFFECT_CAVE_BASE, patch["blob"]))
+    hooks = patch["hooks"]
+    for _name, off, _orig, target_lbl in VFX_HIT_HOOK_ORIGINALS:
+        writes.append((off, struct.pack(">HI", 0x4EB9, hooks[target_lbl])))
+    return {"active": True, "writes": writes}
 
 
 def apply_combat_and_unlock_patches_to_p1(
