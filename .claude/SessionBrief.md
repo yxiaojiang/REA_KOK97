@@ -15,9 +15,8 @@
 ## 模块索引
 - src/core/paths.py：源代码、单文件及 onedir 的根目录/配置/前端路径解析。
 - src/studio/bridge_api.py：皮肤、特效、ROM 打包、沙盒模拟器启动 API。
-- src/studio/kof97_webview_app.py：Studio 入口；按 EXE 文件名分派 KOF97GameLauncher.exe 的无界面启动模式。
-- src/studio/web/index.html：Studio 前端及“全部随机”“开始游戏”交互。
-- src/build/build_exe.py、BuildStudio.bat、launch_mod_studio.bat：onedir 构建及桌面入口。
+- src/studio/kof97_webview_app.py：Studio 入口及 KOF97GameLauncher.exe 无界面分派。
+- src/studio/web/index.html：随机与开始游戏交互；src/build/：onedir 构建和入口。
 
 ## 关键限制与下一步
 - 活跃 Python、批处理脚本保持纯英文/ASCII 规范；新增变量和注释仅用英文。
