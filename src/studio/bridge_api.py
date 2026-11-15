@@ -907,16 +907,15 @@ class KOF97BridgeApi:
         def _task() -> None:
             try:
                 async_log("\u6b63\u5728\u6267\u884c\u5168\u5c40\u5de5\u5177\u94fe\u81ea\u68c0 (bswap16 / LSPC2 / \u74e6\u7247\u6d4b\u8bd5)...", "INFO")
-                script_path = _paths.PROJECT_ROOT / "src" / "rom" / "rom_tool.py"
-                cmd = [sys.executable, str(script_path), "self-test"]
-                res = subprocess.run(cmd, capture_output=True, text=True, cwd=str(_paths.PROJECT_ROOT))
-                if res.returncode == 0:
-                    for line in res.stdout.strip().splitlines():
-                        if line.strip():
-                            async_log(line.strip(), "INFO")
-                    async_log("[PASS] \u5168\u5c40\u81ea\u68c0 100% \u901a\u8fc7\uff01", "SUCCESS")
-                else:
-                    async_log(res.stderr.strip(), "ERROR")
+                import contextlib
+                import io
+                from src.rom import rom_tool, crom_tool
+
+                output = io.StringIO()
+                with contextlib.redirect_stdout(output):
+                    rom_tool.run_self_test()
+                    crom_tool.run_crom_self_test()
+                async_log(output.getvalue(), "INFO")
             except Exception as exc:
                 async_log(f"\u81ea\u68c0\u6267\u884c\u5f02\u5e38: {exc}", "ERROR")
 

@@ -99,3 +99,24 @@ Improve Studio startup packaging, make the "randomize all" action assign both co
 
 ## Not included
 - Existing user/worktree changes in mod_studio_config.json, sandbox/WinKawaks.ini, sandbox/capture/*, and temp/ were left untouched and excluded from the intended commit.
+# TASK-STUDIO-022 Portable Release (2026-11-15)
+
+## Implementation
+- Added src/build/build_portable.py: explicit runtime allowlist; original kof97.ZIP and neogeo.zip copied read-only from installed source; studio.exe and KOF97GameLauncher.exe share _internal. Current configuration and emulator controls are included; ROM paths are relative. Captures, recordings, old saves, source and Git data are excluded.
+- src/core/paths.py recognizes portable-package.json before workspace ancestors. Both ROM tools use the shared source directory: portable releases read roms/ exclusively, while development layouts retain the installed-ROM fallback.
+- Frozen --check-package generates the mod ROM and a sprite preview, records JSON, and fails on errors. Builder checks that root and source stay in the requested portable destination.
+- Studio toolchain self-test calls bundled Python functions instead of trying to run absent source scripts through the frozen sys.executable.
+- Docs/Portable-Readme.txt documents usage, paths, controls, runtime requirements and third-party authorization limits. Existing emulator documentation and SHA256SUMS.txt are included.
+
+## Verification
+- PyInstaller onedir rebuild passed. Shared executable: 6,472,082 bytes.
+- dist/KOF97-Portable-20261115.zip built; frozen repack and preview passed inside package.
+- Copied full package outside project into visualization root / KOF97 Portable Test (path contains spaces). Frozen repack/preview passed with root and ROM source entirely within the copy.
+- External launcher started WinKawaks 1.48 with KOF97 Plus window title. Read existing project-defined program ROM pointer 0x00712660 from this test process: P1 (1 MiB) and P2 (4 MiB) matched external output ZIP byte-for-byte. NOP patches at 0x004624FD and 0x00462A09 matched expected bytes. See runtime-verification.json in release.
+- External studio.exe accessibility content confirmed frontend loaded, ROM status normal, 36 characters and saved costume/VFX configuration restored.
+- rom_tool self-test, crom_tool self-test and all 9 VFX unit tests passed. git diff --check passed.
+
+## Limits and Review
+- Window capture timed out twice. Full gameplay and visual validation are not claimed. Clean Windows without WebView2/.NET was not tested; offline installers are not bundled.
+- ROM/BIOS/emulator are locally supplied third-party content. No redistribution license was established, and no upload/public distribution was performed.
+- TASK-STUDIO-021 and 022 await Argon review; reviewer-owned REVIEW.md was not changed. Existing configuration/INI/capture/temp changes preserved. No commit or push performed.

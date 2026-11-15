@@ -28,8 +28,9 @@ if _ROOT_STR not in sys.path:
     sys.path.insert(0, _ROOT_STR)
 
 from src.core.paths import PROJECT_ROOT as WORKSPACE_ROOT
+from src.core.paths import SOURCE_ROM_DIR
 
-DEFAULT_SOURCE_ROM = Path(r"C:\Program Files (x86)\KOF97\roms\kof97.ZIP")
+DEFAULT_SOURCE_ROM = SOURCE_ROM_DIR / "kof97.ZIP"
 DEFAULT_CROM_DIR = WORKSPACE_ROOT / "build" / "crom_unpacked"
 
 C_ROM_PAIRS = [

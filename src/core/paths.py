@@ -9,7 +9,12 @@ if getattr(sys, "frozen", False):
     EXE_DIR = Path(sys.executable).resolve().parent
     BUNDLE_DIR = Path(getattr(sys, "_MEIPASS", EXE_DIR))
     workspace_candidates = (EXE_DIR, *EXE_DIR.parents)
-    PROJECT_ROOT = next(
+    portable_root = next(
+        (candidate for candidate in workspace_candidates
+         if (candidate / "portable-package.json").is_file()),
+        None,
+    )
+    PROJECT_ROOT = portable_root or next(
         (
             candidate
             for candidate in workspace_candidates
@@ -34,6 +39,12 @@ else:
     EXE_DIR = PROJECT_ROOT
 
 CONFIG_FILE_NAME = "mod_studio_config.json"
+LOCAL_ROM_DIR = PROJECT_ROOT / "roms"
+SOURCE_ROM_DIR = (
+    LOCAL_ROM_DIR
+    if LOCAL_ROM_DIR.is_dir() or (PROJECT_ROOT / "portable-package.json").is_file()
+    else Path(r"C:\Program Files (x86)\KOF97\roms")
+)
 
 
 def get_config_path() -> Path:

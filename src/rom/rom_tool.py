@@ -28,11 +28,12 @@ if _ROOT_STR not in sys.path:
     sys.path.insert(0, _ROOT_STR)
 
 from src.core.paths import PROJECT_ROOT as WORKSPACE_ROOT
+from src.core.paths import SOURCE_ROM_DIR
 from src.palette.color_utils import decode_lspc2, encode_lspc2
 from src.rom import crom_tool
 
 
-DEFAULT_SOURCE_ROM_DIR = Path(r"C:\Program Files (x86)\KOF97\roms")
+DEFAULT_SOURCE_ROM_DIR = SOURCE_ROM_DIR
 DEFAULT_KOF97_ZIP = DEFAULT_SOURCE_ROM_DIR / "kof97.ZIP"
 DEFAULT_KOF97PLS_ZIP = DEFAULT_SOURCE_ROM_DIR / "kof97pls.zip"
 

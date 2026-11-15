@@ -124,7 +124,31 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if Path(sys.executable).stem.lower() == "kof97gamelauncher":
+    if "--check-package" in sys.argv:
+        import json
+        import traceback
+        from src.core.paths import PROJECT_ROOT, SOURCE_ROM_DIR
+
+        report = {"root": str(PROJECT_ROOT), "source": str(SOURCE_ROM_DIR)}
+        try:
+            api = KOF97BridgeApi()
+            report["web"] = resolve_web_index_html().is_file()
+            report["pack"] = api.pack_rom()
+            if not report["pack"].get("success"):
+                raise RuntimeError(report["pack"])
+            preview = api.get_idle_preview()
+            report["preview"] = bool(preview.get("success"))
+            if not report["preview"]:
+                raise RuntimeError(preview.get("error", "Preview failed"))
+            report["success"] = True
+        except Exception:
+            report["success"] = False
+            report["error"] = traceback.format_exc()
+        (PROJECT_ROOT / "package-check.json").write_text(
+            json.dumps(report, indent=2), encoding="utf-8"
+        )
+        raise SystemExit(0 if report["success"] else 1)
+    elif Path(sys.executable).stem.lower() == "kof97gamelauncher":
         try:
             KOF97BridgeApi().launch_game_sync()
         except Exception as exc:

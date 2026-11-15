@@ -1,12 +1,12 @@
 # 当前代码与 Patch 审查状态
 
-- **Task ID**：TASK-STUDIO-021
-- **Target**：onedir 启动优化、“全部随机”增加特效主题、修复沙盒启动路径并交付独立游戏启动器
+- **Task ID**：TASK-STUDIO-021 / TASK-STUDIO-022
+- **Target**：onedir、独立启动器及模拟器/原版 ROM/BIOS/魔改 ROM 的完整便携包
 - **Round**：1（Implementation Review）
 - **Status**：READY_FOR_REVIEW
 - **Current owner**：Argon
 - **Last updated at**：2026-11-15
 
 ## 下一步
-1. Argon 独立核对 CRDocs/IMPLEMENTATION.md 中 TASK-STUDIO-021 的变更清单、路径解析和构建产物证据。
-2. 尚未完成 KOF97GameLauncher.exe 的运行态 ROM 启动验证；审查时应将该项保持为未验证，不得据构建成功推定运行成功。
+1. Argon 核对 IMPLEMENTATION.md 中两个任务的路径解析、冻结态自检、构建流程与验证证据。
+2. 项目外独立启动器已确认加载包内 P1/P2，运行时补丁生效；Studio 前端和配置恢复通过。截图捕获连续超时，完整画面和对战、干净 Windows 环境仍未验证。
