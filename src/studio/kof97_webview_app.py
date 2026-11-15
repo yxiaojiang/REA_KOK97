@@ -124,4 +124,18 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if Path(sys.executable).stem.lower() == "kof97gamelauncher":
+        try:
+            KOF97BridgeApi().launch_game_sync()
+        except Exception as exc:
+            import ctypes
+
+            ctypes.windll.user32.MessageBoxW(
+                None,
+                str(exc),
+                "KOF97 Game Launcher",
+                0x10,
+            )
+            raise SystemExit(1)
+    else:
+        main()

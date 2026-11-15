@@ -8,7 +8,21 @@ from pathlib import Path
 if getattr(sys, "frozen", False):
     EXE_DIR = Path(sys.executable).resolve().parent
     BUNDLE_DIR = Path(getattr(sys, "_MEIPASS", EXE_DIR))
-    if (EXE_DIR / "src").exists() or (EXE_DIR / "sandbox").exists():
+    workspace_candidates = (EXE_DIR, *EXE_DIR.parents)
+    PROJECT_ROOT = next(
+        (
+            candidate
+            for candidate in workspace_candidates
+            if (candidate / "src").is_dir()
+            and (candidate / "sandbox" / "WinKawaks.exe").is_file()
+        ),
+        None,
+    )
+    if PROJECT_ROOT is None and (BUNDLE_DIR / "src").exists():
+        PROJECT_ROOT = EXE_DIR
+    elif PROJECT_ROOT is not None:
+        pass
+    elif (EXE_DIR / "src").exists() or (EXE_DIR / "sandbox").exists():
         PROJECT_ROOT = EXE_DIR
     elif (EXE_DIR.parent / "src").exists() or (EXE_DIR.parent / "sandbox").exists():
         PROJECT_ROOT = EXE_DIR.parent

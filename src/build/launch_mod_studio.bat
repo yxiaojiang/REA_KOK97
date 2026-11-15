@@ -5,13 +5,13 @@ setlocal
 for %%I in ("%~dp0..\..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
 
-if exist "%ROOT_DIR%\KOF97ModStudio.exe" (
-    start "" "%ROOT_DIR%\KOF97ModStudio.exe"
+if exist "%ROOT_DIR%\dist\KOF97ModStudio\KOF97ModStudio.exe" (
+    start "" "%ROOT_DIR%\dist\KOF97ModStudio\KOF97ModStudio.exe"
     exit /b 0
 )
 
-if exist "%ROOT_DIR%\dist\KOF97ModStudio.exe" (
-    start "" "%ROOT_DIR%\dist\KOF97ModStudio.exe"
+if exist "%ROOT_DIR%\KOF97ModStudio.exe" (
+    start "" "%ROOT_DIR%\KOF97ModStudio.exe"
     exit /b 0
 )
 

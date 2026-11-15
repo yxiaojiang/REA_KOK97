@@ -18,7 +18,7 @@ from src.core.paths import PROJECT_ROOT
 
 
 def build_executable() -> bool:
-    """Run PyInstaller to create standalone KOF97ModStudio.exe."""
+    """Run PyInstaller to create a directory-based KOF97 Mod Studio build."""
     entry_script = PROJECT_ROOT / "src" / "studio" / "kof97_webview_app.py"
     html_asset = PROJECT_ROOT / "src" / "studio" / "web" / "index.html"
 
@@ -38,9 +38,10 @@ def build_executable() -> bool:
         "-m",
         "PyInstaller",
         "--name=KOF97ModStudio",
-        "--onefile",
+        "--onedir",
         "--noconsole",
         "--clean",
+        "--noconfirm",
         f"--paths={PROJECT_ROOT}",
         f"--add-data={html_asset};src/studio/web",
         "--hidden-import=webview",
@@ -81,19 +82,17 @@ def build_executable() -> bool:
         print("[ERROR] PyInstaller build failed with code:", res.returncode)
         return False
 
-    built_exe = dist_dir / "KOF97ModStudio.exe"
+    bundle_dir = dist_dir / "KOF97ModStudio"
+    built_exe = bundle_dir / "KOF97ModStudio.exe"
     if not built_exe.exists():
         print(f"[ERROR] Expected output executable not found: {built_exe}")
         return False
 
-    print(f"[SUCCESS] Standalone executable created: {built_exe} ({built_exe.stat().st_size:,} bytes)")
-
-    root_exe = PROJECT_ROOT / "KOF97ModStudio.exe"
-    try:
-        shutil.copy2(built_exe, root_exe)
-        print(f"[SUCCESS] Copied executable to workspace root: {root_exe}")
-    except Exception as exc:
-        print(f"[WARN] Could not copy executable to root: {exc}")
+    game_launcher = bundle_dir / "KOF97GameLauncher.exe"
+    shutil.copy2(built_exe, game_launcher)
+    print(f"[SUCCESS] Directory-based build created: {bundle_dir}")
+    print(f"[SUCCESS] Launcher executable: {built_exe} ({built_exe.stat().st_size:,} bytes)")
+    print(f"[SUCCESS] Game launcher executable: {game_launcher} ({game_launcher.stat().st_size:,} bytes)")
 
     return True
 

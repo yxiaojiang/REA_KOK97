@@ -1,6 +1,6 @@
 @echo off
-rem Build standalone KOF97ModStudio.exe with PyInstaller.
-rem Output: dist\KOF97ModStudio.exe, then a copy at the project root.
+rem Build directory-based KOF97ModStudio with PyInstaller.
+rem Output: dist\KOF97ModStudio\KOF97ModStudio.exe and its dependencies.
 setlocal
 for %%I in ("%~dp0..\..") do set "ROOT_DIR=%%~fI"
 cd /d "%ROOT_DIR%"
@@ -19,7 +19,6 @@ if errorlevel 1 (
 )
 
 echo [INFO] Build finished.
-echo [INFO] dist\KOF97ModStudio.exe
-echo [INFO] KOF97ModStudio.exe
+echo [INFO] dist\KOF97ModStudio\KOF97ModStudio.exe
 endlocal
 exit /b 0

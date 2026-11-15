@@ -543,35 +543,41 @@ class KOF97BridgeApi:
         return {"success": True}
 
     def randomize_other_skins(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Assign a preset skin to every roster character."""
+        """Assign randomized skin and VFX presets to every roster character."""
         available_themes = [t for t in PRESET_THEMES if t["id"] != "classic"]
         if not available_themes:
             return {"success": False, "error": "No custom themes available"}
+        available_vfx = [p for p in VFX_PRESETS if p["id"] not in ("classic", "sync_skin")]
+        if not available_vfx:
+            return {"success": False, "error": "No custom VFX themes available"}
 
         p1_data, p2_clean = self._load_p1_p2_baseline()
 
         randomized_count = 0
         theme_pool = list(available_themes)
         random.shuffle(theme_pool)
+        vfx_pool = list(available_vfx)
+        random.shuffle(vfx_pool)
         pool_idx = 0
 
         for char_info in CHARACTER_ROSTER:
             cid = char_info["id"]
             chosen_theme = theme_pool[pool_idx % len(theme_pool)]
+            chosen_vfx = vfx_pool[pool_idx % len(vfx_pool)]
             pool_idx += 1
             theme_id = chosen_theme["id"]
-
-            cur_vfx = str(self._character_skins.get(cid, {}).get("vfxTheme", "classic"))
+            vfx_theme = chosen_vfx["id"]
             lspc_words = generate_harmonious_character_palette(cid, theme_id, p1_data, p2_clean)
             hex_colors = [lspc2_to_hex(w) for w in lspc_words]
-            self._character_skins[cid] = make_skin_entry(cid, theme_id, hex_colors, vfx_theme=cur_vfx)
+            self._character_skins[cid] = make_skin_entry(cid, theme_id, hex_colors, vfx_theme=vfx_theme)
             randomized_count += 1
 
         self._save_config_to_disk()
-        async_log(f"\u5df2\u4e3a\u5168\u90e8 {randomized_count} \u4f4d\u89d2\u8272\u968f\u673a\u5206\u914d\u76ae\u80a4\u3002", "SUCCESS")
+        async_log(f"\u5df2\u4e3a\u5168\u90e8 {randomized_count} \u4f4d\u89d2\u8272\u968f\u673a\u5206\u914d\u76ae\u80a4\u4e0e\u6280\u80fd\u7279\u6548\u914d\u8272\u3002", "SUCCESS")
         return {
             "success": True,
             "count": randomized_count,
+            "vfx_count": randomized_count,
             "character_skins": {str(k): v for k, v in self._character_skins.items()},
             "vfx_previews": self._build_vfx_previews(),
         }
@@ -757,32 +763,36 @@ class KOF97BridgeApi:
     # Start Game Launcher & Live Memory Injection
     # ------------------------------------------------------------------------
 
+    def launch_game_sync(self) -> subprocess.Popen:
+        """Prepare the current ROM and launch the sandbox emulator."""
+        if not self._output_zip.exists():
+            async_log("\u672a\u68c0\u6d4b\u5230 output/roms/kof97pls.zip\uff0c\u6b63\u5728\u81ea\u52a8\u6253\u5305...", "WARN")
+            result = self.pack_rom()
+            if not result.get("success"):
+                raise RuntimeError(result.get("error", "ROM packaging failed"))
+
+        exe_path = self._sandbox_dir / "WinKawaks.exe"
+        if not exe_path.exists():
+            raise FileNotFoundError(f"\u672a\u627e\u5230\u6a21\u62df\u5668\u4e3b\u7a0b\u5e8f: {exe_path}")
+
+        async_log(f"\u6b63\u5728\u542f\u52a8\u6c99\u76d2\u6a21\u62df\u5668 WinKawaks (\u6302\u8f7d RomPath1={self._output_zip.parent})...", "INFO")
+        proc = start_sandbox_kawaks(self._sandbox_dir, rom_name="kof97pls", enable_bg_input=False)
+        self._running_proc = proc
+        self._cached_p2_base = None
+        self._cached_p2_pid = None
+        async_log(f"WinKawaks \u6a21\u62df\u5668\u5df2\u6210\u529f\u542f\u52a8\uff01(PID={proc.pid})\uff0c\u5df2\u65bd\u52a0\u5185\u5b58\u53cd\u906e\u853d Patch\uff01", "SUCCESS")
+        return proc
+
     def start_game(self, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Launch WinKawaks with custom ROM in background thread."""
         def _launch() -> None:
             try:
-                if not self._output_zip.exists():
-                    async_log("\u672a\u68c0\u6d4b\u5230 output/roms/kof97pls.zip\uff0c\u6b63\u5728\u81ea\u52a8\u89e6\u53d1\u6253\u5305...", "WARN")
-                    res = self.pack_rom()
-                    if not res.get("success"):
-                        async_log("\u81ea\u52a8\u6253\u5305\u5931\u8d25\uff0c\u542f\u52a8\u4e2d\u6b62\u3002", "ERROR")
-                        return
-
-                exe_path = self._sandbox_dir / "WinKawaks.exe"
-                if not exe_path.exists():
-                    raise FileNotFoundError(f"\u672a\u627e\u5230\u6a21\u62df\u5668\u4e3b\u7a0b\u5e8f: {exe_path}")
-
-                async_log(f"\u6b63\u5728\u542f\u52a8\u6c99\u76d2\u6a21\u62df\u5668 WinKawaks (\u6302\u8f7d RomPath1={self._output_zip.parent})...", "INFO")
-                proc = start_sandbox_kawaks(self._sandbox_dir, rom_name="kof97pls", enable_bg_input=False)
-                self._running_proc = proc
-                self._cached_p2_base = None
-                self._cached_p2_pid = None
-                async_log(f"WinKawaks \u6a21\u62df\u5668\u5df2\u6210\u529f\u542f\u52a8\uff01(PID={proc.pid})\uff0c\u5df2\u65bd\u52a0\u5185\u5b58\u53cd\u906e\u853d Patch\uff01", "SUCCESS")
+                self.launch_game_sync()
             except Exception as exc:
                 async_log(f"\u542f\u52a8\u6a21\u62df\u5668\u5931\u8d25: {exc}", "ERROR")
 
         threading.Thread(target=_launch, daemon=True).start()
-        return {"success": True, "pid": 0}
+        return {"success": True, "starting": True, "pid": 0}
 
     def _find_kawaks_pid(self) -> Optional[int]:
         """Locate running WinKawaks process PID."""

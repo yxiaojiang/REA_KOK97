@@ -74,3 +74,28 @@
   - `dist/KOF97ModStudio.exe` (`cwd=d:\TEmp\REA\Fighter97\dist`) → **PASS** (`PID=23300`, `alive=True`)
   - `dist/KOF97ModStudio.exe` (`cwd=%TEMP%`) → **PASS** (`PID=20996`, `alive=True`)
   - `KOF97ModStudio.exe` (`cwd=%TEMP%`) → **PASS** (`PID=20312`, `alive=True`)
+
+---
+
+# TASK-STUDIO-021 Implementation Handoff (2026-11-15)
+
+## Scope
+Improve Studio startup packaging, make the "randomize all" action assign both costume and VFX themes, fix sandbox emulator launch from the onedir build, and add a standalone game launcher executable.
+
+## Implementation
+- src/build/build_exe.py: switched PyInstaller output to --onedir, enabled non-interactive rebuilds, and copies the built Studio executable to dist/KOF97ModStudio/KOF97GameLauncher.exe so both entry points share _internal dependencies.
+- src/build/BuildStudio.bat and src/build/launch_mod_studio.bat: report and prefer the onedir output. The root one-file executable was restored from the current Git HEAD and remains available as fallback.
+- src/core/paths.py: frozen builds search executable ancestors for the actual project root containing both src/ and sandbox/WinKawaks.exe; this fixes resolution when the Studio executable is under dist/KOF97ModStudio/.
+- src/studio/bridge_api.py: randomize_other_skins now shuffles custom VFX themes (excluding classic and sync_skin) alongside costume themes and saves both in each character entry. Added synchronous launch_game_sync; the UI method delegates to it on a background thread and reports a pending state.
+- src/studio/kof97_webview_app.py: dispatches the copied executable by basename to the standalone game launch path and shows launch errors in a Windows message box.
+- src/studio/web/index.html: updates randomization copy and avoids reporting asynchronous launch as already successful.
+
+## Verification evidence
+- Ran python src/build/build_exe.py: exit 0, PyInstaller 6.21.0 completed onedir output.
+- Built Studio executable: dist/KOF97ModStudio/KOF97ModStudio.exe (6,471,247 bytes).
+- Copied launcher executable: dist/KOF97ModStudio/KOF97GameLauncher.exe (6,471,247 bytes).
+- The dist/KOF97ModStudio/ output contains the shared _internal bundle. The former root executable was restored to 26,617,663 bytes.
+- No runtime test of the new launcher or its emulator/ROM load was performed. The build emitted optional NumPy/PyInstaller hook warnings; they did not fail the build.
+
+## Not included
+- Existing user/worktree changes in mod_studio_config.json, sandbox/WinKawaks.ini, sandbox/capture/*, and temp/ were left untouched and excluded from the intended commit.
